@@ -4,6 +4,7 @@ import org.fogbowcloud.arrebol.core.models.Task;
 import org.fogbowcloud.arrebol.core.models.TaskStatus;
 import org.fogbowcloud.arrebol.core.scheduler.DefaultScheduler;
 import org.fogbowcloud.arrebol.core.scheduler.Scheduler;
+import org.fogbowcloud.arrebol.pool.ResourceObserver;
 import org.fogbowcloud.arrebol.pool.ResourcePool;
 
 import java.util.Map;
@@ -16,8 +17,11 @@ public class ArrebolController {
     private ResourcePool resourcePool;
 
     public ArrebolController() {
-        this.resourcePool = new ResourcePool();
         this.scheduler = new DefaultScheduler();
+        this.resourcePool = new ResourcePool();
+
+        ResourceObserver schedulerObserver = (ResourceObserver) this.scheduler;
+        this.resourcePool.registerObserver(schedulerObserver);
     }
 
     public void addTask(Task task) {
