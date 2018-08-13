@@ -13,20 +13,21 @@ import java.util.concurrent.ConcurrentHashMap;
 public class ArrebolController {
 
     private Scheduler scheduler;
-    private Map<Task, TaskStatus> taskPool = new ConcurrentHashMap<Task, TaskStatus>();
+    private TaskProcessor taskProcessor;
+
     private ResourcePool resourcePool;
 
     public ArrebolController() {
-        this.scheduler = new DefaultScheduler();
+        this.scheduler = new StandardScheduler(this.taskProcessor);
         this.resourcePool = new ResourcePool();
 
         ResourceObserver schedulerObserver = (ResourceObserver) this.scheduler;
         this.resourcePool.registerObserver(schedulerObserver);
+
+        this.taskProcessor = new TaskProcessorImpl(this.resourcePool);
     }
 
     public void addTask(Task task) {
         this.scheduler.addTask(task);
-        this.taskPool.put(task, TaskStatus.PENDING);
     }
-
 }
