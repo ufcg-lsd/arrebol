@@ -1,7 +1,6 @@
-package org.fogbowcloud.arrebol.pool;
+package org.fogbowcloud.arrebol.pools.resource;
 
 import org.fogbowcloud.arrebol.core.models.Resource;
-import org.fogbowcloud.arrebol.core.models.Task;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -12,7 +11,7 @@ public class ResourcePool implements ResourceSubject {
 
     private List<ResourceObserver> resourcesObservers;
 
-    private List<Resource>  freeResources = new ArrayList<Resource>();
+    private List<Resource> freeResources = new ArrayList<Resource>();
     private Map<String, Resource> resourcePool = new ConcurrentHashMap<String, Resource>();
 
     public ResourcePool() {
