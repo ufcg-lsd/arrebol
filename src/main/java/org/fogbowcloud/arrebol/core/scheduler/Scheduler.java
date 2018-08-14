@@ -1,6 +1,8 @@
 package org.fogbowcloud.arrebol.core.scheduler;
 
 import java.util.List;
+
+import org.fogbowcloud.arrebol.core.models.Resource;
 import org.fogbowcloud.arrebol.core.models.Task;
 
 public interface Scheduler {
@@ -8,8 +10,7 @@ public interface Scheduler {
 
     List<Task> getPendingTasks();
 
-    void runTask(Task task);
+    void runTask(Task task, Resource resource);
 
     void stopTask(Task task);
-
 }

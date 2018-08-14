@@ -1,5 +1,5 @@
 package org.fogbowcloud.arrebol.core.models;
 
-public enum TaskStatus {
-    PENDING, FAILED, SUCCEDED
+public enum TaskState {
+    PENDING, FAILED, SUCCEDED, RUNNING
 }

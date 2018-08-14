@@ -2,8 +2,6 @@ package org.fogbowcloud.arrebol.core.scheduler;
 
 import org.fogbowcloud.arrebol.core.models.Resource;
 import org.fogbowcloud.arrebol.core.models.Task;
-import org.fogbowcloud.arrebol.core.scheduler.Scheduler;
-import org.fogbowcloud.arrebol.core.scheduler.TaskProcessor;
 import org.fogbowcloud.arrebol.pools.resource.ResourceObserver;
 
 import java.util.ArrayList;
@@ -40,9 +38,10 @@ public class StandardScheduler implements Scheduler, ResourceObserver {
         //      probl: and if list of tasks can be priority?
     }
 
-    public void runTask(Task task) {
+    public void runTask(Task task, Resource resource) {
         // TODO
-        this.taskProcessor.runTask(task);
+        this.freeResources.remove(resource);
+        this.taskProcessor.runTask(task, resource);
     }
 
     public void stopTask(Task task) {
