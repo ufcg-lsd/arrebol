@@ -6,6 +6,7 @@ import org.fogbowcloud.arrebol.core.scheduler.StandardScheduler;
 import org.fogbowcloud.arrebol.core.scheduler.Scheduler;
 import org.fogbowcloud.arrebol.pools.resource.ResourceObserver;
 import org.fogbowcloud.arrebol.pools.resource.ResourcePool;
+import org.fogbowcloud.arrebol.pools.resource.ResourceStateTransitioner;
 
 
 public class ArrebolController {

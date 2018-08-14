@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class ResourcePool implements ResourceSubject {
+public class ResourcePool implements ResourceSubject, ResourceStateTransitioner {
 
     private List<ResourceObserver> resourcesObservers;
 
@@ -16,10 +16,6 @@ public class ResourcePool implements ResourceSubject {
 
     public ResourcePool() {
         this.resourcesObservers = new ArrayList<ResourceObserver>();
-    }
-
-    public List<Resource> getFreeResources() {
-        return this.freeResources;
     }
 
     public void registerObserver(ResourceObserver o) {
@@ -34,5 +30,13 @@ public class ResourcePool implements ResourceSubject {
         for (ResourceObserver observer: this.resourcesObservers) {
             observer.update(resource);
         }
+    }
+
+    public void releaseResource(Resource resource) {
+        // TODO
+    }
+
+    public void holdResource(Resource resource) {
+        // TODO
     }
 }
