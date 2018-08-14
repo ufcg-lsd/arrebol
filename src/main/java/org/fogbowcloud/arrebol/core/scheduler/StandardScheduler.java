@@ -51,6 +51,10 @@ public class StandardScheduler implements Scheduler, ResourceObserver {
     }
 
     public void addTask(Task task) {
+        // TODO
+        // check if there are free resources that matches the task specification
+        //   if yes, run task.
+        //   if not:
         this.pedingTasks.add(task);
     }
 

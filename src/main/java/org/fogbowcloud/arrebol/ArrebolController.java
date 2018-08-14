@@ -16,16 +16,20 @@ public class ArrebolController {
     private ResourcePool resourcePool;
 
     public ArrebolController() {
-        this.scheduler = new StandardScheduler(this.taskProcessor);
         this.resourcePool = new ResourcePool();
+
+        this.taskProcessor = new TaskProcessor(this.resourcePool);
+        this.scheduler = new StandardScheduler(this.taskProcessor);
 
         ResourceObserver schedulerObserver = (ResourceObserver) this.scheduler;
         this.resourcePool.registerObserver(schedulerObserver);
-
-        this.taskProcessor = new TaskProcessor(this.resourcePool);
     }
 
     public void addTask(Task task) {
         this.scheduler.addTask(task);
+    }
+
+    public void stopTask(Task task) {
+        this.scheduler.stopTask(task);
     }
 }

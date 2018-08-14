@@ -26,12 +26,12 @@ public class TaskProcessor implements Runnable {
         // TODO
     }
 
-    public void runTask(Task task) {
+    void runTask(Task task) {
         // TODO
         this.taskPool.put(task, TaskStatus.PENDING);
     }
 
-    public void stopTask(Task task) {
+    void stopTask(Task task) {
         // TODO
     }
 }
