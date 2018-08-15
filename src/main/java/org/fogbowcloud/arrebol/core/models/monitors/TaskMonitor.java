@@ -1,4 +1,4 @@
-package org.fogbowcloud.arrebol.core.scheduler;
+package org.fogbowcloud.arrebol.core.models.monitors;
 
 import org.fogbowcloud.arrebol.core.models.Resource;
 import org.fogbowcloud.arrebol.core.models.Task;
@@ -9,12 +9,12 @@ import org.fogbowcloud.arrebol.pools.resource.ResourceStateTransitioner;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class TaskProcessor implements Runnable {
+public class TaskMonitor implements Runnable {
 
     private ResourceStateTransitioner ResourceStateTransitioner;
     private Map<TaskState, Task> taskPool;
 
-    public TaskProcessor(ResourceStateTransitioner ResourceStateTransitioner) {
+    public TaskMonitor(ResourceStateTransitioner ResourceStateTransitioner) {
         this.ResourceStateTransitioner = ResourceStateTransitioner;
         this.taskPool = new ConcurrentHashMap<TaskState, Task>();
     }
@@ -23,13 +23,13 @@ public class TaskProcessor implements Runnable {
         // TODO
     }
 
-    void runTask(Task task, Resource resource) {
+    public void runTask(Task task, Resource resource) {
         // TODO
         // make resource busy in resourcePool
         this.taskPool.put(TaskState.RUNNING, task);
     }
 
-    void stopTask(Task task) {
+    public void stopTask(Task task) {
         // TODO
         // release resource matched with task
     }

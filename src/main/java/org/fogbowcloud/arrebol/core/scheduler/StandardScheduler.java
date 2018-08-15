@@ -2,6 +2,7 @@ package org.fogbowcloud.arrebol.core.scheduler;
 
 import org.fogbowcloud.arrebol.core.models.Resource;
 import org.fogbowcloud.arrebol.core.models.Task;
+import org.fogbowcloud.arrebol.core.models.monitors.TaskMonitor;
 import org.fogbowcloud.arrebol.pools.resource.ResourceObserver;
 
 import java.util.ArrayList;
@@ -9,13 +10,13 @@ import java.util.List;
 
 public class StandardScheduler implements Scheduler, ResourceObserver {
 
-    private TaskProcessor taskProcessor;
+    private TaskMonitor taskMonitor;
 
     private List<Task> pedingTasks;
     private List<Resource> freeResources;
 
-    public StandardScheduler(TaskProcessor taskProcessor) {
-        this.taskProcessor = taskProcessor;
+    public StandardScheduler(TaskMonitor taskMonitor) {
+        this.taskMonitor = taskMonitor;
 
         this.pedingTasks = new ArrayList<Task>();
         this.freeResources = new ArrayList<Resource>();
@@ -41,12 +42,12 @@ public class StandardScheduler implements Scheduler, ResourceObserver {
     public void runTask(Task task, Resource resource) {
         // TODO
         this.freeResources.remove(resource);
-        this.taskProcessor.runTask(task, resource);
+        this.taskMonitor.runTask(task, resource);
     }
 
     public void stopTask(Task task) {
         // TODO
-        this.taskProcessor.stopTask(task);
+        this.taskMonitor.stopTask(task);
     }
 
     public void addTask(Task task) {
