@@ -2,42 +2,54 @@ package org.fogbowcloud.arrebol.core.monitors;
 
 import org.fogbowcloud.arrebol.core.models.Resource;
 import org.fogbowcloud.arrebol.core.models.Task;
-import org.fogbowcloud.arrebol.core.models.TaskState;
 import org.fogbowcloud.arrebol.core.processors.TaskProcessor;
 import org.fogbowcloud.arrebol.pools.resource.ResourceStateTransitioner;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
-public class TasksMonitor implements Runnable {
+public class TasksMonitor {
 
-    private Map<TaskState, Task> taskPool;
+    private ExecutorService tasksExecutorService = Executors.newCachedThreadPool();
+
     private Map<Task, TaskProcessor> runningTasks;
-    private ResourceStateTransitioner ResourceStateTransitioner;
+    private ResourceStateTransitioner resourceStateTransitioner;
 
-    public TasksMonitor(ResourceStateTransitioner ResourceStateTransitioner) {
-        this.taskPool = new HashMap<TaskState, Task>();
+    public TasksMonitor(ResourceStateTransitioner resourceStateTransitioner) {
         this.runningTasks = new HashMap<Task, TaskProcessor>();
-        this.ResourceStateTransitioner = ResourceStateTransitioner;
+        this.resourceStateTransitioner = resourceStateTransitioner;
     }
 
-    public void runTask(Task task, Resource resource) {
-        // TODO
-        // make resource busy in resourcePool
-        this.taskPool.put(TaskState.RUNNING, task);
+    public void runTask(Task task, final Resource resource) {
+        final TaskProcessor taskProcessor = createProcess(task);
+
+        if (this.runningTasks.get(task) == null) {
+            this.runningTasks.put(task, taskProcessor);
+            this.resourceStateTransitioner.holdResource(resource); // make resource busy in resourcePool
+        }
+
+        this.tasksExecutorService.submit(new Runnable() {
+            public void run() {
+                taskProcessor.executeTask(resource);
+            }
+        });
     }
 
     public void stopTask(Task task) {
-        // TODO
-        // release resource matched with task
+        TaskProcessor processToHalt = this.runningTasks.remove(task);
+        if (processToHalt != null) {
+            Resource resource = processToHalt.getResource();
+            if (resource != null) {
+                this.resourceStateTransitioner.releaseResource(resource); // make resource idle in resourcePool
+
+            }
+        }
     }
 
-    protected TaskProcessor createProcess(Task task) {
+    private TaskProcessor createProcess(Task task) {
         // TODO
         return null;
-    }
-
-    public void run() {
-        // TODO
     }
 }
