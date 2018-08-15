@@ -2,7 +2,7 @@ package org.fogbowcloud.arrebol.core.scheduler;
 
 import org.fogbowcloud.arrebol.core.models.Resource;
 import org.fogbowcloud.arrebol.core.models.Task;
-import org.fogbowcloud.arrebol.core.models.monitors.TaskMonitor;
+import org.fogbowcloud.arrebol.core.monitors.TasksMonitor;
 import org.fogbowcloud.arrebol.pools.resource.ResourceObserver;
 
 import java.util.ArrayList;
@@ -10,13 +10,13 @@ import java.util.List;
 
 public class StandardScheduler implements Scheduler, ResourceObserver {
 
-    private TaskMonitor taskMonitor;
+    private TasksMonitor tasksMonitor;
 
     private List<Task> pedingTasks;
     private List<Resource> freeResources;
 
-    public StandardScheduler(TaskMonitor taskMonitor) {
-        this.taskMonitor = taskMonitor;
+    public StandardScheduler(TasksMonitor tasksMonitor) {
+        this.tasksMonitor = tasksMonitor;
 
         this.pedingTasks = new ArrayList<Task>();
         this.freeResources = new ArrayList<Resource>();
@@ -29,7 +29,7 @@ public class StandardScheduler implements Scheduler, ResourceObserver {
     private void actOnResources() {
         // TODO
         // iterave over pending tasks and free resources and match their specifications
-        // if matched, submit task to taskMonitor (runTask())
+        // if matched, submit task to tasksMonitor (runTask())
 
         // questions:
         // 1) how decide when a task can be submitted to a specific resource?
@@ -42,12 +42,12 @@ public class StandardScheduler implements Scheduler, ResourceObserver {
     public void runTask(Task task, Resource resource) {
         // TODO
         this.freeResources.remove(resource);
-        this.taskMonitor.runTask(task, resource);
+        this.tasksMonitor.runTask(task, resource);
     }
 
     public void stopTask(Task task) {
         // TODO
-        this.taskMonitor.stopTask(task);
+        this.tasksMonitor.stopTask(task);
     }
 
     public void addTask(Task task) {
