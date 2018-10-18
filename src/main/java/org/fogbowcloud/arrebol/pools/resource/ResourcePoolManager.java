@@ -7,14 +7,16 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class ResourcePool implements ResourceSubject, ResourceStateTransitioner {
+public class ResourcePoolManager implements ResourceSubject, ResourceStateTransitioner {
 
     private List<ResourceObserver> resourcesObservers;
 
     private List<Resource> freeResources = new ArrayList<Resource>();
     private Map<String, Resource> resourcePool = new ConcurrentHashMap<String, Resource>();
 
-    public ResourcePool() {
+    private InfraProvider infraProvider;
+
+    public ResourcePoolManager() {
         this.resourcesObservers = new ArrayList<ResourceObserver>();
     }
 
