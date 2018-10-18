@@ -12,13 +12,13 @@ public class StandardScheduler implements Scheduler, ResourceObserver {
 
     private TasksMonitor tasksMonitor;
 
-    private List<Task> pedingTasks;
+    private List<Task> pendingTasks;
     private List<Resource> freeResources;
 
     public StandardScheduler(TasksMonitor tasksMonitor) {
         this.tasksMonitor = tasksMonitor;
 
-        this.pedingTasks = new ArrayList<Task>();
+        this.pendingTasks = new ArrayList<Task>();
         this.freeResources = new ArrayList<Resource>();
     }
 
@@ -40,7 +40,7 @@ public class StandardScheduler implements Scheduler, ResourceObserver {
     }
 
     public void runTask(Task task, Resource resource) {
-        // TODO
+        this.pendingTasks.remove(task);
         this.freeResources.remove(resource);
         this.tasksMonitor.runTask(task, resource);
     }
@@ -59,7 +59,7 @@ public class StandardScheduler implements Scheduler, ResourceObserver {
     }
 
     public List<Task> getPendingTasks() {
-        return this.pedingTasks;
+        return this.pendingTasks;
     }
 
     public void update(Resource r) {
