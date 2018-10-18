@@ -2,6 +2,7 @@ package org.fogbowcloud.arrebol.core.monitors;
 
 import org.fogbowcloud.arrebol.core.models.Resource;
 import org.fogbowcloud.arrebol.core.models.Task;
+import org.fogbowcloud.arrebol.core.models.TaskState;
 import org.fogbowcloud.arrebol.core.processors.TaskProcessor;
 import org.fogbowcloud.arrebol.pools.resource.ResourceStateTransitioner;
 
@@ -27,6 +28,7 @@ public class TasksMonitor {
 
         if (this.runningTasks.get(task) == null) {
             this.runningTasks.put(task, taskProcessor);
+            task.setState(TaskState.RUNNING);
             this.resourceStateTransitioner.holdResource(resource); // make resource busy in resourcePool
         }
 
