@@ -16,11 +16,13 @@ public interface TaskProcessor {
 
     void executeTask(Resource resource);
 
-    TaskState getStatus();
-
     Specification getSpecification();
 
     Resource getResource();
+
+    void setResource(Resource resource);
+
+    TaskState getStatus();
 
     void setStatus(TaskState taskState);
 }

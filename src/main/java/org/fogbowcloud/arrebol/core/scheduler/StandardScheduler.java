@@ -66,8 +66,7 @@ public class StandardScheduler implements Scheduler, ResourceObserver {
     }
 
     public void stopTask(Task task) {
-        // TODO
-        task.setState(TaskState.FAILED); // check if it is better create another possible state (asks Fubica)
+        task.setState(TaskState.CLOSED); // check if it is better create another possible state (asks Fubica)
         this.tasksMonitor.stopTask(task);
     }
 

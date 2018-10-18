@@ -4,6 +4,7 @@ import org.fogbowcloud.arrebol.core.models.Resource;
 import org.fogbowcloud.arrebol.core.models.Task;
 import org.fogbowcloud.arrebol.core.models.TaskState;
 import org.fogbowcloud.arrebol.core.processors.TaskProcessor;
+import org.fogbowcloud.arrebol.core.processors.TaskProcessorImpl;
 import org.fogbowcloud.arrebol.pools.resource.ResourceStateTransitioner;
 
 import java.util.HashMap;
@@ -44,14 +45,14 @@ public class TasksMonitor {
         if (processToHalt != null) {
             Resource resource = processToHalt.getResource();
             if (resource != null) {
+                // TODO: Find out how to stop the execution of the process
                 this.resourceStateTransitioner.releaseResource(resource); // make resource idle in resourcePool
-
             }
         }
     }
 
     private TaskProcessor createProcess(Task task) {
-        // TODO
-        return null;
+        TaskProcessor taskProcessor = new TaskProcessorImpl(task.getId(), task.getAllCommands(), task.getSpecification(), task.getUUID());
+        return taskProcessor;
     }
 }
