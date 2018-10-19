@@ -1,5 +1,5 @@
 package org.fogbowcloud.arrebol.core.models;
 
 public enum ResourceState {
-    BUSY, IDLE
+    BUSY, IDLE, FAILED
 }

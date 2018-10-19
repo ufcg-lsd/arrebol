@@ -6,4 +6,6 @@ public interface ResourceStateTransitioner {
     void releaseResource(Resource resource);
 
     void holdResource(Resource resource);
+
+    void putResourceToRemove(Resource resource);
 }

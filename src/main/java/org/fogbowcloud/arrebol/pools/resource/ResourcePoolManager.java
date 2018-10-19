@@ -34,11 +34,18 @@ public class ResourcePoolManager implements ResourceSubject, ResourceStateTransi
         }
     }
 
+    @Override
     public void releaseResource(Resource resource) {
         // TODO
     }
 
+    @Override
     public void holdResource(Resource resource) {
         // TODO
+    }
+
+    @Override
+    public void putResourceToRemove(Resource resource) {
+        // TODO: resource has failed
     }
 }

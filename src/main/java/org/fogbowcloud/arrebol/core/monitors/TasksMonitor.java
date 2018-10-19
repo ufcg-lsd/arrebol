@@ -7,14 +7,19 @@ import org.fogbowcloud.arrebol.core.processors.TaskProcessor;
 import org.fogbowcloud.arrebol.core.processors.TaskProcessorImpl;
 import org.fogbowcloud.arrebol.pools.resource.ResourceStateTransitioner;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-public class TasksMonitor {
+public class TasksMonitor implements  Runnable {
 
     private ExecutorService tasksExecutorService = Executors.newCachedThreadPool();
+
+    private Thread monitoringServiceRunner;
+    private boolean active;
 
     private Map<Task, TaskProcessor> runningTasks;
     private ResourceStateTransitioner resourceStateTransitioner;
@@ -22,6 +27,31 @@ public class TasksMonitor {
     public TasksMonitor(ResourceStateTransitioner resourceStateTransitioner) {
         this.runningTasks = new HashMap<Task, TaskProcessor>();
         this.resourceStateTransitioner = resourceStateTransitioner;
+        this.active = false;
+    }
+
+    public void start() {
+        this.active = true;
+        this.monitoringServiceRunner = new Thread(this);
+        this.monitoringServiceRunner.start();
+    }
+
+    public void stop() {
+        this.active = false;
+        this.monitoringServiceRunner.interrupt();
+    }
+
+    @Override
+    public void run() {
+        while(this.active) {
+            procMon();
+            try {
+                long timeout = 30000;
+                Thread.sleep(timeout);
+            } catch (InterruptedException e) {
+                stop();
+            }
+        }
     }
 
     public void runTask(Task task, final Resource resource) {
@@ -51,8 +81,49 @@ public class TasksMonitor {
         }
     }
 
+    public void procMon() {
+        for (TaskProcessor tp : getRunningProcesses()) {
+            Resource resource = tp.getResource();
+            Task task = getTaskById(tp.getTaskId());
+
+            if (tp.getStatus().equals(TaskState.FAILED)) {
+                this.runningTasks.remove(task);
+                if (resource != null)
+                    resourceStateTransitioner.putResourceToRemove(resource);
+            }
+            if (tp.getStatus().equals(TaskState.FINISHED)) {
+                this.runningTasks.remove(task);
+                if (task != null)
+                    task.finish();
+                if (resource != null)
+                    resourceStateTransitioner.releaseResource(resource);
+            }
+        }
+    }
+
+    public Task getTaskById(String taskId) {
+        for (Task task : runningTasks.keySet()) {
+            if (task.getId().equals(taskId)) {
+                return task;
+            }
+        }
+        return null;
+    }
+
     private TaskProcessor createProcess(Task task) {
         TaskProcessor taskProcessor = new TaskProcessorImpl(task.getId(), task.getAllCommands(), task.getSpecification(), task.getUUID());
         return taskProcessor;
     }
+
+    private List<TaskProcessor> getRunningProcesses() {
+        List<TaskProcessor> processes = new ArrayList<TaskProcessor>();
+        processes.addAll(this.runningTasks.values());
+        return processes;
+    }
+
+    public TaskState getTaskState(Task task) {
+        // TODO
+        return null;
+    }
+
 }

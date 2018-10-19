@@ -12,4 +12,6 @@ public interface Task {
     Specification getSpecification();
 
     String getUUID();
+
+    void finish();
 }
