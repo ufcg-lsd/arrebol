@@ -1,5 +1,7 @@
 package org.fogbowcloud.arrebol.core.models;
 
+import org.fogbowcloud.arrebol.core.models.specification.Specification;
+
 import java.util.List;
 
 public interface Task {

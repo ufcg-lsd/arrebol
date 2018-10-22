@@ -1,9 +1,8 @@
-package org.fogbowcloud.arrebol.core.models;
+package org.fogbowcloud.arrebol.core.models.specification;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.*;
 import java.util.*;
 
 public class Specification {
