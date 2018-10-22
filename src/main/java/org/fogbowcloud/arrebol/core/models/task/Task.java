@@ -17,4 +17,6 @@ public interface Task {
     String getUUID();
 
     void finish();
+
+    boolean isFinished();
 }
