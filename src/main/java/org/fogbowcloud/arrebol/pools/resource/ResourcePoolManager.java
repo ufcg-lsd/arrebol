@@ -1,6 +1,6 @@
 package org.fogbowcloud.arrebol.pools.resource;
 
-import org.fogbowcloud.arrebol.core.models.Resource;
+import org.fogbowcloud.arrebol.core.models.resource.Resource;
 import org.fogbowcloud.arrebol.infrastructure.InfraProvider;
 
 import java.util.ArrayList;

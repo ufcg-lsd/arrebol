@@ -1,5 +1,6 @@
-package org.fogbowcloud.arrebol.core.models;
+package org.fogbowcloud.arrebol.core.models.task;
 
+import org.fogbowcloud.arrebol.core.models.command.Command;
 import org.fogbowcloud.arrebol.core.models.specification.Specification;
 
 import java.util.List;

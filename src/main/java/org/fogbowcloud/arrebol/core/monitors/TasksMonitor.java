@@ -1,8 +1,8 @@
 package org.fogbowcloud.arrebol.core.monitors;
 
-import org.fogbowcloud.arrebol.core.models.Resource;
-import org.fogbowcloud.arrebol.core.models.Task;
-import org.fogbowcloud.arrebol.core.models.TaskState;
+import org.fogbowcloud.arrebol.core.models.resource.Resource;
+import org.fogbowcloud.arrebol.core.models.task.Task;
+import org.fogbowcloud.arrebol.core.models.task.TaskState;
 import org.fogbowcloud.arrebol.core.processors.TaskProcessor;
 import org.fogbowcloud.arrebol.core.processors.TaskProcessorImpl;
 import org.fogbowcloud.arrebol.pools.resource.ResourceStateTransitioner;
