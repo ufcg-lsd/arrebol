@@ -10,7 +10,5 @@ public interface Scheduler {
 
     List<Task> getPendingTasks();
 
-    void runTask(Task task, Resource resource);
-
     void stopTask(Task task);
 }

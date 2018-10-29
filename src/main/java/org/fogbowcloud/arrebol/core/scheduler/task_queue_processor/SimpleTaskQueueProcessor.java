@@ -25,6 +25,6 @@ public class SimpleTaskQueueProcessor implements TaskQueueProcessor {
                 }
             }
         }
-        return null;
+        return new MatchedTask(null, null);
     }
 }
