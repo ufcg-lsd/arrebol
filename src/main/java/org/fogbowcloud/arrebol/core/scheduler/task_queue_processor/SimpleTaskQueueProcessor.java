@@ -17,7 +17,7 @@ public class SimpleTaskQueueProcessor implements TaskQueueProcessor {
     public MatchedTask pickTaskToRun(List<Task> pendingTasks, List<Resource> freeResources) {
         for (Task task : pendingTasks) {
             for (Resource resource : freeResources) {
-                boolean isSameSpecification = resource.getRequestedSpec().equals(task.getSpecification());
+                boolean isSameSpecification = resource.getRequestedSpecification().equals(task.getSpecification());
                 if (!task.isFinished() && isSameSpecification) {
                     pendingTasks.remove(task); // TODO: test if is removed
                     freeResources.remove(resource);
