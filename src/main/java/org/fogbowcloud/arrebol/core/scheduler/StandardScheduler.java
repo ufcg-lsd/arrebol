@@ -1,8 +1,8 @@
 package org.fogbowcloud.arrebol.core.scheduler;
 
-import org.fogbowcloud.arrebol.core.models.Resource;
-import org.fogbowcloud.arrebol.core.models.Task;
-import org.fogbowcloud.arrebol.core.models.TaskState;
+import org.fogbowcloud.arrebol.core.models.resource.Resource;
+import org.fogbowcloud.arrebol.core.models.task.Task;
+import org.fogbowcloud.arrebol.core.models.task.TaskState;
 import org.fogbowcloud.arrebol.core.monitors.TasksMonitor;
 import org.fogbowcloud.arrebol.core.scheduler.task_queue_processor.SimpleTaskQueueProcessor;
 import org.fogbowcloud.arrebol.core.scheduler.task_queue_processor.MatchedTask;
@@ -38,7 +38,7 @@ public class StandardScheduler implements Scheduler, ResourceObserver {
         // 1) how decide when a task can be submitted to a specific resource?
         //    option A: if resource has the specification for that task, match them
         //      probl: give to a small task a big resource
-        //    option B: sort task and resource and try matche big with big, small with smal..
+        //    option B: sort task and resource and try matche big with big, small with small..
         //      probl: and if list of tasks can be priority?
         // solution: delegated to TaskQueueProcessor object
         return this.taskQueueProcessor.pickTaskToRun(this.pendingTasks, this.freeResources);
@@ -47,7 +47,7 @@ public class StandardScheduler implements Scheduler, ResourceObserver {
     /**
      * Put pending tasks to run on resources.
      * The decision of what tasks choose to run os free resources is delegated to a TaskQueueProcessor object
-     * thrugh the call for pickTaskToRun method.
+     * thrugh the call for pickTaskToRun().
      */
     private void actOnResources() {
         MatchedTask matchedTask = pickTaskToRun();
@@ -55,14 +55,6 @@ public class StandardScheduler implements Scheduler, ResourceObserver {
             runTask(matchedTask.getTask(), matchedTask.getResource());
             matchedTask = pickTaskToRun();
         }
-    }
-
-    public void runTask(Task task, Resource resource) {
-        this.pendingTasks.remove(task);
-        this.freeResources.remove(resource);
-
-        // taskMonitor is the responsible for changing task state and resource state
-        this.tasksMonitor.runTask(task, resource);
     }
 
     public void stopTask(Task task) {
@@ -85,5 +77,13 @@ public class StandardScheduler implements Scheduler, ResourceObserver {
         this.freeResources.add(r);
 
         actOnResources();
+    }
+
+    private void runTask(Task task, Resource resource) {
+        this.pendingTasks.remove(task);
+        this.freeResources.remove(resource);
+
+        // taskMonitor is the responsible for changing task state and resource state
+        this.tasksMonitor.runTask(task, resource);
     }
 }

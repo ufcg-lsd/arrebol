@@ -1,7 +1,7 @@
 package org.fogbowcloud.arrebol.core.scheduler.task_queue_processor;
 
-import org.fogbowcloud.arrebol.core.models.Resource;
-import org.fogbowcloud.arrebol.core.models.Task;
+import org.fogbowcloud.arrebol.core.models.resource.Resource;
+import org.fogbowcloud.arrebol.core.models.task.Task;
 
 public class MatchedTask {
 

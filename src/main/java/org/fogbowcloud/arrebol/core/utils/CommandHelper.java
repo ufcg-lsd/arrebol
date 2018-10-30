@@ -1,8 +1,8 @@
 package org.fogbowcloud.arrebol.core.utils;
 
-import org.fogbowcloud.arrebol.core.models.Command;
-import org.fogbowcloud.arrebol.core.models.CommandState;
-import org.fogbowcloud.arrebol.core.models.CommandType;
+import org.fogbowcloud.arrebol.core.models.command.Command;
+import org.fogbowcloud.arrebol.core.models.command.CommandState;
+import org.fogbowcloud.arrebol.core.models.command.CommandType;
 import org.json.JSONObject;
 
 public class CommandHelper {
