@@ -1,13 +1,10 @@
-package org.fogbowcloud.arrebol.core.models;
+package org.fogbowcloud.arrebol.core.models.command;
 
-import org.apache.log4j.Logger;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 
 public class Command {
-
-    private static final Logger LOGGER = Logger.getLogger(Command.class);
 
     public static final String COMMAND_KEY = "command";
     public static final String COMMAND_TYPE_KEY = "type";
@@ -51,7 +48,6 @@ public class Command {
             command.put(COMMAND_STATE_KEY, this.getState().toString());
             return command;
         } catch (JSONException e) {
-            LOGGER.debug("Error while trying to create a JSON from command", e);
             return null;
         }
     }
