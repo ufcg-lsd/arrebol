@@ -13,7 +13,7 @@ import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-public class TasksMonitor implements  Runnable {
+public class TasksMonitor implements Runnable, TaskSubmitter {
 
     private ExecutorService tasksExecutorService = Executors.newCachedThreadPool();
 
@@ -27,17 +27,6 @@ public class TasksMonitor implements  Runnable {
         this.runningTasks = new HashMap<Task, TaskProcessor>();
         this.resourceStateTransitioner = resourceStateTransitioner;
         this.active = false;
-    }
-
-    public void start() {
-        this.active = true;
-        this.monitoringServiceRunner = new Thread(this);
-        this.monitoringServiceRunner.start();
-    }
-
-    public void stop() {
-        this.active = false;
-        this.monitoringServiceRunner.interrupt();
     }
 
     @Override
@@ -88,16 +77,27 @@ public class TasksMonitor implements  Runnable {
             if (tp.getStatus().equals(TaskState.FAILED)) {
                 this.runningTasks.remove(task);
                 if (resource != null)
-                    resourceStateTransitioner.putResourceToRemove(resource);
+                    this.resourceStateTransitioner.putResourceToRemove(resource);
             }
             if (tp.getStatus().equals(TaskState.FINISHED)) {
                 this.runningTasks.remove(task);
                 if (task != null)
                     task.finish();
                 if (resource != null)
-                    resourceStateTransitioner.releaseResource(resource);
+                    this.resourceStateTransitioner.releaseResource(resource);
             }
         }
+    }
+
+    public void start() {
+        this.active = true;
+        this.monitoringServiceRunner = new Thread(this);
+        this.monitoringServiceRunner.start();
+    }
+
+    public void stop() {
+        this.active = false;
+        this.monitoringServiceRunner.interrupt();
     }
 
     public Task getTaskById(String taskId) {
