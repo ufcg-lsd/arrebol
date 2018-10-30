@@ -1,6 +1,6 @@
 package org.fogbowcloud.arrebol.core.scheduler;
 
-import org.fogbowcloud.arrebol.core.models.resource.Resource;
+import org.fogbowcloud.arrebol.core.models.resource.AbstractResource;
 import org.fogbowcloud.arrebol.core.models.specification.Specification;
 import org.fogbowcloud.arrebol.core.models.task.Task;
 import org.fogbowcloud.arrebol.core.monitors.TasksMonitor;
@@ -50,7 +50,7 @@ public class StandardSchedulerTest {
         return scheduler;
     }
 
-    private void addNewResource(ResourceObserver scheduler, Resource newResource) {
+    private void addNewResource(ResourceObserver scheduler, AbstractResource newResource) {
         scheduler.update(newResource);
     }
 

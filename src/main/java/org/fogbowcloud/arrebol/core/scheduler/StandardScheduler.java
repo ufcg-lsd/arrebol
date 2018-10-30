@@ -1,6 +1,6 @@
 package org.fogbowcloud.arrebol.core.scheduler;
 
-import org.fogbowcloud.arrebol.core.models.resource.Resource;
+import org.fogbowcloud.arrebol.core.models.resource.AbstractResource;
 import org.fogbowcloud.arrebol.core.models.task.Task;
 import org.fogbowcloud.arrebol.core.models.task.TaskState;
 import org.fogbowcloud.arrebol.core.monitors.TasksMonitor;
@@ -18,7 +18,7 @@ public class StandardScheduler implements Scheduler, ResourceObserver {
     private TasksMonitor tasksMonitor;
 
     private List<Task> pendingTasks;
-    private List<Resource> freeResources;
+    private List<AbstractResource> freeResources;
     private ConcurrentHashMap<String, Task> taskPool;
 
     private TaskQueueProcessor taskQueueProcessor;
@@ -27,7 +27,7 @@ public class StandardScheduler implements Scheduler, ResourceObserver {
         this.tasksMonitor = tasksMonitor;
 
         this.pendingTasks = new ArrayList<Task>();
-        this.freeResources = new ArrayList<Resource>();
+        this.freeResources = new ArrayList<AbstractResource>();
         this.taskPool = new ConcurrentHashMap<String, Task>();
 
         this.taskQueueProcessor = new SimpleTaskQueueProcessor();
@@ -73,13 +73,13 @@ public class StandardScheduler implements Scheduler, ResourceObserver {
         return this.pendingTasks;
     }
 
-    public void update(Resource r) {
+    public void update(AbstractResource r) {
         this.freeResources.add(r);
 
         actOnResources();
     }
 
-    private void runTask(Task task, Resource resource) {
+    private void runTask(Task task, AbstractResource resource) {
         this.pendingTasks.remove(task);
         this.freeResources.remove(resource);
 

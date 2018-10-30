@@ -1,6 +1,6 @@
 package org.fogbowcloud.arrebol.core.monitors;
 
-import org.fogbowcloud.arrebol.core.models.resource.Resource;
+import org.fogbowcloud.arrebol.core.models.resource.AbstractResource;
 import org.fogbowcloud.arrebol.core.models.task.Task;
 import org.fogbowcloud.arrebol.core.models.task.TaskState;
 import org.fogbowcloud.arrebol.core.processors.TaskProcessor;
@@ -53,7 +53,7 @@ public class TasksMonitor implements  Runnable {
         }
     }
 
-    public void runTask(Task task, final Resource resource) {
+    public void runTask(Task task, final AbstractResource resource) {
         final TaskProcessor taskProcessor = createProcess(task);
 
         if (this.runningTasks.get(task) == null) {
@@ -72,7 +72,7 @@ public class TasksMonitor implements  Runnable {
     public void stopTask(Task task) {
         TaskProcessor processToHalt = this.runningTasks.remove(task);
         if (processToHalt != null) {
-            Resource resource = processToHalt.getResource();
+            AbstractResource resource = processToHalt.getResource();
             if (resource != null) {
                 // TODO: Find out how to stop the execution of the process
                 this.resourceStateTransitioner.releaseResource(resource); // make resource idle in resourcePool
@@ -82,7 +82,7 @@ public class TasksMonitor implements  Runnable {
 
     public void procMon() {
         for (TaskProcessor tp : getRunningProcesses()) {
-            Resource resource = tp.getResource();
+            AbstractResource resource = tp.getResource();
             Task task = getTaskById(tp.getTaskId());
 
             if (tp.getStatus().equals(TaskState.FAILED)) {
