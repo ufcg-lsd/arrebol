@@ -4,7 +4,6 @@ import org.fogbowcloud.arrebol.core.models.resource.Resource;
 import org.fogbowcloud.arrebol.core.models.task.Task;
 import org.fogbowcloud.arrebol.core.models.task.TaskState;
 import org.fogbowcloud.arrebol.core.processors.TaskProcessor;
-import org.fogbowcloud.arrebol.core.processors.TaskProcessorImpl;
 import org.fogbowcloud.arrebol.pools.resource.ResourceStateTransitioner;
 
 import java.util.ArrayList;
@@ -111,7 +110,7 @@ public class TasksMonitor implements  Runnable {
     }
 
     private TaskProcessor createProcess(Task task) {
-        TaskProcessor taskProcessor = new TaskProcessorImpl(task.getId(), task.getAllCommands(), task.getSpecification(), task.getUUID());
+        TaskProcessor taskProcessor = new TaskProcessor(task.getId(), task.getAllCommands(), task.getSpecification(), task.getUUID());
         return taskProcessor;
     }
 

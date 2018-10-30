@@ -6,23 +6,59 @@ import org.fogbowcloud.arrebol.core.models.specification.Specification;
 import org.fogbowcloud.arrebol.core.models.task.TaskState;
 
 import java.util.List;
+import java.util.UUID;
 
-public interface TaskProcessor {
-    String getProcessId();
+public class TaskProcessor {
 
-    String getTaskId();
+    private String processId;
+    private String taskId;
+    private List<Command> commands;
+    private Specification specification;
+    private String userId;
+    private TaskState status;
+    private Resource resource;
 
-    List<Command> getCommands();
+    public TaskProcessor(String taskId, List<Command> commands, Specification specification, String userId) {
+        this.processId = UUID.randomUUID().toString();
+        this.taskId = taskId;
+        this.commands = commands;
+        this.specification = specification;
+        this.userId = userId;
+    }
 
-    void executeTask(Resource resource);
+    public String getProcessId() {
+        return this.processId;
+    }
 
-    Specification getSpecification();
+    public String getTaskId() {
+        return this.taskId;
+    }
 
-    Resource getResource();
+    public List<Command> getCommands() {
+        return this.commands;
+    }
 
-    void setResource(Resource resource);
+    public void executeTask(Resource resource) {
 
-    TaskState getStatus();
+    }
 
-    void setStatus(TaskState taskState);
+    public Specification getSpecification() {
+        return this.specification;
+    }
+
+    public Resource getResource() {
+        return this.resource;
+    }
+
+    public void setResource(Resource resource) {
+        this.resource = resource;
+    }
+
+    public TaskState getStatus() {
+        return this.status;
+    }
+
+    public void setStatus(TaskState taskState) {
+        this.status = taskState;
+    }
 }
