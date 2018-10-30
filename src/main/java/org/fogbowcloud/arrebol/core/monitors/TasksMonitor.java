@@ -1,10 +1,9 @@
 package org.fogbowcloud.arrebol.core.monitors;
 
-import org.fogbowcloud.arrebol.core.models.resource.Resource;
+import org.fogbowcloud.arrebol.core.models.resource.AbstractResource;
 import org.fogbowcloud.arrebol.core.models.task.Task;
 import org.fogbowcloud.arrebol.core.models.task.TaskState;
 import org.fogbowcloud.arrebol.core.processors.TaskProcessor;
-import org.fogbowcloud.arrebol.core.processors.TaskProcessorImpl;
 import org.fogbowcloud.arrebol.pools.resource.ResourceStateTransitioner;
 
 import java.util.ArrayList;
@@ -14,7 +13,7 @@ import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-public class TasksMonitor implements  Runnable {
+public class TasksMonitor implements Runnable, Monitor, TaskSubmitter {
 
     private ExecutorService tasksExecutorService = Executors.newCachedThreadPool();
 
@@ -30,21 +29,10 @@ public class TasksMonitor implements  Runnable {
         this.active = false;
     }
 
-    public void start() {
-        this.active = true;
-        this.monitoringServiceRunner = new Thread(this);
-        this.monitoringServiceRunner.start();
-    }
-
-    public void stop() {
-        this.active = false;
-        this.monitoringServiceRunner.interrupt();
-    }
-
     @Override
     public void run() {
         while(this.active) {
-            procMon();
+            monitorTasks();
             try {
                 long timeout = 30000;
                 Thread.sleep(timeout);
@@ -54,7 +42,7 @@ public class TasksMonitor implements  Runnable {
         }
     }
 
-    public void runTask(Task task, final Resource resource) {
+    public void runTask(Task task, final AbstractResource resource) {
         final TaskProcessor taskProcessor = createProcess(task);
 
         if (this.runningTasks.get(task) == null) {
@@ -73,7 +61,7 @@ public class TasksMonitor implements  Runnable {
     public void stopTask(Task task) {
         TaskProcessor processToHalt = this.runningTasks.remove(task);
         if (processToHalt != null) {
-            Resource resource = processToHalt.getResource();
+            AbstractResource resource = processToHalt.getResource();
             if (resource != null) {
                 // TODO: Find out how to stop the execution of the process
                 this.resourceStateTransitioner.releaseResource(resource); // make resource idle in resourcePool
@@ -81,22 +69,33 @@ public class TasksMonitor implements  Runnable {
         }
     }
 
-    public void procMon() {
+    public void start() {
+        this.active = true;
+        this.monitoringServiceRunner = new Thread(this);
+        this.monitoringServiceRunner.start();
+    }
+
+    public void stop() {
+        this.active = false;
+        this.monitoringServiceRunner.interrupt();
+    }
+
+    private void monitorTasks() {
         for (TaskProcessor tp : getRunningProcesses()) {
-            Resource resource = tp.getResource();
+            AbstractResource resource = tp.getResource();
             Task task = getTaskById(tp.getTaskId());
 
             if (tp.getStatus().equals(TaskState.FAILED)) {
                 this.runningTasks.remove(task);
                 if (resource != null)
-                    resourceStateTransitioner.putResourceToRemove(resource);
+                    this.resourceStateTransitioner.putResourceToRemove(resource);
             }
             if (tp.getStatus().equals(TaskState.FINISHED)) {
                 this.runningTasks.remove(task);
                 if (task != null)
                     task.finish();
                 if (resource != null)
-                    resourceStateTransitioner.releaseResource(resource);
+                    this.resourceStateTransitioner.releaseResource(resource);
             }
         }
     }
@@ -111,7 +110,7 @@ public class TasksMonitor implements  Runnable {
     }
 
     private TaskProcessor createProcess(Task task) {
-        TaskProcessor taskProcessor = new TaskProcessorImpl(task.getId(), task.getAllCommands(), task.getSpecification(), task.getUUID());
+        TaskProcessor taskProcessor = new TaskProcessor(task.getId(), task.getAllCommands(), task.getSpecification(), task.getUUID());
         return taskProcessor;
     }
 

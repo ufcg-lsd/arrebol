@@ -1,11 +1,11 @@
 package org.fogbowcloud.arrebol.pools.resource;
 
-import org.fogbowcloud.arrebol.core.models.resource.Resource;
+import org.fogbowcloud.arrebol.core.models.resource.AbstractResource;
 
 public interface ResourceSubject {
     void registerObserver(ResourceObserver o);
 
     void removeObserver(ResourceObserver o);
 
-    void notifyObservers(Resource r);
+    void notifyObservers(AbstractResource r);
 }

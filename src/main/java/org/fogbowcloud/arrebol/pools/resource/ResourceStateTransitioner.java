@@ -1,11 +1,11 @@
 package org.fogbowcloud.arrebol.pools.resource;
 
-import org.fogbowcloud.arrebol.core.models.resource.Resource;
+import org.fogbowcloud.arrebol.core.models.resource.AbstractResource;
 
 public interface ResourceStateTransitioner {
-    void releaseResource(Resource resource);
+    void releaseResource(AbstractResource resource);
 
-    void holdResource(Resource resource);
+    void holdResource(AbstractResource resource);
 
-    void putResourceToRemove(Resource resource);
+    void putResourceToRemove(AbstractResource resource);
 }
