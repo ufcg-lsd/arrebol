@@ -1,6 +1,8 @@
 package org.fogbowcloud.arrebol.pools.resource;
 
 import org.fogbowcloud.arrebol.core.models.Resource;
+import org.fogbowcloud.arrebol.infrastructure.FogbowInfraProvider;
+import org.fogbowcloud.arrebol.infrastructure.InfraProvider;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -18,6 +20,9 @@ public class ResourcePoolManager implements ResourceSubject, ResourceStateTransi
 
     public ResourcePoolManager() {
         this.resourcesObservers = new ArrayList<ResourceObserver>();
+
+        this.infraProvider = new FogbowInfraProvider();
+        // create request default X resources
     }
 
     public void registerObserver(ResourceObserver o) {
