@@ -3,13 +3,14 @@ package org.fogbowcloud.arrebol.pools.resource;
 import org.fogbowcloud.arrebol.infrastructure.FogbowInfraProvider;
 import org.fogbowcloud.arrebol.core.models.resource.AbstractResource;
 import org.fogbowcloud.arrebol.infrastructure.InfraProvider;
+import org.fogbowcloud.arrebol.pools.PoolManager;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class ResourcePoolManager implements ResourceSubject, ResourceStateTransitioner {
+public class ResourcePoolManager implements ResourceSubject, ResourceStateTransitioner, PoolManager<AbstractResource> {
 
     private List<ResourceObserver> resourcesObservers;
 
@@ -52,5 +53,11 @@ public class ResourcePoolManager implements ResourceSubject, ResourceStateTransi
     @Override
     public void putResourceToRemove(AbstractResource resource) {
         // TODO: resource has failed
+    }
+
+    @Override
+    public void addToPool(AbstractResource resource) {
+        this.resourcePool.put(resource.getId(), resource);
+        notifyObservers(resource);
     }
 }
