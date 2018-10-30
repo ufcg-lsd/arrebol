@@ -13,7 +13,7 @@ import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-public class TasksMonitor implements Runnable, TaskSubmitter {
+public class TasksMonitor implements Runnable, Monitor, TaskSubmitter {
 
     private ExecutorService tasksExecutorService = Executors.newCachedThreadPool();
 
@@ -32,7 +32,7 @@ public class TasksMonitor implements Runnable, TaskSubmitter {
     @Override
     public void run() {
         while(this.active) {
-            procMon();
+            monitorTasks();
             try {
                 long timeout = 30000;
                 Thread.sleep(timeout);
@@ -69,7 +69,18 @@ public class TasksMonitor implements Runnable, TaskSubmitter {
         }
     }
 
-    public void procMon() {
+    public void start() {
+        this.active = true;
+        this.monitoringServiceRunner = new Thread(this);
+        this.monitoringServiceRunner.start();
+    }
+
+    public void stop() {
+        this.active = false;
+        this.monitoringServiceRunner.interrupt();
+    }
+
+    private void monitorTasks() {
         for (TaskProcessor tp : getRunningProcesses()) {
             AbstractResource resource = tp.getResource();
             Task task = getTaskById(tp.getTaskId());
@@ -87,17 +98,6 @@ public class TasksMonitor implements Runnable, TaskSubmitter {
                     this.resourceStateTransitioner.releaseResource(resource);
             }
         }
-    }
-
-    public void start() {
-        this.active = true;
-        this.monitoringServiceRunner = new Thread(this);
-        this.monitoringServiceRunner.start();
-    }
-
-    public void stop() {
-        this.active = false;
-        this.monitoringServiceRunner.interrupt();
     }
 
     public Task getTaskById(String taskId) {
