@@ -1,6 +1,6 @@
 package org.fogbowcloud.arrebol.pools.resource;
 
-import org.fogbowcloud.arrebol.core.models.resource.AbstractResource;
+import org.fogbowcloud.arrebol.core.resource.models.AbstractResource;
 
 public interface ResourceStateTransitioner {
     void releaseResource(AbstractResource resource);

@@ -5,8 +5,10 @@ import org.fogbowcloud.arrebol.core.models.task.TaskState;
 import org.fogbowcloud.arrebol.core.monitors.TasksMonitor;
 import org.fogbowcloud.arrebol.core.scheduler.StandardScheduler;
 import org.fogbowcloud.arrebol.core.scheduler.Scheduler;
-import org.fogbowcloud.arrebol.pools.resource.ResourceObserver;
-import org.fogbowcloud.arrebol.pools.resource.ResourcePoolManager;
+import org.fogbowcloud.arrebol.core.resource.ResourceObserver;
+import org.fogbowcloud.arrebol.core.resource.ResourceManager;
+import org.fogbowcloud.arrebol.pools.resource.ResourcePool;
+import org.fogbowcloud.arrebol.pools.resource.ResourceStateTransitioner;
 
 
 public class ArrebolController {
@@ -14,16 +16,17 @@ public class ArrebolController {
     private Scheduler scheduler;
     private TasksMonitor tasksMonitor;
 
-    private ResourcePoolManager resourcePoolManager;
+    private ResourceManager resourceManager;
 
     public ArrebolController() {
-        this.resourcePoolManager = new ResourcePoolManager();
+        this.resourceManager = new ResourceManager();
 
-        this.tasksMonitor = new TasksMonitor(this.resourcePoolManager);
+        ResourceStateTransitioner resourceStateTransitioner = this.resourceManager.getResourcePool();
+        this.tasksMonitor = new TasksMonitor(resourceStateTransitioner);
         this.scheduler = new StandardScheduler(this.tasksMonitor);
 
         ResourceObserver schedulerObserver = (ResourceObserver) this.scheduler;
-        this.resourcePoolManager.registerObserver(schedulerObserver);
+        this.resourceManager.registerObserver(schedulerObserver);
     }
 
     public void start() {

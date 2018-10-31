@@ -1,14 +1,13 @@
 package org.fogbowcloud.arrebol.core.scheduler;
 
-import org.fogbowcloud.arrebol.core.models.resource.AbstractResource;
+import org.fogbowcloud.arrebol.core.resource.models.AbstractResource;
 import org.fogbowcloud.arrebol.core.models.task.Task;
 import org.fogbowcloud.arrebol.core.models.task.TaskState;
 import org.fogbowcloud.arrebol.core.monitors.TaskSubmitter;
-import org.fogbowcloud.arrebol.core.monitors.TasksMonitor;
 import org.fogbowcloud.arrebol.core.scheduler.task_queue_processor.SimpleTaskQueueProcessor;
 import org.fogbowcloud.arrebol.core.scheduler.task_queue_processor.MatchedTask;
 import org.fogbowcloud.arrebol.core.scheduler.task_queue_processor.TaskQueueProcessor;
-import org.fogbowcloud.arrebol.pools.resource.ResourceObserver;
+import org.fogbowcloud.arrebol.core.resource.ResourceObserver;
 
 import java.util.ArrayList;
 import java.util.List;

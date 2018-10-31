@@ -1,6 +1,6 @@
-package org.fogbowcloud.arrebol.pools.resource;
+package org.fogbowcloud.arrebol.core.resource;
 
-import org.fogbowcloud.arrebol.core.models.resource.AbstractResource;
+import org.fogbowcloud.arrebol.core.resource.models.AbstractResource;
 
 public interface ResourceSubject {
     void registerObserver(ResourceObserver o);

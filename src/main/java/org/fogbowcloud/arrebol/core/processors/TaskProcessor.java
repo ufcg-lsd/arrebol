@@ -1,7 +1,7 @@
 package org.fogbowcloud.arrebol.core.processors;
 
 import org.fogbowcloud.arrebol.core.models.command.Command;
-import org.fogbowcloud.arrebol.core.models.resource.AbstractResource;
+import org.fogbowcloud.arrebol.core.resource.models.AbstractResource;
 import org.fogbowcloud.arrebol.core.models.specification.Specification;
 import org.fogbowcloud.arrebol.core.models.task.TaskState;
 

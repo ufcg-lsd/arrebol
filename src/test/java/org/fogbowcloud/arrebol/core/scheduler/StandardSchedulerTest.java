@@ -1,13 +1,13 @@
 package org.fogbowcloud.arrebol.core.scheduler;
 
-import org.fogbowcloud.arrebol.core.models.resource.AbstractResource;
-import org.fogbowcloud.arrebol.core.models.resource.FogbowResource;
+import org.fogbowcloud.arrebol.core.resource.models.AbstractResource;
+import org.fogbowcloud.arrebol.core.resource.models.FogbowResource;
 import org.fogbowcloud.arrebol.core.models.specification.Specification;
 import org.fogbowcloud.arrebol.core.models.task.Task;
 import org.fogbowcloud.arrebol.core.models.task.TaskState;
 import org.fogbowcloud.arrebol.core.monitors.TasksMonitor;
-import org.fogbowcloud.arrebol.pools.resource.ResourceObserver;
-import org.fogbowcloud.arrebol.pools.resource.ResourcePoolManager;
+import org.fogbowcloud.arrebol.core.resource.ResourceObserver;
+import org.fogbowcloud.arrebol.core.resource.ResourceManager;
 import org.fogbowcloud.arrebol.pools.resource.ResourceStateTransitioner;
 import org.junit.Assert;
 import org.junit.Test;
@@ -75,7 +75,7 @@ public class StandardSchedulerTest {
     }
 
     private Scheduler getNewScheduler() {
-        ResourceStateTransitioner resourceStateTransitioner = new ResourcePoolManager();
+        ResourceStateTransitioner resourceStateTransitioner = new ResourceManager();
         TasksMonitor tasksMonitor = new TasksMonitor(resourceStateTransitioner);
         Scheduler scheduler = new StandardScheduler(tasksMonitor);
         return scheduler;
