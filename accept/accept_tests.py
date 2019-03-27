@@ -14,8 +14,10 @@ class AcceptTests(unittest.TestCase):
 
         self.assertStatusCode(response, 201)
 
-        actualMessage = response.json()['message']
-        self.assertIsInstance(actualMessage, str)
+        #TODO: need to understand better the response method
+        #the code I borrowed uses response.json()['message'] instead
+        actualMessage = response.json()
+        #TODO: replaces by a pattern match a.b.c?
         self.assertNotEqual(actualMessage, "")
 
     def assertStatusCode(self, response, expectedStatusCode):
