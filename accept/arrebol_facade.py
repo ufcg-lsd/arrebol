@@ -1,5 +1,4 @@
 import requests
-from util import utilMethods
 import json
 
 class Arrebol:
