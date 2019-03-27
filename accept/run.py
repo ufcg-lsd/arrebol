@@ -1,3 +1,4 @@
+import unittest
 from arrebol_facade import Arrebol
 
 arrebolUrl=""
