@@ -1,4 +1,4 @@
-package org.fogbowcloud.arrebol;
+package org.fogbowcloud.arrebol.core;
 
 import org.fogbowcloud.arrebol.core.models.task.Task;
 import org.fogbowcloud.arrebol.core.models.task.TaskState;
@@ -10,15 +10,19 @@ import org.fogbowcloud.arrebol.core.resource.ResourceManager;
 import org.fogbowcloud.arrebol.pools.resource.ResourcePool;
 import org.fogbowcloud.arrebol.pools.resource.ResourceStateTransitioner;
 
+import java.util.Properties;
+
 
 public class ArrebolController {
 
     private Scheduler scheduler;
     private TasksMonitor tasksMonitor;
+    private Properties properties;
 
     private ResourceManager resourceManager;
 
-    public ArrebolController() {
+    public ArrebolController(Properties properties) {
+        this.properties = properties;
         this.resourceManager = new ResourceManager();
 
         ResourceStateTransitioner resourceStateTransitioner = this.resourceManager.getResourcePool();
