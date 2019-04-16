@@ -3,7 +3,10 @@ import argparse
 from fogbow_data import *
 import time
 import uuid
-from threading import Thread
+import sys
+
+compute_request_failed_message = "Failed: The compute request was failed."
+public_ip_request_failed_message = "Failed: The public ip request was failed."
 
 def get_ras_public_key():
     response = requests.get(ras_public_key_endpoint)
@@ -50,61 +53,55 @@ def delete_public_ip(token, public_ip_id):
     response = requests.delete(ras_public_ip_endpoint + "/" + public_ip_id,
                 headers={'Fogbow-User-Token':token})
 
-def add_resource(pool, token, specification):
+def add_resource(token, specification):
     compute_id = create_compute(token, specification)
     compute_state = get_compute(token, compute_id)['state']
-    while(compute_state != "READY"):
+    while(compute_state != "READY" and compute_state != "FAILED"):
         time.sleep(3)
         compute_state = get_compute(token, compute_id)['state']
-    public_ip_id = create_public_ip(token, compute_id)
-    public_ip_state = get_public_ip(token, public_ip_id)['state']
-    while(public_ip_state != "READY" and public_ip_state != "FAILED"):
-        time.sleep(3)
+    if(compute_state == "READY"):
+        public_ip_id = create_public_ip(token, compute_id)
         public_ip_state = get_public_ip(token, public_ip_id)['state']
-    if(public_ip_state == "READY"):
-        resource_id = str(uuid.uuid4())
-        resource = {'resource_id':resource_id, 'compute_id':compute_id, 'public_ip':public_ip_id}
-        pool[resource_id] = resource
+        while(public_ip_state != "READY" and public_ip_state != "FAILED"):
+            time.sleep(3)
+            public_ip_state = get_public_ip(token, public_ip_id)['state']
+
+        if(public_ip_state == "READY"):
+            resource_id = str(uuid.uuid4())
+            resource = {'resource_id':resource_id, 'compute_id':compute_id, 'public_ip':public_ip_id}
+            return resource
+        elif(public_ip_state == "FAILED"):
+            delete_public_ip(token, public_ip_id)
+            time.sleep(1)
+            delete_compute(token, compute_id)
+            return public_ip_request_failed_message
     else:
-        delete_public_ip(token, public_ip_id)
-        time.sleep(1)
         delete_compute(token, compute_id)
+        return compute_request_failed_message
 
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("-p", "--plugin", default="fogbow",
-                    help="")
-    ap.add_argument("-s", "--size",
-                    help="")
-    ap.add_argument("-i", "--imageId",
-                    help="")
-    ap.add_argument("-m", "--memory",
-                    help="")
-    ap.add_argument("-c", "--vCPU",
-                    help="")
-    ap.add_argument("-d", "--disk",
-                    help="")
+    ap.add_argument("-i", "--imageId", default="38bbda26-a44f-4ed6-85c3-8c111e315ebf",
+                    help="Id of the compute image")
+    ap.add_argument("-m", "--memory", default="1024",
+                    help="Compute memory size")
+    ap.add_argument("-c", "--vCPU", default="2",
+                    help="Amount of compute cpu")
+    ap.add_argument("-d", "--disk", default="20",
+                    help="Compute disk size")
     args = vars(ap.parse_args())
     args['public_key'] = public_key
-    args['name'] = name
-
-    plugin = args.pop('plugin', None)
+    args['name'] = compute_name
     my_token = create_token()
-    size = int(args.pop('size', None))
 
-    threads = []
-    pool = {}
-
-    for i in range(0, size):
-        my_thread = Thread(target=add_resource, args=(pool, my_token, args))
-        my_thread.start()
-        threads.append(my_thread)
-    
-    for t in threads:
-        t.join()
-    
-    print(pool)
+    response = add_resource(my_token, args)
+    if(type(response) is not dict):
+         print(response)
+         sys.exit(1)
+    else:
+        print(response)
+        sys.exit(0)
 
 if __name__== "__main__":
     main()
