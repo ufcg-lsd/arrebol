@@ -25,10 +25,14 @@ def create_compute(token, specification):
     compute_id = response.json()['id']
     return compute_id
 
-def get_compute(compute_id, token):
+def get_compute(token, compute_id):
     response = requests.get(ras_compute_endpoint + "/" + compute_id,
                 headers={'Fogbow-User-Token':token})
     return response.json()
+
+def delete_compute(token, compute_id):
+    response = requests.delete(ras_compute_endpoint + "/" + compute_id,
+                headers={'Fogbow-User-Token':token})
 
 def create_public_ip(token, compute_id):
     response = requests.post(ras_public_ip_endpoint,
@@ -42,16 +46,30 @@ def get_public_ip(token, public_ip_id):
                 headers={'Fogbow-User-Token':token})
     return response.json()
 
+def delete_public_ip(token, public_ip_id):
+    response = requests.delete(ras_public_ip_endpoint + "/" + public_ip_id,
+                headers={'Fogbow-User-Token':token})
+
 def add_resource(pool, token, specification):
     compute_id = create_compute(token, specification)
-    compute_state = get_compute(compute_id, token)['state']
+    compute_state = get_compute(token, compute_id)['state']
     while(compute_state != "READY"):
-        time.sleep(5)
-        compute_state = get_compute(compute_id, token)['state']
+        time.sleep(3)
+        compute_state = get_compute(token, compute_id)['state']
     public_ip_id = create_public_ip(token, compute_id)
-    resource_id = str(uuid.uuid4())
-    resource = {'resource_id':resource_id, 'compute_id':compute_id, 'public_ip':public_ip_id}
-    pool[resource_id] = resource
+    public_ip_state = get_public_ip(token, public_ip_id)['state']
+    while(public_ip_state != "READY" and public_ip_state != "FAILED"):
+        time.sleep(3)
+        public_ip_state = get_public_ip(token, public_ip_id)['state']
+    if(public_ip_state == "READY"):
+        resource_id = str(uuid.uuid4())
+        resource = {'resource_id':resource_id, 'compute_id':compute_id, 'public_ip':public_ip_id}
+        pool[resource_id] = resource
+    else:
+        delete_public_ip(token, public_ip_id)
+        time.sleep(1)
+        delete_compute(token, compute_id)
+
 
 def main():
     ap = argparse.ArgumentParser()
