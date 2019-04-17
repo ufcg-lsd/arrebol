@@ -5,8 +5,8 @@ import time
 import uuid
 import sys
 
-compute_request_failed_message = "Failed: The compute request was failed."
-public_ip_request_failed_message = "Failed: The public ip request was failed."
+compute_request_failed_message = "Failed: Could not create a compute instance."
+public_ip_request_failed_message = "Failed: Could not attach a public IP to the VM."
 
 def get_ras_public_key():
     response = requests.get(ras_public_key_endpoint)
@@ -56,9 +56,12 @@ def delete_public_ip(token, public_ip_id):
 def add_resource(token, specification):
     compute_id = create_compute(token, specification)
     compute_state = get_compute(token, compute_id)['state']
+    #TODO replace it by a func likewise (wait_compute (interval, max_tries)) that returns a boolean and a msg.
     while(compute_state != "READY" and compute_state != "FAILED"):
         time.sleep(3)
         compute_state = get_compute(token, compute_id)['state']
+    
+    #TODO replace this to a function.
     if(compute_state == "READY"):
         public_ip_id = create_public_ip(token, compute_id)
         public_ip_state = get_public_ip(token, public_ip_id)['state']
@@ -82,23 +85,25 @@ def add_resource(token, specification):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("-i", "--imageId", default="38bbda26-a44f-4ed6-85c3-8c111e315ebf",
+    ap.add_argument("-i", "--imageId", default="",
                     help="Id of the compute image")
-    ap.add_argument("-m", "--memory", default="1024",
+    ap.add_argument("-m", "--memory", default="",
                     help="Compute memory size")
-    ap.add_argument("-c", "--vCPU", default="2",
+    ap.add_argument("-c", "--vCPU", default="",
                     help="Amount of compute cpu")
-    ap.add_argument("-d", "--disk", default="20",
+    ap.add_argument("-d", "--disk", default="",
                     help="Compute disk size")
     args = vars(ap.parse_args())
+
+    #TODO Add information about using args.
     args['public_key'] = public_key
     args['name'] = compute_name
     my_token = create_token()
 
     response = add_resource(my_token, args)
     if(type(response) is not dict):
-         print(response)
-         sys.exit(1)
+        print(response)
+        sys.exit(1)
     else:
         print(response)
         sys.exit(0)
