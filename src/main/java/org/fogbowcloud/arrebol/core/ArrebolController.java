@@ -1,5 +1,6 @@
 package org.fogbowcloud.arrebol.core;
 
+import org.fogbowcloud.arrebol.core.models.job.JDFJob;
 import org.fogbowcloud.arrebol.core.models.task.Task;
 import org.fogbowcloud.arrebol.core.models.task.TaskState;
 import org.fogbowcloud.arrebol.core.monitors.TasksMonitor;
@@ -10,6 +11,7 @@ import org.fogbowcloud.arrebol.core.resource.ResourceManager;
 import org.fogbowcloud.arrebol.pools.resource.ResourcePool;
 import org.fogbowcloud.arrebol.pools.resource.ResourceStateTransitioner;
 
+import java.util.Map;
 import java.util.Properties;
 
 
@@ -45,12 +47,20 @@ public class ArrebolController {
         this.tasksMonitor.stop();
     }
 
-    public void addTask(Task task) {
-        this.scheduler.addTask(task);
+    public String addJob(JDFJob job) {
+        Map<String, Task> taskMap = job.getTaskList();
+        for(Task task : taskMap.values()){
+            this.scheduler.addTask(task);
+        }
+        return job.getId();
     }
 
-    public void stopTask(Task task) {
-        this.scheduler.stopTask(task);
+    public String stopJob(JDFJob job) {
+        Map<String, Task> taskMap = job.getTaskList();
+        for(Task task : taskMap.values()){
+            this.scheduler.stopTask(task);
+        }
+        return job.getId();
     }
 
     public TaskState getTaskState(String taskId) {

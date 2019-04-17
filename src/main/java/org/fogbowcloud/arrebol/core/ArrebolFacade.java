@@ -1,6 +1,6 @@
 package org.fogbowcloud.arrebol.core;
 
-import org.fogbowcloud.arrebol.core.models.task.Task;
+import org.fogbowcloud.arrebol.core.models.job.JDFJob;
 import org.fogbowcloud.arrebol.core.models.task.TaskState;
 
 public class ArrebolFacade {
@@ -19,12 +19,12 @@ public class ArrebolFacade {
         arrebolController.stop();
     }
 
-    public void addTask(Task task){
-        arrebolController.addTask(task);
+    public String addJob(JDFJob job){
+        return arrebolController.addJob(job);
     }
 
-    public void stopTask(Task task){
-        arrebolController.stopTask(task);
+    public void stopJob(JDFJob job){
+        arrebolController.stopJob(job);
     }
 
     public TaskState getTaskState(String taskId){
