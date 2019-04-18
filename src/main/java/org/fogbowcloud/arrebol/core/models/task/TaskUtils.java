@@ -22,6 +22,7 @@ public class TaskUtils {
     public static final String JSON_KEY_COMMANDS = "commands";
     public static final String JSON_KEY_METADATA = "metadata";
 
+    /*
     public static Task fromJSON(JSONObject taskJSON) {
         String taskId = taskJSON.optString(JSON_KEY_ID);
         String taskUuid = taskJSON.optString(JSON_KEY_UUID);
@@ -78,4 +79,5 @@ public class TaskUtils {
             return null;
         }
     }
+    */
 }

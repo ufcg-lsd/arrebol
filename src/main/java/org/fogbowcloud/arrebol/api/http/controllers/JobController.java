@@ -3,15 +3,12 @@ package org.fogbowcloud.arrebol.api.http.controllers;
 import org.apache.log4j.Logger;
 import org.fogbowcloud.arrebol.api.constants.ApiDocumentation;
 import org.fogbowcloud.arrebol.api.http.services.JobService;
-import org.fogbowcloud.arrebol.core.models.job.JDFJob;
+import org.fogbowcloud.arrebol.core.models.job.JobSpec;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping(value = ApiDocumentation.ApiEndpoints.JOB_ENDPOINT)
@@ -27,10 +24,23 @@ public class JobController {
     }
 
     @RequestMapping(method = RequestMethod.POST)
-    public ResponseEntity<String> addJob(@RequestBody JDFJob jdfJob){
-        LOGGER.info("Saving new Job.");
+    public ResponseEntity<String> addJob(@RequestBody JobSpec jobSpec){
+        LOGGER.info("Arrebol: saving new Job: " + jobSpec.getLabel() + ".");
 
-        String idJob = jobService.addJob(jdfJob);
-        return new ResponseEntity<String>(idJob, HttpStatus.CREATED);
+        String idJob = jobService.addJob(jobSpec);
+        JobResponse jobResponse = new JobResponse(idJob);
+
+        LOGGER.info("Saved " + jobSpec.getLabel() + " with id " + idJob + ".");
+        return new ResponseEntity(jobResponse, HttpStatus.CREATED);
+    }
+
+    public class JobResponse {
+        private String id;
+        public JobResponse(String id) { this.id = id; }
+        public String getId() {
+            return this.id;
+        }
+        public void setIt(String id) { this.id = id;}
     }
 }
+

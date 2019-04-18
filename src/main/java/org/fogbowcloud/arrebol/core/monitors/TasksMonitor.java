@@ -110,7 +110,7 @@ public class TasksMonitor implements Runnable, Monitor, TaskSubmitter {
     }
 
     private TaskProcessor createProcess(Task task) {
-        TaskProcessor taskProcessor = new TaskProcessor(task.getId(), task.getAllCommands(), task.getSpecification(), task.getUUID());
+        TaskProcessor taskProcessor = new TaskProcessor(task.getId(), task.getAllCommands(), task.getSpecification(), task.getId());
         return taskProcessor;
     }
 

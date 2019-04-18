@@ -7,18 +7,19 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.HashMap;
 import java.util.Map;
-
-import static java.util.Map.entry;
 
 @RestController
 @RequestMapping(value = ApiDocumentation.ApiEndpoints.VERSION_ENDPOINT)
 public class VersionController {
 
-    private static final Map<String,String> VERSION = Map.ofEntries(
-            entry("Version", ApiDocumentation.ApiInfo.VERSION)
-    );
+    private static Map<String,String> VERSION;
 
+    public VersionController(){
+        VERSION = new HashMap<>();
+        VERSION.put("VERSION", ApiDocumentation.ApiInfo.VERSION);
+    }
 
     @RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Map> getVersion(){
