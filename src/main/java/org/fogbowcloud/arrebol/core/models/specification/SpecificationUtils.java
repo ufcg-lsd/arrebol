@@ -60,6 +60,7 @@ public class SpecificationUtils {
         return specifications;
     }
 
+    /*
     public static Specification fromJSON(JSONObject specJSON) {
         Specification specification = new Specification(
                 specJSON.optString(SpecificationConstants.IMAGE_STR),
@@ -73,6 +74,7 @@ public class SpecificationUtils {
         specification.putAllRequirements(reqMap);
         return specification;
     }
+    */
 
     public static Map<String, String> toMap(String jsonStr) {
         Map<String, String> newMap = new HashMap<String, String>();

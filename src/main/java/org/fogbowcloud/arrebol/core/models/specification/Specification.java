@@ -6,6 +6,7 @@ import org.json.JSONObject;
 import java.util.*;
 
 public class Specification {
+    String cloudName;
     String image;
     String username;
     String privateKeyFilePath;
@@ -17,11 +18,16 @@ public class Specification {
     Map<String, String> requirements = new HashMap<String, String>();
 
     public Specification(String image, String username, String publicKey, String privateKeyFilePath) {
-        this(image, username, publicKey, privateKeyFilePath, "", "");
+        this(image, username, publicKey, "", privateKeyFilePath, "", "");
     }
 
-    public Specification(String image, String username, String publicKey, String privateKeyFilePath,
+    public Specification(String image, String username, String publicKey, String privateKeyFilePath, String cloudName){
+        this(image, username, publicKey, privateKeyFilePath, cloudName, "", "");
+    }
+
+    public Specification(String image, String username, String publicKey, String privateKeyFilePath, String cloudName,
                          String userDataFile, String userDataType) {
+        this.cloudName = cloudName;
         this.image = image;
         this.username = username;
         this.publicKey = publicKey;
@@ -29,6 +35,8 @@ public class Specification {
         this.userDataFile = userDataFile;
         this.userDataType = userDataType;
     }
+
+    public Specification(){}
 
     public void addRequirement(String key, String value) {
         requirements.put(key, value);
@@ -104,6 +112,7 @@ public class Specification {
         this.userDataType = userDataType;
     }
 
+    //TODO Update toString
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
@@ -128,6 +137,7 @@ public class Specification {
         return sb.toString();
     }
 
+    //TODO Update hashcode
     @Override
     public int hashCode() {
         final int prime = 31;
@@ -143,6 +153,7 @@ public class Specification {
         return result;
     }
 
+    //TODO Review equals
     @Override
     public boolean equals(Object obj) {
         if (this == obj)
@@ -197,7 +208,7 @@ public class Specification {
 
     public Specification clone() {
         Specification cloneSpec = new Specification(this.image, this.username, this.publicKey, this.privateKeyFilePath,
-                this.userDataFile, this.userDataType);
+                this.cloudName, this.userDataFile, this.userDataType);
         cloneSpec.putAllRequirements(this.getAllRequirements());
         return cloneSpec;
     }

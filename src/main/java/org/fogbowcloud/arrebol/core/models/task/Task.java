@@ -12,22 +12,26 @@ public class Task {
 
     private String id;
     private Specification specification;
-    private List<Command> commands = new ArrayList<Command>();
+    private List<Command> commands;
     private TaskState state;
-    private String uuid;
     private boolean isFinished;
     private boolean isFailed;
     private int retries;
     private Map<String, String> metadata = new HashMap<String, String>();
 
-    public Task(String id, Specification spec, String uuid) {
+    public Task(String id, Specification spec) {
         this.id = id;
         this.specification = spec;
-        this.uuid = uuid;
         this.isFinished = false;
         this.isFailed = false;
         this.state = TaskState.PENDING;
         this.retries = -1;
+        this.commands = new ArrayList<Command>();
+    }
+
+    public Task(String id, Specification spec, List<Command> commands){
+        this(id, spec);
+        this.commands = commands;
     }
 
     public void addCommand(Command command) {
@@ -80,10 +84,6 @@ public class Task {
 
     public String getId() {
         return this.id;
-    }
-
-    public String getUUID() {
-        return this.uuid;
     }
 
     public int getRetries() {

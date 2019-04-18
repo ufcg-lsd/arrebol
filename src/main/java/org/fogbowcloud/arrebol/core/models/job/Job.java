@@ -2,75 +2,48 @@ package org.fogbowcloud.arrebol.core.models.job;
 
 import org.apache.log4j.Logger;
 import org.fogbowcloud.arrebol.core.models.task.Task;
+import org.fogbowcloud.arrebol.core.models.task.TaskSpec;
+import org.fogbowcloud.arrebol.core.models.task.TaskState;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
-public abstract class Job implements Serializable {
+public class Job implements Serializable {
 
 	private static final long serialVersionUID = -6111900503095749695L;
 	private static final Logger LOGGER = Logger.getLogger(Job.class);
 
-	private Map<String, Task> taskList;
-	private final ReentrantReadWriteLock taskReadyLock;
-	private boolean isCreated;
+	private final String id;
+	private final String label;
+	private JobState jobState;
+	private Map<String, Task> tasks;
 
-	public Job(List<Task> tasks) {
-		this.isCreated = true;
-		this.taskList = new HashMap<String, Task>();
-		this.taskReadyLock = new ReentrantReadWriteLock();
-		addTasks(tasks);
+	public Job(String label){
+		this.id = UUID.randomUUID().toString();
+		this.jobState = JobState.SUBMITTED;
+		this.label = label;
+		this.tasks = new HashMap<String, Task>();
 	}
 
-	//TODO: not sure that we need to guarantee thread safety at the job level
-	public void addTask(Task task) {
-		LOGGER.debug("Adding task " + task.getId());
-		taskReadyLock.writeLock().lock();
-		try {
-			getTaskList().put(task.getId(), task);
-		} finally {
-			taskReadyLock.writeLock().unlock();
-		}
+	public Job(String label, Map<String, Task> tasks){
+		this(label);
+		this.tasks = tasks;
 	}
 
-	private void addTasks(List<Task> tasks) {
-		for(Task task : tasks){
-			addTask(task);
-		}
-	}
-	
-	public List<Task> getTasks(){
-		return new ArrayList<Task>(taskList.values());
-	}
-	
-	public abstract void finish(Task task);
-
-	public abstract void fail(Task task);
-
-	public abstract String getId();
-
-	//TODO: it seems this *created* and restart methods help the Scheduler class to its job. I'm not sure
-	//if we should keep them.
-	public boolean isCreated() {
-		return this.isCreated;
-	}
-	
-	public void setCreated() { this.isCreated = true; }
-
-	public void restart() {
-		this.isCreated = false;
+	public void addTask(Task task){
+		tasks.put(task.getId(), task);
 	}
 
-	public Map<String, Task> getTaskList() {
-		return taskList;
+	public Map<String, Task> getTasks(){
+		return this.tasks;
 	}
 
-	//FIXME: why do we need this method? (serialization?)
-	public void setTaskList(Map<String, Task> taskList) {
-		this.taskList = taskList;
+	public String getId(){
+		return this.id;
+	}
+
+	public void setJobState(JobState jobState){
+		this.jobState = jobState;
 	}
 }

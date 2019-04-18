@@ -1,6 +1,8 @@
 package org.fogbowcloud.arrebol.core;
 
-import org.fogbowcloud.arrebol.core.models.job.JDFJob;
+import org.fogbowcloud.arrebol.core.models.job.Job;
+import org.fogbowcloud.arrebol.core.models.job.JobSpec;
+import org.fogbowcloud.arrebol.core.models.job.JobState;
 import org.fogbowcloud.arrebol.core.models.task.Task;
 import org.fogbowcloud.arrebol.core.models.task.TaskState;
 import org.fogbowcloud.arrebol.core.monitors.TasksMonitor;
@@ -47,16 +49,17 @@ public class ArrebolController {
         this.tasksMonitor.stop();
     }
 
-    public String addJob(JDFJob job) {
-        Map<String, Task> taskMap = job.getTaskList();
+    public String addJob(Job job) {
+        Map<String, Task> taskMap = job.getTasks();
         for(Task task : taskMap.values()){
             this.scheduler.addTask(task);
         }
+        job.setJobState(JobState.READY);
         return job.getId();
     }
 
-    public String stopJob(JDFJob job) {
-        Map<String, Task> taskMap = job.getTaskList();
+    public String stopJob(Job job) {
+        Map<String, Task> taskMap = job.getTasks();
         for(Task task : taskMap.values()){
             this.scheduler.stopTask(task);
         }
