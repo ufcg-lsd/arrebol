@@ -2,6 +2,8 @@ package org.fogbowcloud.arrebol.core.models.job;
 
 import org.apache.log4j.Logger;
 import org.fogbowcloud.arrebol.core.models.task.Task;
+
+import javax.persistence.*;
 import java.io.Serializable;
 import java.util.*;
 
@@ -12,6 +14,7 @@ public class Job implements Serializable {
 
 	private final String id;
 	private final String label;
+
 	private JobState jobState;
 
 	private Map<String, Task> tasks;
@@ -20,7 +23,7 @@ public class Job implements Serializable {
 		this.id = UUID.randomUUID().toString();
 		this.jobState = JobState.SUBMITTED;
 		this.label = label;
-		this.tasks = new HashMap<String, Task>();
+		this.tasks = new HashMap<>();
 	}
 
 	public Job(String label, Map<String, Task> tasks){

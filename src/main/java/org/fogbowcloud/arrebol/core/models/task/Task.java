@@ -3,56 +3,35 @@ package org.fogbowcloud.arrebol.core.models.task;
 import org.fogbowcloud.arrebol.core.models.command.Command;
 import org.fogbowcloud.arrebol.core.models.specification.Specification;
 
-import java.util.ArrayList;
+import javax.persistence.*;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+@Entity
 public class Task {
 
+    @Id
     private String id;
+
+    @OneToOne
     private Specification specification;
+
+    @OneToMany(mappedBy="task")
     private List<Command> commands;
+    @Enumerated(EnumType.STRING)
     private TaskState state;
-    private boolean isFinished;
-    private boolean isFailed;
-    private int retries;
+
+    @ElementCollection
     private Map<String, String> metadata = new HashMap<String, String>();
 
-    public Task(String id, Specification spec) {
+    public Task(String id, Specification spec, List<Command> commands) {
         this.id = id;
         this.specification = spec;
-        this.isFinished = false;
-        this.isFailed = false;
         this.state = TaskState.PENDING;
-        this.retries = -1;
-        this.commands = new ArrayList<Command>();
+        this.commands = commands;;
     }
 
-    public Task(String id, Specification spec, List<Command> commands){
-        this(id, spec);
-        this.commands = commands;
-    }
-
-    public void addCommand(Command command) {
-        commands.add(command);
-    }
-
-    public boolean isFinished() {
-        return isFinished;
-    }
-
-    public void finish(){
-        this.isFinished = true;
-    }
-
-    protected void fail() {
-        this.isFailed = true;
-    }
-
-    public boolean isFailed() {
-        return isFailed;
-    }
 
     public void putMetadata(String attributeName, String value) {
         this.metadata.put(attributeName, value);
@@ -66,6 +45,7 @@ public class Task {
         return metadata;
     }
 
+
     public Specification getSpecification() {
         return this.specification;
     }
@@ -78,19 +58,15 @@ public class Task {
         this.state = newState;
     }
 
-    public List<Command> getAllCommands() {
+    public List<Command> getCommands() {
         return commands;
+    }
+
+    public void setCommands(List<Command> commands){
+        this.commands = commands;
     }
 
     public String getId() {
         return this.id;
-    }
-
-    public int getRetries() {
-        return this.retries;
-    }
-
-    public void setRetries(int retries) {
-        this.retries = retries;
     }
 }

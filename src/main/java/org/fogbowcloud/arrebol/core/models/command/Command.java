@@ -1,15 +1,20 @@
 package org.fogbowcloud.arrebol.core.models.command;
 
+import org.fogbowcloud.arrebol.core.models.task.Task;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import javax.persistence.*;
 
+@Entity
 public class Command {
 
-    public static final String COMMAND_KEY = "command";
-    public static final String COMMAND_STATE_KEY = "state";
+    @Id
+    @GeneratedValue(strategy=GenerationType.IDENTITY)
+    private Integer id;
 
     private String command;
+    //@Enumerated(EnumType.STRING)
     private CommandState state;
 
     public Command(String command) {
@@ -38,8 +43,6 @@ public class Command {
     public JSONObject toJSON() {
         try {
             JSONObject command = new JSONObject();
-            command.put(COMMAND_KEY, this.getCommand());
-            command.put(COMMAND_STATE_KEY, this.getState().toString());
             return command;
         } catch (JSONException e) {
             return null;
@@ -49,4 +52,8 @@ public class Command {
     public String toString(){
         return "Command: " + this.command + System.lineSeparator() + "State: " + this.state.toString();
     }
+
+    @ManyToOne
+    @JoinColumn(name="id_task")
+    private Task task;
 }

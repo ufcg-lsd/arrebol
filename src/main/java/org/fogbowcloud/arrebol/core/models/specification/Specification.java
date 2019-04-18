@@ -3,9 +3,15 @@ package org.fogbowcloud.arrebol.core.models.specification;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import javax.persistence.*;
 import java.util.*;
 
+@Entity
 public class Specification {
+
+    @Id
+    @GeneratedValue(strategy= GenerationType.IDENTITY)
+    String id;
     String cloudName;
     String image;
     String username;
@@ -15,6 +21,7 @@ public class Specification {
     String userDataFile;
     String userDataType;
 
+    @ElementCollection
     Map<String, String> requirements = new HashMap<String, String>();
 
     public Specification(String image, String username, String publicKey, String privateKeyFilePath) {
