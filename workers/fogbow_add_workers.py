@@ -4,9 +4,7 @@ from fogbow_data import *
 import time
 import uuid
 import sys
-
-compute_request_failed_message = "Failed: Could not create a compute instance."
-public_ip_request_failed_message = "Failed: Could not attach a public IP to the VM."
+import constants
 
 def get_ras_public_key():
     response = requests.get(ras_public_key_endpoint)
@@ -53,34 +51,55 @@ def delete_public_ip(token, public_ip_id):
     response = requests.delete(ras_public_ip_endpoint + "/" + public_ip_id,
                 headers={'Fogbow-User-Token':token})
 
+def wait_compute(token, compute_id, interval, max_tries):
+    tries = 0
+    compute_state = get_compute(token, compute_id)['state']
+    while(tries < max_tries and compute_state != "READY" and compute_state != "FAILED"):
+        time.sleep(constants.INTERVAL_CHECK_COMPUTE_STATE_SEC)
+        compute_state = get_compute(token, compute_id)['state']
+        tries += 1
+    if(compute_state == "READY"):
+        return {"result":True, "message": constants.COMPUTE_REQUEST_SUCCESSFUL_MESSAGE}
+    elif(compute_state == "FAILED"):
+        return {"result":False, "message": constants.COMPUTE_REQUEST_FAILED_MESSAGE}
+    elif(tries == max_tries):
+        return {"result":False, "message": constants.COMPUTE_REQUEST_MAX_TRIES_MESSAGE}
+
+def wait_public_ip(token, public_ip_id, interval, max_tries):
+    tries = 0
+    public_ip_state = get_public_ip(token, public_ip_id)['state']
+    while(tries < max_tries and public_ip_state != "READY" and public_ip_state != "FAILED"):
+        time.sleep(constants.INTERVAL_CHECK_PUBLIC_IP_STATE_SEC)
+        public_ip_state = get_public_ip(token, public_ip_id)['state']
+        tries += 1
+    if(public_ip_state == "READY"):
+        return {"result":True, "message": constants.PUBLIC_IP_REQUEST_SUCCESSFUL_MESSAGE}
+    elif(public_ip_state == "FAILED"):
+        return {"result":False, "message": constants.PUBLIC_IP_REQUEST_FAILED_MESSAGE}
+    elif(tries == max_tries):
+        return {"result":False, "message": constants.PUBLIC_IP_REQUEST_MAX_TRIES_MESSAGE}
+
 def add_resource(token, specification):
     compute_id = create_compute(token, specification)
     compute_state = get_compute(token, compute_id)['state']
-    #TODO replace it by a func likewise (wait_compute (interval, max_tries)) that returns a boolean and a msg.
-    while(compute_state != "READY" and compute_state != "FAILED"):
-        time.sleep(3)
-        compute_state = get_compute(token, compute_id)['state']
+    result, message = wait_compute(token, compute_id, constants.INTERVAL_CHECK_COMPUTE_STATE_SEC, 20)
     
-    #TODO replace this to a function.
-    if(compute_state == "READY"):
+    if result:
         public_ip_id = create_public_ip(token, compute_id)
-        public_ip_state = get_public_ip(token, public_ip_id)['state']
-        while(public_ip_state != "READY" and public_ip_state != "FAILED"):
-            time.sleep(3)
-            public_ip_state = get_public_ip(token, public_ip_id)['state']
-
-        if(public_ip_state == "READY"):
+        result, message = wait_public_ip(token, public_ip_id, constants.INTERVAL_CHECK_PUBLIC_IP_STATE_SEC, 20)
+        if result:
             resource_id = str(uuid.uuid4())
             resource = {'resource_id':resource_id, 'compute_id':compute_id, 'public_ip':public_ip_id}
             return resource
-        elif(public_ip_state == "FAILED"):
+        else:
             delete_public_ip(token, public_ip_id)
             time.sleep(1)
             delete_compute(token, compute_id)
-            return public_ip_request_failed_message
+            return message
     else:
         delete_compute(token, compute_id)
-        return compute_request_failed_message
+        return message
+
 
 
 def main():
