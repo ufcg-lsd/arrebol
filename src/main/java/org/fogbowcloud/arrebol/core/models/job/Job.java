@@ -2,12 +2,8 @@ package org.fogbowcloud.arrebol.core.models.job;
 
 import org.apache.log4j.Logger;
 import org.fogbowcloud.arrebol.core.models.task.Task;
-import org.fogbowcloud.arrebol.core.models.task.TaskSpec;
-import org.fogbowcloud.arrebol.core.models.task.TaskState;
-
 import java.io.Serializable;
 import java.util.*;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 public class Job implements Serializable {
 
@@ -17,6 +13,7 @@ public class Job implements Serializable {
 	private final String id;
 	private final String label;
 	private JobState jobState;
+
 	private Map<String, Task> tasks;
 
 	public Job(String label){
