@@ -12,8 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 @Lazy
 @Component
@@ -31,14 +30,15 @@ public class JobService {
     }
 
     private Job createJobFromSpec(JobSpec jobSpec){
-        Job job = new Job(jobSpec.getLabel());
+        Map<String, Task> taskList = new HashMap<>();
         for(TaskSpec taskSpec : jobSpec.getTasksSpecs()){
             List<Command> commands = taskSpec.getCommands();
             Specification spec = taskSpec.getSpec();
             String taskId = UUID.randomUUID().toString();
             Task task = new Task(taskId, spec, commands);
-            job.addTask(task);
+            taskList.put(taskId, task);
         }
+        Job job = new Job(jobSpec.getLabel(), taskList);
         return job;
     }
 

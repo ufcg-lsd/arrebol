@@ -14,7 +14,7 @@ public class Command {
     private Integer id;
 
     private String command;
-    //@Enumerated(EnumType.STRING)
+    @Enumerated(EnumType.STRING)
     private CommandState state;
 
     public Command(String command) {
@@ -54,6 +54,9 @@ public class Command {
     }
 
     @ManyToOne
-    @JoinColumn(name="id_task")
+    @JoinColumn(name = "task_id")
     private Task task;
+    public void setTask(Task task){
+        this.task = task;
+    }
 }

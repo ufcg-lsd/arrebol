@@ -1,6 +1,7 @@
 package org.fogbowcloud.arrebol.core.models.task;
 
 import org.fogbowcloud.arrebol.core.models.command.Command;
+import org.fogbowcloud.arrebol.core.models.job.Job;
 import org.fogbowcloud.arrebol.core.models.specification.Specification;
 
 import javax.persistence.*;
@@ -14,11 +15,12 @@ public class Task {
     @Id
     private String id;
 
-    @OneToOne
+    @OneToOne(cascade = CascadeType.ALL)
     private Specification specification;
 
-    @OneToMany(mappedBy="task")
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "task")
     private List<Command> commands;
+
     @Enumerated(EnumType.STRING)
     private TaskState state;
 
@@ -31,6 +33,8 @@ public class Task {
         this.state = TaskState.PENDING;
         this.commands = commands;;
     }
+
+    public Task(){}
 
 
     public void putMetadata(String attributeName, String value) {
@@ -68,5 +72,12 @@ public class Task {
 
     public String getId() {
         return this.id;
+    }
+
+    @ManyToOne
+    private Job job;
+
+    public void setJob(Job job){
+        this.job = job;
     }
 }

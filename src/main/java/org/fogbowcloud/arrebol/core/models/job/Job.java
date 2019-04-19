@@ -7,28 +7,31 @@ import javax.persistence.*;
 import java.io.Serializable;
 import java.util.*;
 
+@Entity
 public class Job implements Serializable {
 
 	private static final long serialVersionUID = -6111900503095749695L;
 	private static final Logger LOGGER = Logger.getLogger(Job.class);
 
-	private final String id;
-	private final String label;
+	@Id
+	private String id;
+	private String label;
 
+	@Enumerated(EnumType.STRING)
 	private JobState jobState;
 
+	@OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+	@MapKey(name = "id")
 	private Map<String, Task> tasks;
 
-	public Job(String label){
+	public Job(String label, Map<String, Task> tasks){
 		this.id = UUID.randomUUID().toString();
 		this.jobState = JobState.SUBMITTED;
 		this.label = label;
-		this.tasks = new HashMap<>();
+		this.tasks = tasks;
 	}
 
-	public Job(String label, Map<String, Task> tasks){
-		this(label);
-		this.tasks = tasks;
+	public Job(){
 	}
 
 	public void addTask(Task task){
