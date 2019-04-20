@@ -1,14 +1,14 @@
 package org.fogbowcloud.arrebol.core.scheduler.task_queue_processor;
 
-import org.fogbowcloud.arrebol.core.resource.models.AbstractResource;
 import org.fogbowcloud.arrebol.core.models.task.Task;
+import org.fogbowcloud.arrebol.core.resource.models.Resource;
 
 public class MatchedTask {
 
     private Task task;
-    private AbstractResource resource;
+    private Resource resource;
 
-    public MatchedTask(Task t, AbstractResource r) {
+    public MatchedTask(Task t, Resource r) {
         this.task = t;
         this.resource = r;
     }
@@ -17,7 +17,7 @@ public class MatchedTask {
         return task;
     }
 
-    public AbstractResource getResource() {
+    public Resource getResource() {
         return resource;
     }
 }

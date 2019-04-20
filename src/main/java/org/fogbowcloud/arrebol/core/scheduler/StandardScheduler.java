@@ -1,24 +1,23 @@
 package org.fogbowcloud.arrebol.core.scheduler;
 
-import org.fogbowcloud.arrebol.core.resource.models.AbstractResource;
 import org.fogbowcloud.arrebol.core.models.task.Task;
 import org.fogbowcloud.arrebol.core.models.task.TaskState;
 import org.fogbowcloud.arrebol.core.monitors.TaskSubmitter;
+import org.fogbowcloud.arrebol.core.resource.models.Resource;
 import org.fogbowcloud.arrebol.core.scheduler.task_queue_processor.SimpleTaskQueueProcessor;
 import org.fogbowcloud.arrebol.core.scheduler.task_queue_processor.MatchedTask;
 import org.fogbowcloud.arrebol.core.scheduler.task_queue_processor.TaskQueueProcessor;
-import org.fogbowcloud.arrebol.core.resource.ResourceObserver;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class StandardScheduler implements Scheduler, ResourceObserver {
+public class StandardScheduler implements Scheduler {
 
     private TaskSubmitter taskSubmitter;
 
     private List<Task> pendingTasks;
-    private List<AbstractResource> freeResources;
+    private List<Resource> freeResources;
     private ConcurrentHashMap<String, Task> taskPool;
 
     private TaskQueueProcessor taskQueueProcessor;
@@ -27,7 +26,7 @@ public class StandardScheduler implements Scheduler, ResourceObserver {
         this.taskSubmitter = taskSubmitter;
 
         this.pendingTasks = new ArrayList<Task>();
-        this.freeResources = new ArrayList<AbstractResource>();
+        this.freeResources = new ArrayList<Resource>();
         this.taskPool = new ConcurrentHashMap<String, Task>();
 
         this.taskQueueProcessor = new SimpleTaskQueueProcessor();
@@ -73,13 +72,13 @@ public class StandardScheduler implements Scheduler, ResourceObserver {
         return this.pendingTasks;
     }
 
-    public void update(AbstractResource r) {
+    public void update(Resource r) {
         this.freeResources.add(r);
 
         actOnResources();
     }
 
-    private void runTask(Task task, AbstractResource resource) {
+    private void runTask(Task task, Resource resource) {
         this.pendingTasks.remove(task);
         this.freeResources.remove(resource);
 

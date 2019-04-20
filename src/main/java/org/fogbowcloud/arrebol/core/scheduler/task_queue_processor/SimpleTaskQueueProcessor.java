@@ -1,7 +1,7 @@
 package org.fogbowcloud.arrebol.core.scheduler.task_queue_processor;
 
-import org.fogbowcloud.arrebol.core.resource.models.AbstractResource;
 import org.fogbowcloud.arrebol.core.models.task.Task;
+import org.fogbowcloud.arrebol.core.resource.models.Resource;
 
 import java.util.List;
 
@@ -14,10 +14,10 @@ public class SimpleTaskQueueProcessor implements TaskQueueProcessor {
      * @return an instance of MatchedTask, to save a match between a task and a resource.
      */
     @Override
-    public MatchedTask pickTaskToRun(List<Task> pendingTasks, List<AbstractResource> freeResources) {
+    public MatchedTask pickTaskToRun(List<Task> pendingTasks, List<Resource> freeResources) {
         for (Task task : pendingTasks) {
-            for (AbstractResource resource : freeResources) {
-                boolean isSameSpecification = resource.getRequestedSpecification().equals(task.getSpecification());
+            for (Resource resource : freeResources) {
+                boolean isSameSpecification = resource.getSpecification().equals(task.getSpecification());
                 if (!task.isFinished() && isSameSpecification) {
                     pendingTasks.remove(task); // TODO: test if is removed
                     freeResources.remove(resource);
