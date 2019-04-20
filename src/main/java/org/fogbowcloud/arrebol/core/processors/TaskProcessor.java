@@ -9,6 +9,8 @@ import java.util.UUID;
 
 public class TaskProcessor {
 
+    /**
+
     private String processId;
     private String taskId;
     private List<Command> commands;
@@ -60,4 +62,5 @@ public class TaskProcessor {
     public void setStatus(TaskState taskState) {
         this.status = taskState;
     }
+     */
 }

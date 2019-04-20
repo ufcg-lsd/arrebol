@@ -73,7 +73,7 @@ public class StandardSchedulerTest {
     private Scheduler getNewScheduler() {
         ResourceStateTransitioner resourceStateTransitioner = new ResourceManager();
         TasksMonitor tasksMonitor = new TasksMonitor(resourceStateTransitioner);
-        Scheduler scheduler = new StandardScheduler(tasksMonitor);
+        Scheduler scheduler = new DefaultScheduler(tasksMonitor);
         return scheduler;
     }
 

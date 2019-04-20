@@ -5,19 +5,28 @@ import org.fogbowcloud.arrebol.core.resource.models.Resource;
 
 public class AllocationPlan {
 
+    //TODO: I do not quite remember what the STOP type mean (it is mean to be used on failure?!)
+    public enum Type {RUN, STOP};
+
     private Task task;
     private Resource resource;
+    private Type type;
 
-    public AllocationPlan(Task t, Resource r) {
+    public AllocationPlan(Task t, Resource r, Type type) {
         this.task = t;
         this.resource = r;
+        this.type = type;
     }
 
     public Task getTask() {
-        return task;
+        return this.task;
     }
 
     public Resource getResource() {
-        return resource;
+        return this.resource;
+    }
+
+    public Type getType() {
+        return this.type;
     }
 }
