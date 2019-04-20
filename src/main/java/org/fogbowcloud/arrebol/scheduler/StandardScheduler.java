@@ -1,18 +1,18 @@
-package org.fogbowcloud.arrebol.core.scheduler;
+package org.fogbowcloud.arrebol.scheduler;
 
 import org.fogbowcloud.arrebol.core.models.task.Task;
 import org.fogbowcloud.arrebol.core.models.task.TaskState;
 import org.fogbowcloud.arrebol.core.monitors.TaskSubmitter;
 import org.fogbowcloud.arrebol.core.resource.models.Resource;
-import org.fogbowcloud.arrebol.core.scheduler.task_queue_processor.SimpleTaskQueueProcessor;
-import org.fogbowcloud.arrebol.core.scheduler.task_queue_processor.MatchedTask;
-import org.fogbowcloud.arrebol.core.scheduler.task_queue_processor.TaskQueueProcessor;
+import org.fogbowcloud.arrebol.scheduler.task_queue_processor.SimpleTaskQueueProcessor;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class StandardScheduler implements Scheduler {
+public class StandardScheduler /**implements Scheduler*/ {
+
+    /**
 
     private TaskSubmitter taskSubmitter;
 
@@ -48,6 +48,7 @@ public class StandardScheduler implements Scheduler {
      * The decision of what tasks choose to run os free resources is delegated to a TaskQueueProcessor object
      * thrugh the call for pickTaskToRun().
      */
+    /**
     private void actOnResources() {
         MatchedTask matchedTask = pickTaskToRun();
         while (matchedTask.getTask() != null) { // while there are tasks matched with resources
@@ -85,4 +86,6 @@ public class StandardScheduler implements Scheduler {
         // taskMonitor is the responsible for changing task state and resource state
         this.taskSubmitter.runTask(task, resource);
     }
+
+    **/
 }

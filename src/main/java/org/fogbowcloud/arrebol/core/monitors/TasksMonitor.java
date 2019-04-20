@@ -11,8 +11,9 @@ import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-public class TasksMonitor implements Runnable, Monitor, TaskSubmitter {
+public class TasksMonitor /**implements Runnable, Monitor, TaskSubmitter*/ {
 
+    /**
     private ExecutorService tasksExecutorService = Executors.newCachedThreadPool();
 
     private Thread monitoringServiceRunner;
@@ -122,5 +123,5 @@ public class TasksMonitor implements Runnable, Monitor, TaskSubmitter {
         // TODO
         return null;
     }
-
+*/
 }

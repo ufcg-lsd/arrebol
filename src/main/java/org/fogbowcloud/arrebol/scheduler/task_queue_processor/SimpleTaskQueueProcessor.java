@@ -1,11 +1,11 @@
-package org.fogbowcloud.arrebol.core.scheduler.task_queue_processor;
+package org.fogbowcloud.arrebol.scheduler.task_queue_processor;
 
 import org.fogbowcloud.arrebol.core.models.task.Task;
 import org.fogbowcloud.arrebol.core.resource.models.Resource;
 
 import java.util.List;
 
-public class SimpleTaskQueueProcessor implements TaskQueueProcessor {
+public class SimpleTaskQueueProcessor /**implements TaskQueueProcessor*/ {
 
     /**
      * Get the first task in the queue that matches with a resource (resource accomplish task requirements)
@@ -13,6 +13,7 @@ public class SimpleTaskQueueProcessor implements TaskQueueProcessor {
      * @param freeResources, list of free resources
      * @return an instance of MatchedTask, to save a match between a task and a resource.
      */
+    /**
     @Override
     public MatchedTask pickTaskToRun(List<Task> pendingTasks, List<Resource> freeResources) {
         for (Task task : pendingTasks) {
@@ -31,4 +32,5 @@ public class SimpleTaskQueueProcessor implements TaskQueueProcessor {
     private MatchedTask getEmptyMatchedTask() {
         return new MatchedTask(null, null);
     }
+    */
 }
