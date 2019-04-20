@@ -5,6 +5,7 @@ import org.fogbowcloud.arrebol.core.models.specification.Specification;
 
 import java.io.Serializable;
 import java.util.List;
+import java.util.Map;
 
 public class TaskSpec implements Serializable {
 
@@ -12,14 +13,17 @@ public class TaskSpec implements Serializable {
 
     private Specification spec;
     private List<Command> commands;
+    private Map<String, String> metadata;
 
-    public TaskSpec(Specification spec, List<Command> commands){
+    public TaskSpec(Specification spec, List<Command> commands, Map<String, String> metadata){
         this.spec = spec;
         this.commands = commands;
+        this.metadata = metadata;
     }
 
-    public TaskSpec(){}
-
+    public TaskSpec(){
+        //Default constructor.
+    }
 
     public List<Command> getCommands(){
         return this.commands;
@@ -29,14 +33,16 @@ public class TaskSpec implements Serializable {
         return this.spec;
     }
 
+    public Map<String, String> getMetadata() {
+        return this.metadata;
+    }
+
     @Override
     public String toString() {
-        /*
         return "TaskSpec{" +
-                "spec=" + spec.toString() +
-                ", commands=" + commandsToString() +
+                "spec=" + spec +
+                ", commands=" + commands +
+                ", metadata=" + metadata +
                 '}';
-                */
-        return "";
     }
 }

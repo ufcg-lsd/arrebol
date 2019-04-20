@@ -1,10 +1,10 @@
 package org.fogbowcloud.arrebol.core.models.task;
 
 import org.fogbowcloud.arrebol.core.models.command.Command;
-import org.fogbowcloud.arrebol.core.models.job.Job;
 import org.fogbowcloud.arrebol.core.models.specification.Specification;
 
 import javax.persistence.*;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -25,13 +25,14 @@ public class Task {
     private TaskState state;
 
     @ElementCollection
-    private Map<String, String> metadata = new HashMap<String, String>();
+    private Map<String, String> metadata;
 
-    public Task(String id, Specification spec, List<Command> commands) {
+    public Task(String id, Specification spec, List<Command> commands, Map<String, String> metadata) {
         this.id = id;
         this.specification = spec;
         this.state = TaskState.PENDING;
-        this.commands = commands;;
+        this.commands = commands;
+        this.metadata = metadata;
     }
 
     Task(){
@@ -55,19 +56,13 @@ public class Task {
     }
 
     public List<Command> getCommands() {
-        return commands;
+        List<Command> commandsClone = new ArrayList<>(this.commands);
+        return commandsClone;
     }
 
-    public void putMetadata(String attributeName, String value) {
-        this.metadata.put(attributeName, value);
-    }
-
-    public String getMetadata(String attributeName) {
-        return this.metadata.get(attributeName);
-    }
-
-    public Map<String, String> getAllMetadata() {
-        return metadata;
+    public Map<String, String> getMetadata() {
+        Map<String, String> metadataClone = new HashMap<>(this.metadata);
+        return metadataClone;
     }
 
 }

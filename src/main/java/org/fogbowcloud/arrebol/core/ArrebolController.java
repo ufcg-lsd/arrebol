@@ -26,15 +26,12 @@ public class ArrebolController {
     private TasksMonitor tasksMonitor;
     private Properties properties;
 
-    private JobDAO jobDAO;
-
     private ResourceManager resourceManager;
 
     private final Logger LOGGER = Logger.getLogger(ArrebolController.class);
 
-    public ArrebolController(Properties properties, JobDAO jobDAO) {
+    public ArrebolController(Properties properties) {
         this.properties = properties;
-        this.jobDAO = jobDAO;
         this.resourceManager = new ResourceManager();
 
         ResourceStateTransitioner resourceStateTransitioner = this.resourceManager.getResourcePool();
@@ -65,7 +62,6 @@ public class ArrebolController {
             */
         }
         job.setJobState(JobState.READY);
-        jobDAO.addJob(job);
         return job.getId();
     }
 
@@ -75,12 +71,6 @@ public class ArrebolController {
             this.scheduler.stopTask(task);
         }
         return job.getId();
-    }
-
-    public Job getJob(String id){
-        LOGGER.debug("Acessing database to getting a job");
-        Job job = this.jobDAO.getJobById(id);
-        return job;
     }
 
     public TaskState getTaskState(String taskId) {

@@ -11,7 +11,6 @@ import org.fogbowcloud.arrebol.core.models.task.Task;
 import org.fogbowcloud.arrebol.core.models.task.TaskSpec;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
-import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -24,33 +23,40 @@ public class JobService {
     @Autowired
     private ArrebolFacade arrebolFacade;
 
-    /*
+
     @Autowired
     private JobDAO jobDAO;
-    */
+
 
     private final Logger LOGGER = Logger.getLogger(JobService.class);
 
     public String addJob(JobSpec jobSpec){
         Job job = createJobFromSpec(jobSpec);
-        return this.arrebolFacade.addJob(job);
+        String id = this.arrebolFacade.addJob(job);
+        this.jobDAO.addJob(job);
+        return id;
     }
 
     public Job getJobById(String id){
-        Job job = this.arrebolFacade.getJob(id);
+        Job job = this.jobDAO.getJobById(id);
         return job;
     }
 
     private Job createJobFromSpec(JobSpec jobSpec){
+        LOGGER.debug("Creating job object from job specification.");
         Map<String, Task> taskList = new HashMap<>();
         for(TaskSpec taskSpec : jobSpec.getTasksSpecs()){
+
+            String taskId = UUID.randomUUID().toString();
+
             List<Command> commands = taskSpec.getCommands();
             Specification spec = taskSpec.getSpec();
-            String taskId = UUID.randomUUID().toString();
-            Task task = new Task(taskId, spec, commands);
+            Map<String, String> metadata = taskSpec.getMetadata();
+            Task task = new Task(taskId, spec, commands, metadata);
             taskList.put(taskId, task);
         }
         Job job = new Job(jobSpec.getLabel(), taskList);
+        LOGGER.debug("Created job object of " + job.getLabel() + " with " + taskList.size() + " tasks.");
         return job;
     }
 

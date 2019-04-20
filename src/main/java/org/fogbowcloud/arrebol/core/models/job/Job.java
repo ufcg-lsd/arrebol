@@ -52,6 +52,7 @@ public class Job implements Serializable {
 	}
 
 	public Map<String, Task> getTasks(){
-		return this.tasks;
+		Map<String, Task> mapTasks = new HashMap<>(this.tasks);
+		return mapTasks;
 	}
 }

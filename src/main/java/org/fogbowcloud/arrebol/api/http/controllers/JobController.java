@@ -25,13 +25,12 @@ public class JobController {
 
     @RequestMapping(method = RequestMethod.POST)
     public ResponseEntity<String> addJob(@RequestBody JobSpec jobSpec){
-        LOGGER.info("Arrebol: saving new Job: " + jobSpec.getLabel() + ".");
-        LOGGER.info(jobSpec.getTasksSpecs().get(0).getSpec().getRequirements());
+        LOGGER.info("Arrebol: Adding new Job: " + jobSpec.getLabel() + ".");
 
         String jobId = jobService.addJob(jobSpec);
         JobResponse jobResponse = new JobResponse(jobId);
 
-        LOGGER.info("Saved " + jobSpec.getLabel() + " with id " + jobId + ".");
+        LOGGER.info("Added " + jobSpec.getLabel() + " with id " + jobId + ".");
         return new ResponseEntity(jobResponse, HttpStatus.CREATED);
     }
 
