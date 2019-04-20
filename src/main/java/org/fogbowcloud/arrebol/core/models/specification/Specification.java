@@ -4,10 +4,13 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import javax.persistence.*;
+import java.io.Serializable;
 import java.util.*;
 
 @Entity
-public class Specification {
+public class Specification implements Serializable {
+
+    private static final long serialVersionUID = 3435814833254660531L;
 
     @Id
     @GeneratedValue(strategy= GenerationType.IDENTITY)
@@ -16,13 +19,15 @@ public class Specification {
     String image;
     String username;
     String privateKeyFilePath;
+
+    @Column(columnDefinition="varchar(512)")
     String publicKey;
     String contextScript;
     //String userDataFile;
     //String userDataType;
 
     @ElementCollection
-    Map<String, String> requirements = new HashMap<String, String>();
+    Map<String, String> requirements;
 
     public Specification(String image, String username, String publicKey, String privateKeyFilePath, Map<String, String> requirements) {
         this(image, username, publicKey, privateKeyFilePath, requirements, null);
@@ -45,15 +50,12 @@ public class Specification {
         return requirements.get(key);
     }
 
-    public Map<String, String> getAllRequirements() {
+    public Map<String, String> getRequirements() {
         return requirements;
     }
 
-    public boolean parseToJsonFile(String jsonDestFilePath) {
-
-        List<Specification> spec = new ArrayList<Specification>();
-        spec.add(this);
-        return SpecificationUtils.parseSpecsToJsonFile(spec, jsonDestFilePath);
+    public void setRequirements(Map<String, String> requirements){
+        this.requirements = requirements;
     }
 
     public String getImage() {
@@ -80,6 +82,12 @@ public class Specification {
         this.contextScript = contextScript;
     }
 
+    public boolean parseToJsonFile(String jsonDestFilePath) {
+
+        List<Specification> spec = new ArrayList<Specification>();
+        spec.add(this);
+        return SpecificationUtils.parseSpecsToJsonFile(spec, jsonDestFilePath);
+    }
     /*
 
     public String getUserDataFile() {
@@ -218,7 +226,7 @@ public class Specification {
             specification.put(SpecificationConstants.USER_DATA_FILE_STR, this.getUserDataFile());
             specification.put(SpecificationConstants.USER_DATA_TYPE_STR, this.getUserDataType());
             */
-            specification.put(SpecificationConstants.REQUIREMENTS_MAP_STR, getAllRequirements().toString());
+            specification.put(SpecificationConstants.REQUIREMENTS_MAP_STR, getRequirements().toString());
             return specification;
         } catch (JSONException e) {
             return null;

@@ -1,5 +1,6 @@
 package org.fogbowcloud.arrebol;
 
+import org.fogbowcloud.arrebol.api.http.dataaccessobject.JobDAO;
 import org.fogbowcloud.arrebol.core.ArrebolController;
 import org.fogbowcloud.arrebol.core.ArrebolFacade;
 import org.fogbowcloud.arrebol.core.models.command.Command;
@@ -28,9 +29,14 @@ public class ArrebolApplication implements CommandLineRunner {
     }
 
     @Bean
+    public JobDAO jobDAO() {
+        return new JobDAO();
+    }
+
+    @Bean
     @Lazy
-    public ArrebolFacade arrebolFacade(Properties properties) {
-        ArrebolController arrebolController = new ArrebolController(properties);
+    public ArrebolFacade arrebolFacade(Properties properties, JobDAO jobDAO) {
+        ArrebolController arrebolController = new ArrebolController(properties, jobDAO);
         ArrebolFacade arrebolFacade = new ArrebolFacade(arrebolController);
         try {
             arrebolFacade.start();
@@ -40,12 +46,14 @@ public class ArrebolApplication implements CommandLineRunner {
         return arrebolFacade;
     }
 
-    @Autowired
-    private JobRepository jobRepository;
-
     public static void main(String[] args) {
         SpringApplication.run(ArrebolApplication.class, args);
     }
+
+
+    @Autowired
+    JobRepository jobRepository;
+
 
     @Override
     public void run(String... args) throws Exception {
@@ -85,5 +93,10 @@ public class ArrebolApplication implements CommandLineRunner {
 
         jobRepository.save(j1);
         jobRepository.save(j2);
+
+        Thread.currentThread().sleep(5000);
+
+        jobRepository.deleteById(j1.getId());
+
     }
 }

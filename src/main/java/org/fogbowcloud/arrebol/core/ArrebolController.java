@@ -1,5 +1,7 @@
 package org.fogbowcloud.arrebol.core;
 
+import org.apache.log4j.Logger;
+import org.fogbowcloud.arrebol.api.http.dataaccessobject.JobDAO;
 import org.fogbowcloud.arrebol.core.models.job.Job;
 import org.fogbowcloud.arrebol.core.models.job.JobSpec;
 import org.fogbowcloud.arrebol.core.models.job.JobState;
@@ -12,6 +14,7 @@ import org.fogbowcloud.arrebol.core.resource.ResourceObserver;
 import org.fogbowcloud.arrebol.core.resource.ResourceManager;
 import org.fogbowcloud.arrebol.pools.resource.ResourcePool;
 import org.fogbowcloud.arrebol.pools.resource.ResourceStateTransitioner;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Map;
 import java.util.Properties;
@@ -23,10 +26,15 @@ public class ArrebolController {
     private TasksMonitor tasksMonitor;
     private Properties properties;
 
+    private JobDAO jobDAO;
+
     private ResourceManager resourceManager;
 
-    public ArrebolController(Properties properties) {
+    private final Logger LOGGER = Logger.getLogger(ArrebolController.class);
+
+    public ArrebolController(Properties properties, JobDAO jobDAO) {
         this.properties = properties;
+        this.jobDAO = jobDAO;
         this.resourceManager = new ResourceManager();
 
         ResourceStateTransitioner resourceStateTransitioner = this.resourceManager.getResourcePool();
@@ -52,9 +60,12 @@ public class ArrebolController {
     public String addJob(Job job) {
         Map<String, Task> taskMap = job.getTasks();
         for(Task task : taskMap.values()){
+            /*
             this.scheduler.addTask(task);
+            */
         }
         job.setJobState(JobState.READY);
+        jobDAO.addJob(job);
         return job.getId();
     }
 
@@ -64,6 +75,12 @@ public class ArrebolController {
             this.scheduler.stopTask(task);
         }
         return job.getId();
+    }
+
+    public Job getJob(String id){
+        LOGGER.debug("Acessing database to getting a job");
+        Job job = this.jobDAO.getJobById(id);
+        return job;
     }
 
     public TaskState getTaskState(String taskId) {

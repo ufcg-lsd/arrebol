@@ -28,6 +28,8 @@ public class ArrebolFacade {
         arrebolController.stopJob(job);
     }
 
+    public Job getJob(String id) {return arrebolController.getJob(id);}
+
     public TaskState getTaskState(String taskId){
         return arrebolController.getTaskState(taskId);
     }

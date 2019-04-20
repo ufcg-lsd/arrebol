@@ -18,7 +18,7 @@ public class JobSpec implements Serializable {
     private String label;
     private List<TaskSpec> tasksSpecs;
 
-    public JobSpec(){}
+    JobSpec(){}
 
     public JobSpec(String label, List<TaskSpec> taskSpecs){
         this.label = label;
@@ -33,4 +33,5 @@ public class JobSpec implements Serializable {
     public List<TaskSpec> getTasksSpecs(){
         return this.tasksSpecs;
     }
+
 }
