@@ -50,22 +50,40 @@ public class ArrebolApplication implements CommandLineRunner {
     @Override
     public void run(String... args) throws Exception {
 
-        Command c1 = new Command("echo teste1");
-        Command c2 = new Command("echo teste2");
+        Command c1 = new Command("echo Hello World");
+        Command c2 = new Command("echo Hello World");
 
-        Specification spec1 = new Specification("ubuntu", "my_user", "publicKey", "privateKeyPath", "my_cloud");
+        Map<String, String> requeriments1 = new HashMap<>();
+        requeriments1.put("Glue2Ram", "2048");
+        Specification spec1 = new Specification("ubuntu", "my_user", "publicKey", "privateKeyPath", requeriments1, "my_cloud");
 
-        Task t = new Task("task_id", spec1, Arrays.asList(c1, c2));
+        Task t1 = new Task("36961076-35f3-42bc-a932-bd2fe0249be9", spec1, Arrays.asList(c1, c2));
 
-        Map<String, Task> taskMap = new HashMap<>();
-        taskMap.put("task_id", t);
+        t1.putMetadata("AnyData", "AnyValue");
 
-        Job j = new Job("job", taskMap);
+        Map<String, Task> taskMap1 = new HashMap<>();
+        taskMap1.put("36961076-35f3-42bc-a932-bd2fe0249be9", t1);
 
-        t.setJob(j);
-        c1.setTask(t);
-        c2.setTask(t);
+        Job j1 = new Job("job", taskMap1);
 
-        jobRepository.save(j);
+        Command c3 = new Command("sleep 10000");
+        Command c4 = new Command("sleep 10000");
+
+        Map<String, String> requeriments2 = new HashMap<>();
+        requeriments2.put("Glue2Disk", "20");
+
+        Specification spec2 = new Specification("fedora", "your_user", "anotherPublicKey", "anotherPrivateKeyPath", requeriments2, "cloud");
+
+        Task t2 = new Task("fa100b5b-52a8-46c8-97aa-7413fe3100cb", spec2, Arrays.asList(c3, c4));
+
+        t2.putMetadata("SuperData", "SuperValue");
+
+        Map<String, Task> taskMap2 = new HashMap<>();
+        taskMap2.put("36961076-35f3-42bc-a932-bd2fe0249be9", t2);
+
+        Job j2 = new Job("job", taskMap2);
+
+        jobRepository.save(j1);
+        jobRepository.save(j2);
     }
 }

@@ -18,7 +18,7 @@ public class Task {
     @OneToOne(cascade = CascadeType.ALL)
     private Specification specification;
 
-    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "task")
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Command> commands;
 
     @Enumerated(EnumType.STRING)
@@ -34,21 +34,13 @@ public class Task {
         this.commands = commands;;
     }
 
-    public Task(){}
-
-
-    public void putMetadata(String attributeName, String value) {
-        this.metadata.put(attributeName, value);
+    Task(){
+        //Default constructor
     }
 
-    public String getMetadata(String attributeName) {
-        return this.metadata.get(attributeName);
+    public String getId() {
+        return this.id;
     }
-
-    public Map<String, String> getAllMetadata() {
-        return metadata;
-    }
-
 
     public Specification getSpecification() {
         return this.specification;
@@ -66,18 +58,16 @@ public class Task {
         return commands;
     }
 
-    public void setCommands(List<Command> commands){
-        this.commands = commands;
+    public void putMetadata(String attributeName, String value) {
+        this.metadata.put(attributeName, value);
     }
 
-    public String getId() {
-        return this.id;
+    public String getMetadata(String attributeName) {
+        return this.metadata.get(attributeName);
     }
 
-    @ManyToOne
-    private Job job;
-
-    public void setJob(Job job){
-        this.job = job;
+    public Map<String, String> getAllMetadata() {
+        return metadata;
     }
+
 }

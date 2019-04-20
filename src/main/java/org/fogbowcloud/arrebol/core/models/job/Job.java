@@ -31,22 +31,27 @@ public class Job implements Serializable {
 		this.tasks = tasks;
 	}
 
-	public Job(){
-	}
-
-	public void addTask(Task task){
-		tasks.put(task.getId(), task);
-	}
-
-	public Map<String, Task> getTasks(){
-		return this.tasks;
+	Job(){
+		//Default constructor
 	}
 
 	public String getId(){
 		return this.id;
 	}
 
+	public String getLabel(){
+		return this.label;
+	}
+
+	public JobState getJobState(){
+		return this.jobState;
+	}
+
 	public void setJobState(JobState jobState){
 		this.jobState = jobState;
+	}
+
+	public Map<String, Task> getTasks(){
+		return this.tasks;
 	}
 }
