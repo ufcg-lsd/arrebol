@@ -4,21 +4,18 @@ import org.fogbowcloud.arrebol.queue.JobQueue;
 import org.fogbowcloud.arrebol.queue.QueueObserver;
 import org.fogbowcloud.arrebol.resource.ResourceObserver;
 import org.fogbowcloud.arrebol.resource.ResourcePool;
-import org.fogbowcloud.arrebol.scheduler.task_queue_processor.AllocationPlan;
 
 import java.util.Collection;
 
-public class DefaultScheduler implements ResourceObserver, QueueObserver, Scheduler {
-
+public class DefaultScheduler implements ResourceObserver, QueueObserver {
     //TODO: to pick a better name (maybe silly-scheduler? :))
 
     private final JobQueue queue;
     private final ResourcePool pool;
     private final SchedulerPolicy policy;
-    private PlanExecutor planExecutor;
+    private final PlanExecutor planExecutor;
 
-    public DefaultScheduler(JobQueue queue, ResourcePool pool, SchedulerPolicy policy,
-                            PlanExecutor executor) {
+    public DefaultScheduler(JobQueue queue, ResourcePool pool, SchedulerPolicy policy) {
 
         //this implementation is super-naive: we create a new allocation plan whenever
         //a notification is received (jobAdded or resourceAvailable). Failures are just ignored.
@@ -32,7 +29,7 @@ public class DefaultScheduler implements ResourceObserver, QueueObserver, Schedu
         this.queue = queue;
         this.pool = pool;
         this.policy = policy;
-        this.planExecutor = executor;
+        this.planExecutor = new DefaultPlanExecutor();
     }
 
     @Override
@@ -53,7 +50,7 @@ public class DefaultScheduler implements ResourceObserver, QueueObserver, Schedu
     private void act() {
         synchronized (this) {
             Collection<AllocationPlan> plan = this.policy.schedule(this.queue, this.pool);
-
+            this.planExecutor.execute(plan);
         }
     }
 
@@ -76,6 +73,7 @@ public class DefaultScheduler implements ResourceObserver, QueueObserver, Schedu
                     case RUN: {
                         //job state should change
                         //task state should change
+                        //resource state should change
                         //a worker should be associated with the resource
                         //someone should take care of execution
                         //some should take care of monitoring the execution

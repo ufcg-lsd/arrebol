@@ -1,4 +1,4 @@
-package org.fogbowcloud.arrebol.scheduler.task_queue_processor;
+package org.fogbowcloud.arrebol.scheduler;
 
 import org.fogbowcloud.arrebol.core.models.task.Task;
 import org.fogbowcloud.arrebol.core.resource.models.Resource;

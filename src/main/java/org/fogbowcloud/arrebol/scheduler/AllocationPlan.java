@@ -1,11 +1,11 @@
-package org.fogbowcloud.arrebol.scheduler.task_queue_processor;
+package org.fogbowcloud.arrebol.scheduler;
 
 import org.fogbowcloud.arrebol.core.models.task.Task;
 import org.fogbowcloud.arrebol.core.resource.models.Resource;
 
 public class AllocationPlan {
 
-    //TODO: I do not quite remember what the STOP type mean (it is mean to be used on failure?!)
+    //TODO: I do not quite remember what the STOP type mean (is it related to failures?!)
     public enum Type {RUN, STOP};
 
     private Task task;
