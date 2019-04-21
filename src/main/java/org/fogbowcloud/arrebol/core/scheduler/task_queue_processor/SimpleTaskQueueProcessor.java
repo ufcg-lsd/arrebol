@@ -15,6 +15,7 @@ public class SimpleTaskQueueProcessor implements TaskQueueProcessor {
      */
     @Override
     public MatchedTask pickTaskToRun(List<Task> pendingTasks, List<AbstractResource> freeResources) {
+        /*
         for (Task task : pendingTasks) {
             for (AbstractResource resource : freeResources) {
                 boolean isSameSpecification = resource.getRequestedSpecification().equals(task.getSpecification());
@@ -26,6 +27,8 @@ public class SimpleTaskQueueProcessor implements TaskQueueProcessor {
             }
         }
         return getEmptyMatchedTask();
+        */
+        return null;
     }
 
     private MatchedTask getEmptyMatchedTask() {

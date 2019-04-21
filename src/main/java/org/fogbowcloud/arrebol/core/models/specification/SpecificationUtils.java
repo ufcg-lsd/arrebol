@@ -50,7 +50,7 @@ public class SpecificationUtils {
                     while ((line = brSpec.readLine()) != null && !line.isEmpty()) {
                         sb.append(line);
                     }
-                    spec.setPublicKey(sb.toString());
+                    //spec.setPublicKey(sb.toString());
 
                     brSpec.close();
                 }

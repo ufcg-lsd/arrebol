@@ -3,67 +3,44 @@ package org.fogbowcloud.arrebol.core.models.task;
 import org.fogbowcloud.arrebol.core.models.command.Command;
 import org.fogbowcloud.arrebol.core.models.specification.Specification;
 
+import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+@Entity
 public class Task {
 
+    @Id
     private String id;
-    private Specification specification;
-    private List<Command> commands;
-    private TaskState state;
-    private boolean isFinished;
-    private boolean isFailed;
-    private int retries;
-    private Map<String, String> metadata = new HashMap<String, String>();
 
-    public Task(String id, Specification spec) {
+    @OneToOne(cascade = CascadeType.ALL)
+    private Specification specification;
+
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Command> commands;
+
+    @Enumerated(EnumType.STRING)
+    private TaskState state;
+
+    @ElementCollection
+    private Map<String, String> metadata;
+
+    public Task(String id, Specification spec, List<Command> commands, Map<String, String> metadata) {
         this.id = id;
         this.specification = spec;
-        this.isFinished = false;
-        this.isFailed = false;
         this.state = TaskState.PENDING;
-        this.retries = -1;
-        this.commands = new ArrayList<Command>();
-    }
-
-    public Task(String id, Specification spec, List<Command> commands){
-        this(id, spec);
         this.commands = commands;
+        this.metadata = metadata;
     }
 
-    public void addCommand(Command command) {
-        commands.add(command);
+    Task(){
+        //Default constructor
     }
 
-    public boolean isFinished() {
-        return isFinished;
-    }
-
-    public void finish(){
-        this.isFinished = true;
-    }
-
-    protected void fail() {
-        this.isFailed = true;
-    }
-
-    public boolean isFailed() {
-        return isFailed;
-    }
-
-    public void putMetadata(String attributeName, String value) {
-        this.metadata.put(attributeName, value);
-    }
-
-    public String getMetadata(String attributeName) {
-        return this.metadata.get(attributeName);
-    }
-
-    public Map<String, String> getAllMetadata() {
-        return metadata;
+    public String getId() {
+        return this.id;
     }
 
     public Specification getSpecification() {
@@ -78,19 +55,14 @@ public class Task {
         this.state = newState;
     }
 
-    public List<Command> getAllCommands() {
-        return commands;
+    public List<Command> getCommands() {
+        List<Command> commandsClone = new ArrayList<>(this.commands);
+        return commandsClone;
     }
 
-    public String getId() {
-        return this.id;
+    public Map<String, String> getMetadata() {
+        Map<String, String> metadataClone = new HashMap<>(this.metadata);
+        return metadataClone;
     }
 
-    public int getRetries() {
-        return this.retries;
-    }
-
-    public void setRetries(int retries) {
-        this.retries = retries;
-    }
 }
