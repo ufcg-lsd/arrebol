@@ -25,7 +25,7 @@ public class JobController {
 
     @RequestMapping(method = RequestMethod.POST)
     public ResponseEntity<String> addJob(@RequestBody JobSpec jobSpec){
-        LOGGER.info("Arrebol: Adding new Job: " + jobSpec.getLabel() + ".");
+        LOGGER.info("Adding new Job: " + jobSpec.getLabel() + ".");
 
         String jobId = jobService.addJob(jobSpec);
         JobResponse jobResponse = new JobResponse(jobId);
@@ -36,7 +36,7 @@ public class JobController {
 
     @RequestMapping(value = ApiDocumentation.ApiEndpoints.JOB_PATH, method = RequestMethod.GET)
     public ResponseEntity<String> getJob(@PathVariable String id){
-        LOGGER.info("Arrebol: Getting an job with id: " + id);
+        LOGGER.info("Getting an job with id: " + id);
 
         Job job = jobService.getJobById(id);
         return new ResponseEntity(job, HttpStatus.CREATED);
