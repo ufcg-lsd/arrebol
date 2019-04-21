@@ -2,7 +2,6 @@ package org.fogbowcloud.arrebol.core.models.task;
 
 import org.fogbowcloud.arrebol.core.models.command.Command;
 import org.fogbowcloud.arrebol.core.models.command.CommandsUtils;
-import org.fogbowcloud.arrebol.core.models.specification.Specification;
 import org.fogbowcloud.arrebol.core.models.specification.SpecificationUtils;
 import org.json.JSONArray;
 import org.json.JSONException;

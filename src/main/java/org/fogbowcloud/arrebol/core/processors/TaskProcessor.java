@@ -1,12 +1,5 @@
 package org.fogbowcloud.arrebol.core.processors;
 
-import org.fogbowcloud.arrebol.core.models.command.Command;
-import org.fogbowcloud.arrebol.core.models.specification.Specification;
-import org.fogbowcloud.arrebol.core.models.task.TaskState;
-
-import java.util.List;
-import java.util.UUID;
-
 public class TaskProcessor {
 
     /**

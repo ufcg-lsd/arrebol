@@ -1,13 +1,5 @@
 package org.fogbowcloud.arrebol.core.scheduler;
 
-import org.fogbowcloud.arrebol.core.models.specification.Specification;
-import org.fogbowcloud.arrebol.core.models.task.Task;
-import org.fogbowcloud.arrebol.core.models.task.TaskState;
-import org.fogbowcloud.arrebol.core.monitors.TasksMonitor;
-import org.fogbowcloud.arrebol.core.resource.models.Resource;
-import org.junit.Assert;
-import org.junit.Test;
-
 
 public class StandardSchedulerTest {
 
