@@ -2,26 +2,26 @@ package org.fogbowcloud.arrebol.core.models.command;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+import javax.persistence.*;
 
-
+@Entity
 public class Command {
 
-    public static final String COMMAND_KEY = "command";
-    public static final String COMMAND_TYPE_KEY = "type";
-    public static final String COMMAND_STATE_KEY = "state";
+    @Id
+    @GeneratedValue(strategy=GenerationType.IDENTITY)
+    private Integer id;
 
     private String command;
-    private final CommandType type;
+    @Enumerated(EnumType.STRING)
     private CommandState state;
 
-    public Command(String command, CommandType type) {
-        this.command = command;
-        this.type = type;
-        this.state = CommandState.UNSTARTED;
+    Command() {
+        //default constructor
     }
 
-    public CommandType getType() {
-        return type;
+    public Command(String command) {
+        this.command = command;
+        this.state = CommandState.UNSTARTED;
     }
 
     public String getCommand() {
@@ -37,18 +37,20 @@ public class Command {
     }
 
     public Command clone() {
-        return null;
+        return new Command(this.command);
     }
 
     public JSONObject toJSON() {
         try {
             JSONObject command = new JSONObject();
-            command.put(COMMAND_KEY, this.getCommand());
-            command.put(COMMAND_TYPE_KEY, this.getType().toString());
-            command.put(COMMAND_STATE_KEY, this.getState().toString());
             return command;
         } catch (JSONException e) {
             return null;
         }
     }
+
+    public String toString(){
+        return "Command: " + this.command + System.lineSeparator() + "State: " + this.state.toString();
+    }
+
 }

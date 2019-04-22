@@ -93,7 +93,7 @@ public class TasksMonitor implements Runnable, Monitor, TaskSubmitter {
             if (tp.getStatus().equals(TaskState.FINISHED)) {
                 this.runningTasks.remove(task);
                 if (task != null)
-                    task.finish();
+                    //task.finish();
                 if (resource != null)
                     this.resourceStateTransitioner.releaseResource(resource);
             }
@@ -110,7 +110,7 @@ public class TasksMonitor implements Runnable, Monitor, TaskSubmitter {
     }
 
     private TaskProcessor createProcess(Task task) {
-        TaskProcessor taskProcessor = new TaskProcessor(task.getId(), task.getAllCommands(), task.getSpecification(), task.getUUID());
+        TaskProcessor taskProcessor = new TaskProcessor(task.getId(), task.getCommands(), task.getSpecification(), task.getId());
         return taskProcessor;
     }
 

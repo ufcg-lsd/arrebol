@@ -1,7 +1,6 @@
 package org.fogbowcloud.arrebol.core.models.task;
 
 import org.fogbowcloud.arrebol.core.models.command.Command;
-import org.fogbowcloud.arrebol.core.models.command.CommandsUtils;
 import org.fogbowcloud.arrebol.core.models.specification.Specification;
 import org.fogbowcloud.arrebol.core.models.specification.SpecificationUtils;
 import org.json.JSONArray;
@@ -22,6 +21,7 @@ public class TaskUtils {
     public static final String JSON_KEY_COMMANDS = "commands";
     public static final String JSON_KEY_METADATA = "metadata";
 
+    /*
     public static Task fromJSON(JSONObject taskJSON) {
         String taskId = taskJSON.optString(JSON_KEY_ID);
         String taskUuid = taskJSON.optString(JSON_KEY_UUID);
@@ -78,4 +78,5 @@ public class TaskUtils {
             return null;
         }
     }
+    */
 }

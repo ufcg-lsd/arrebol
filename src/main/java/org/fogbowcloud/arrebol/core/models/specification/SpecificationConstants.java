@@ -1,11 +1,7 @@
 package org.fogbowcloud.arrebol.core.models.specification;
 
 public class SpecificationConstants {
-    public static final String REQUIREMENTS_MAP_STR = "requirementsMap";
-
-    public static final String USER_DATA_TYPE_STR = "userDataType";
-
-    public static final String USER_DATA_FILE_STR = "userDataFile";
+    public static final String REQUIREMENTS_MAP_STR = "requirements";
 
     public static final String CONTEXT_SCRIPT_STR = "contextScript";
 
@@ -16,4 +12,6 @@ public class SpecificationConstants {
     public static final String USERNAME_STR = "username";
 
     public static String IMAGE_STR = "image";
+
+    public static String CLOUD_NAME_STR = "cloudName";
 }
