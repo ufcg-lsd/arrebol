@@ -9,10 +9,12 @@ public class MatchAnyResource implements Resource {
     private ResourceState state;
     private final Specification spec;
     private final String id;
+    private final int poolId;
 
-    public MatchAnyResource(Specification spec, String id) {
+    public MatchAnyResource(Specification spec, String id, int poolId) {
         this.spec = spec;
         this.id = id;
+        this.poolId = poolId;
         this.state = ResourceState.IDLE;
     }
 
@@ -39,5 +41,15 @@ public class MatchAnyResource implements Resource {
     @Override
     public String getId() {
         return this.id;
+    }
+
+    @Override
+    public int getPoolId() {
+        return this.poolId;
+    }
+
+    @Override
+    public String toString() {
+        return "id={" + this.id + "} poolId={" + poolId + "}";
     }
 }

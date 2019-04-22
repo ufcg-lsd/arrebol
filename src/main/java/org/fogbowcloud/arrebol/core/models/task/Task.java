@@ -93,4 +93,9 @@ public class Task {
     public void setRetries(int retries) {
         this.retries = retries;
     }
+
+    @Override
+    public String toString() {
+        return "id={" + getId() + "}";
+    }
 }

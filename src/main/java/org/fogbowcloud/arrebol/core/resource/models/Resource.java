@@ -13,4 +13,6 @@ public interface Resource {
     Specification getSpecification();
 
     String getId();
+
+    int getPoolId();
 }

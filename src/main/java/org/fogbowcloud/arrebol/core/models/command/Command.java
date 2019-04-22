@@ -51,4 +51,9 @@ public class Command {
             return null;
         }
     }
+
+    @Override
+    public String toString() {
+        return "CommandStr={" + this.command + "} state={" + this.state + "}";
+    }
 }
