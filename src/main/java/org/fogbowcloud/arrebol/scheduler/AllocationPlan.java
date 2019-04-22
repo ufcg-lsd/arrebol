@@ -1,7 +1,7 @@
 package org.fogbowcloud.arrebol.scheduler;
 
 import org.fogbowcloud.arrebol.core.models.task.Task;
-import org.fogbowcloud.arrebol.core.resource.models.Resource;
+import org.fogbowcloud.arrebol.resource.Resource;
 
 public class AllocationPlan {
 

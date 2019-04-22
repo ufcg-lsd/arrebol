@@ -1,7 +1,5 @@
 package org.fogbowcloud.arrebol.resource;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.fogbowcloud.arrebol.core.models.command.Command;
 import org.fogbowcloud.arrebol.core.models.task.Task;
 
@@ -10,18 +8,18 @@ import java.util.Arrays;
 
 public class RawWorker implements Worker {
 
-    Logger logger = LogManager.getLogger(RawWorker.class);
+    //Logger logger = LogManager.getLogger(RawWorker.class);
 
     @Override
     public TaskExecutionResult execute(Task task) {
 
-        logger.info("taskId={}", task.getId());
+        //logger.info("taskId={}", task.getId());
 
         TaskExecutionResult.RESULT result = TaskExecutionResult.RESULT.SUCCESS;
 
         //converting to array to make bellow code simple?
-        Command[] cmds = new Command[task.getAllCommands().size()];
-        task.getAllCommands().toArray(cmds);
+        Command[] cmds = new Command[task.getCommands().size()];
+        task.getCommands().toArray(cmds);
 
         int [] exitValues = new int[cmds.length];
         Arrays.fill(exitValues, TaskExecutionResult.UNDETERMINED_RESULT);
@@ -29,9 +27,9 @@ public class RawWorker implements Worker {
         for(int i = 0; i < cmds.length; i++) {
             try {
                 exitValues[i] = executeCommand(cmds[i]);
-                logger.debug("taskId={} cmd_index={} cmd={} result={}", task.getId(), i, cmds[i], exitValues[i]);
+                //logger.debug("taskId={} cmd_index={} cmd={} result={}", task.getId(), i, cmds[i], exitValues[i]);
             } catch (Throwable t) {
-                logger.error("error on executing taskId={} cmd_index={} cmd={}", task.getId(), i, cmds[i], t);
+                //logger.error("error on executing taskId={} cmd_index={} cmd={}", task.getId(), i, cmds[i], t);
                 result = TaskExecutionResult.RESULT.FAILURE;
             }
         }

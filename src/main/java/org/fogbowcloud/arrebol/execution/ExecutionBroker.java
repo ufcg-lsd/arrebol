@@ -1,21 +1,20 @@
 package org.fogbowcloud.arrebol.execution;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.fogbowcloud.arrebol.core.models.task.Task;
 import org.fogbowcloud.arrebol.core.models.task.TaskState;
-import org.fogbowcloud.arrebol.core.resource.models.Resource;
-import org.fogbowcloud.arrebol.core.resource.models.ResourceState;
+import org.fogbowcloud.arrebol.resource.Resource;
+import org.fogbowcloud.arrebol.resource.ResourceState;
 import org.fogbowcloud.arrebol.resource.RawWorker;
 import org.fogbowcloud.arrebol.resource.ResourceObserver;
 import org.fogbowcloud.arrebol.resource.TaskExecutionResult;
-import org.fogbowcloud.arrebol.resource.Worker;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
 
 public class ExecutionBroker {
 
-    Logger logger = LogManager.getLogger(ExecutionBroker.class);
+//    Logger logger = LogManager.getLogger(ExecutionBroker.class);
 
     private final Map<String, Execution> runningExecutions = new HashMap<String, Execution>();
     private final ResourceObserver resourceObserver;
@@ -26,7 +25,7 @@ public class ExecutionBroker {
 
     private void onFinish(String execId) {
         //critical region
-        logger.info("execId={}", execId);
+//        logger.info("execId={}", execId);
 
         Execution exec = runningExecutions.remove(execId);
 
@@ -45,7 +44,7 @@ public class ExecutionBroker {
 
     public void execute(final Task task, final Resource resource) {
 
-        logger.info("task={} resource={}", task, resource);
+//        logger.info("task={} resource={}", task, resource);
 
         //spawn a new thread to execute the task. it reuses the Execution id
         final Execution exec = new Execution(task, resource);
@@ -72,13 +71,13 @@ public class ExecutionBroker {
                             break;
                         }
                         default: {
-                            logger.error("inconsistent results for execution={" + exec + "}");
+//                            logger.error("inconsistent results for execution={" + exec + "}");
                             //TODO: assert we have a proper result object
                             //TODO: I guess the task should be rolled be to its previous (before run) state
                         }
                     }
                 } catch (Throwable t) {
-                    logger.error("Execution={" + exec + "} error={}", t);
+//                    logger.error("Execution={" + exec + "} error={}", t);
                 }
             }
         },

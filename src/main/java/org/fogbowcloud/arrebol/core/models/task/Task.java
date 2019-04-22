@@ -27,6 +27,10 @@ public class Task {
     @ElementCollection
     private Map<String, String> metadata;
 
+    public Task(String id, Specification spec, List<Command> commands) {
+        this(id, spec, commands, new HashMap<String, String>());
+    }
+
     public Task(String id, Specification spec, List<Command> commands, Map<String, String> metadata) {
         this.id = id;
         this.specification = spec;

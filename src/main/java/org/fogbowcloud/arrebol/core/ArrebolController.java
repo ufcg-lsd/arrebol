@@ -1,57 +1,66 @@
 package org.fogbowcloud.arrebol.core;
 
 import org.apache.log4j.Logger;
-import org.fogbowcloud.arrebol.api.http.dataaccessobject.JobDAO;
 import org.fogbowcloud.arrebol.core.models.job.Job;
-import org.fogbowcloud.arrebol.core.models.job.JobSpec;
 import org.fogbowcloud.arrebol.core.models.job.JobState;
+import org.fogbowcloud.arrebol.core.models.specification.Specification;
 import org.fogbowcloud.arrebol.core.models.task.Task;
 import org.fogbowcloud.arrebol.core.models.task.TaskState;
-import org.fogbowcloud.arrebol.core.monitors.TasksMonitor;
-import org.fogbowcloud.arrebol.core.scheduler.StandardScheduler;
-import org.fogbowcloud.arrebol.core.scheduler.Scheduler;
-import org.fogbowcloud.arrebol.core.resource.ResourceObserver;
-import org.fogbowcloud.arrebol.core.resource.ResourceManager;
-import org.fogbowcloud.arrebol.pools.resource.ResourcePool;
-import org.fogbowcloud.arrebol.pools.resource.ResourceStateTransitioner;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.fogbowcloud.arrebol.resource.MatchAnyResource;
+import org.fogbowcloud.arrebol.resource.Resource;
+import org.fogbowcloud.arrebol.queue.JobQueue;
+import org.fogbowcloud.arrebol.resource.ResourcePool;
+import org.fogbowcloud.arrebol.resource.StaticPool;
+import org.fogbowcloud.arrebol.scheduler.DefaultScheduler;
+import org.fogbowcloud.arrebol.scheduler.FifoSchedulerPolicy;
 
+import java.util.Collection;
+import java.util.LinkedList;
 import java.util.Map;
 import java.util.Properties;
 
-
 public class ArrebolController {
 
-    private Scheduler scheduler;
-    private TasksMonitor tasksMonitor;
+    private DefaultScheduler scheduler;
     private Properties properties;
-
-    private ResourceManager resourceManager;
 
     private final Logger LOGGER = Logger.getLogger(ArrebolController.class);
 
     public ArrebolController(Properties properties) {
         this.properties = properties;
-        this.resourceManager = new ResourceManager();
 
-        ResourceStateTransitioner resourceStateTransitioner = this.resourceManager.getResourcePool();
-        this.tasksMonitor = new TasksMonitor(resourceStateTransitioner);
-        this.scheduler = new StandardScheduler(this.tasksMonitor);
+        int queueId = 1;
+        String queueName = "defaultQueue";
+        JobQueue queue = new JobQueue(queueId, queueName);
 
-        ResourceObserver schedulerObserver = (ResourceObserver) this.scheduler;
-        this.resourceManager.registerObserver(schedulerObserver);
+        //create the pool
+        //FIXME: we are missing something related to worker/resource func
+        int poolId = 1;
+        Collection<Resource> resources = createPool(5, poolId);
+        ResourcePool pool = new StaticPool(poolId, resources);
+
+        //create the scheduler
+        //bind the pieces together
+        FifoSchedulerPolicy policy = new FifoSchedulerPolicy();
+        DefaultScheduler scheduler = new DefaultScheduler(queue, pool, policy);
+    }
+
+    private Collection<Resource> createPool(int size, int poolId){
+        Collection<Resource> resources = new LinkedList<Resource>();
+        int poolSize = 5;
+        Specification resourceSpec = null;
+        for (int i = 0; i < poolSize; i++) {
+            resources.add(new MatchAnyResource(resourceSpec, "resourceId-"+i, poolId));
+        }
+        return resources;
     }
 
     public void start() {
         // TODO: read from bd
-
-        this.tasksMonitor.start();
     }
 
     public void stop() {
-        // TODO: delete all resources
-
-        this.tasksMonitor.stop();
+        // TODO: delete all resources?
     }
 
     public String addJob(Job job) {
@@ -68,14 +77,13 @@ public class ArrebolController {
     public String stopJob(Job job) {
         Map<String, Task> taskMap = job.getTasks();
         for(Task task : taskMap.values()){
-            this.scheduler.stopTask(task);
+         //
         }
         return job.getId();
     }
 
     public TaskState getTaskState(String taskId) {
-        Task task = this.tasksMonitor.getTaskById(taskId);
-        TaskState taskState = this.tasksMonitor.getTaskState(task);
-        return taskState;
+        //FIXME:
+        return null;
     }
 }

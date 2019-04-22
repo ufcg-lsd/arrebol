@@ -1,12 +1,11 @@
 package org.fogbowcloud.arrebol.scheduler;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.apache.log4j.Logger;
 import org.fogbowcloud.arrebol.core.models.Job;
 import org.fogbowcloud.arrebol.core.models.task.Task;
 import org.fogbowcloud.arrebol.core.models.task.TaskState;
-import org.fogbowcloud.arrebol.core.resource.models.Resource;
-import org.fogbowcloud.arrebol.core.resource.models.ResourceState;
+import org.fogbowcloud.arrebol.resource.Resource;
+import org.fogbowcloud.arrebol.resource.ResourceState;
 import org.fogbowcloud.arrebol.queue.JobQueue;
 import org.fogbowcloud.arrebol.resource.ResourcePool;
 
@@ -15,12 +14,12 @@ import java.util.LinkedList;
 
 public class FifoSchedulerPolicy implements SchedulerPolicy {
 
-    Logger logger = LogManager.getLogger(SchedulerPolicy.class);
+    private final Logger logger = Logger.getLogger(SchedulerPolicy.class);
 
     @Override
     public Collection<AllocationPlan> schedule(JobQueue queue, ResourcePool pool) {
 
-        logger.info("queueId={} resourcePool={}", queue.getId(), pool.getId());
+        //logger.info("queueId={} resourcePool={}", queue.getId(), pool.getId());
 
         Collection<Resource> availableResources = filterAvailable(pool);
 
@@ -57,7 +56,7 @@ public class FifoSchedulerPolicy implements SchedulerPolicy {
 
         for (Resource resource: availableResources) {
             if (resource.match(task.getSpecification())) {
-                logger.info("allocation made for task={} using resource={}", task, resource);
+                //logger.info("allocation made for task={} using resource={}", task, resource);
                 return new AllocationPlan(task, resource, AllocationPlan.Type.RUN);
             }
         }

@@ -1,4 +1,4 @@
-package org.fogbowcloud.arrebol.core.resource.models;
+package org.fogbowcloud.arrebol.resource;
 
 public enum ResourceState {
 

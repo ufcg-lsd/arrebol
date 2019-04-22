@@ -1,14 +1,12 @@
 package org.fogbowcloud.arrebol;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.apache.log4j.Logger;
 import org.fogbowcloud.arrebol.core.models.Job;
 import org.fogbowcloud.arrebol.core.models.command.Command;
-import org.fogbowcloud.arrebol.core.models.command.CommandType;
 import org.fogbowcloud.arrebol.core.models.specification.Specification;
 import org.fogbowcloud.arrebol.core.models.task.Task;
-import org.fogbowcloud.arrebol.core.resource.models.MatchAnyResource;
-import org.fogbowcloud.arrebol.core.resource.models.Resource;
+import org.fogbowcloud.arrebol.resource.MatchAnyResource;
+import org.fogbowcloud.arrebol.resource.Resource;
 import org.fogbowcloud.arrebol.queue.JobQueue;
 import org.fogbowcloud.arrebol.resource.StaticPool;
 import org.fogbowcloud.arrebol.resource.ResourcePool;
@@ -20,7 +18,7 @@ import java.util.*;
 
 public class RawWorkerIntegrationTest {
 
-    Logger logger = LogManager.getLogger(RawWorkerIntegrationTest.class);
+    private final Logger LOGGER = Logger.getLogger(RawWorkerIntegrationTest.class);
 
     @Test
     public void addTaskWhenNoResources() throws InterruptedException {
@@ -63,7 +61,7 @@ public class RawWorkerIntegrationTest {
         //assert the exitValues
         while(!queue.queue().isEmpty()) {
             Thread.sleep(10000);
-            logger.info("waiting queue to become empty");
+            LOGGER.info("waiting queue to become empty");
         }
     }
 
@@ -82,10 +80,13 @@ public class RawWorkerIntegrationTest {
     private int idCount;
 
     private Task createTask(String cmd) {
+
+        List<Command> cmds = new LinkedList<Command>();
+        cmds.add(new Command((cmd)));
+
         String taskId = "taskId-"+ idCount++;
-        Task task = new Task(taskId, new DummySpec(), taskId);
-        Command command = new Command(cmd, CommandType.LOCAL);
-        task.addCommand(command);
+        Task task = new Task(taskId, new DummySpec(), cmds);
+
         return task;
     }
 
@@ -99,7 +100,17 @@ public class RawWorkerIntegrationTest {
         return resources;
     }
 
-    private class DummySpec implements Specification {
+    private class DummySpec extends Specification {
 
+        public DummySpec() {
+            this(null, null, null, null, null);
+        }
+        public DummySpec(String image, String username, String publicKey, String privateKeyFilePath, Map<String, String> requirements) {
+            super(image, username, publicKey, privateKeyFilePath, requirements);
+        }
+
+        public DummySpec(String image, String username, String publicKey, String privateKeyFilePath, Map<String, String> requirements, String cloudName) {
+            super(image, username, publicKey, privateKeyFilePath, requirements, cloudName);
+        }
     }
 }

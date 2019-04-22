@@ -1,4 +1,4 @@
-package org.fogbowcloud.arrebol.core.resource.models;
+package org.fogbowcloud.arrebol.resource;
 
 import org.fogbowcloud.arrebol.core.models.specification.Specification;
 
