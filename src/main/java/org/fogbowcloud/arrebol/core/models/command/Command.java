@@ -49,8 +49,9 @@ public class Command {
         }
     }
 
-    public String toString(){
-        return "Command: " + this.command + System.lineSeparator() + "State: " + this.state.toString();
+    @Override
+    public String toString() {
+        return "CommandStr={" + this.command + "} state={" + this.state + "}";
     }
 
 }

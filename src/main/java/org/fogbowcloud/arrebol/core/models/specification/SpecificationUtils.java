@@ -8,6 +8,7 @@ import java.util.*;
 
 
 public class SpecificationUtils {
+    /**
 
     public static boolean parseSpecsToJsonFile(List<Specification> specs, String jsonDestFilePath) {
 
@@ -92,5 +93,5 @@ public class SpecificationUtils {
         }
         return newMap;
     }
-
+*/
 }

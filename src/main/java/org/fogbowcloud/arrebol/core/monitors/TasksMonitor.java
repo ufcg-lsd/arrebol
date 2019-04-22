@@ -1,10 +1,8 @@
 package org.fogbowcloud.arrebol.core.monitors;
 
-import org.fogbowcloud.arrebol.core.resource.models.AbstractResource;
 import org.fogbowcloud.arrebol.core.models.task.Task;
 import org.fogbowcloud.arrebol.core.models.task.TaskState;
 import org.fogbowcloud.arrebol.core.processors.TaskProcessor;
-import org.fogbowcloud.arrebol.pools.resource.ResourceStateTransitioner;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -13,8 +11,9 @@ import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-public class TasksMonitor implements Runnable, Monitor, TaskSubmitter {
+public class TasksMonitor /**implements Runnable, Monitor, TaskSubmitter*/ {
 
+    /**
     private ExecutorService tasksExecutorService = Executors.newCachedThreadPool();
 
     private Thread monitoringServiceRunner;
@@ -124,5 +123,5 @@ public class TasksMonitor implements Runnable, Monitor, TaskSubmitter {
         // TODO
         return null;
     }
-
+*/
 }

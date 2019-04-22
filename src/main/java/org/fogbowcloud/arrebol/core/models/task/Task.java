@@ -65,4 +65,8 @@ public class Task {
         return metadataClone;
     }
 
+    @Override
+    public String toString() {
+        return "id={" + getId() + "}";
+    }
 }

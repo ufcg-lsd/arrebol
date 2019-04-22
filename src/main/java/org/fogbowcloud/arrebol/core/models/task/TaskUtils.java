@@ -12,6 +12,7 @@ import java.util.Map;
 
 public class TaskUtils {
 
+    /**
     public static final String JSON_KEY_ID = "id";
     public static final String JSON_KEY_UUID = "uuid";
     public static final String JSON_KEY_RETRIES = "retries";
@@ -78,5 +79,6 @@ public class TaskUtils {
             return null;
         }
     }
+<<<<<<< HEAD
     */
 }

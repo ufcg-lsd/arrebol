@@ -1,5 +1,6 @@
 package org.fogbowcloud.arrebol.core.models.specification;
 
+<<<<<<< HEAD
 import com.fasterxml.jackson.core.JsonProcessingException;
 import org.fogbowcloud.arrebol.core.utils.AppUtil;
 import org.json.JSONException;
@@ -130,4 +131,8 @@ public class Specification implements Serializable {
         }
     }
 
+=======
+public interface Specification {
+    
+>>>>>>> scheduler-refactor
 }
