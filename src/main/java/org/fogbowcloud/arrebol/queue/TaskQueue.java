@@ -2,6 +2,8 @@ package org.fogbowcloud.arrebol.queue;
 
 import org.fogbowcloud.arrebol.models.task.Task;
 
+import java.util.Collection;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.Queue;
 
@@ -9,12 +11,12 @@ public class TaskQueue {
 
     private final String id;
     private final String name;
-    private final Queue<Task> pendingTasks;
+    private final Collection<Task> pendingTasks;
 
     public TaskQueue(String id, String name) {
         this.id = id;
         this.name = name;
-        this.pendingTasks = new LinkedList<Task>();
+        this.pendingTasks = Collections.synchronizedCollection(new LinkedList<Task>());
     }
 
     public boolean addTask(Task task) {
@@ -25,7 +27,7 @@ public class TaskQueue {
         return this.pendingTasks.remove(task);
     }
 
-    public Queue<Task> queue() {
+    public Collection<Task> queue() {
         return new LinkedList<Task>(this.pendingTasks);
     }
 

@@ -1,8 +1,8 @@
 package org.fogbowcloud.arrebol.resource;
 
 import org.apache.log4j.Logger;
-import org.fogbowcloud.arrebol.core.models.command.Command;
-import org.fogbowcloud.arrebol.core.models.task.Task;
+import org.fogbowcloud.arrebol.models.command.Command;
+import org.fogbowcloud.arrebol.models.task.Task;
 import org.fogbowcloud.arrebol.resource.exceptions.DockerStartException;
 
 public class DockerWorker implements Worker {
