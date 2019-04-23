@@ -8,7 +8,7 @@ import org.fogbowcloud.arrebol.api.constants.ApiDocumentation;
 import org.fogbowcloud.arrebol.api.http.services.JobService;
 import org.fogbowcloud.arrebol.core.models.job.Job;
 import org.fogbowcloud.arrebol.core.models.job.JobSpec;
-import org.fogbowcloud.arrebol.execution.ExecutionBroker;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,8 +17,9 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping(value = ApiDocumentation.ApiEndpoints.JOB_ENDPOINT)
 public class JobController {
-    //private final Logger LOGGER = Logger.getLogger(JobController.class);
-    Logger logger = LogManager.getLogger(ExecutionBroker.class);
+    /**
+    private final Logger LOGGER = Logger.getLogger(JobController.class);
+    //Logger logger = LogManager.getLogger(ExecutionBroker.class);
 
 
     @Autowired
@@ -56,5 +57,6 @@ public class JobController {
         }
         public void setIt(String id) { this.id = id;}
     }
+    */
 }
 
