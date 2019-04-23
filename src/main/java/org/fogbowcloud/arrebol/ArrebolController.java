@@ -52,7 +52,7 @@ public class ArrebolController {
         FifoSchedulerPolicy policy = new FifoSchedulerPolicy();
         this.scheduler = new DefaultScheduler(queue, pool, policy);
 
-        this.jobPool = new HashMap<String,  Job>();
+        this.jobPool = Collections.synchronizedMap(new HashMap<String,  Job>());
         this.jobDatabaseCommitter = new Timer(true);
     }
 
