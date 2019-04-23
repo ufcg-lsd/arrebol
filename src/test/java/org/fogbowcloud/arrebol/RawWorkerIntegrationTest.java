@@ -70,8 +70,7 @@ public class RawWorkerIntegrationTest {
             LOGGER.info("waiting queue to become empty");
             Thread.sleep(10000);
         }
-
-        LOGGER.info("queue.tasks: " + queue.queue());
+        
         Assert.assertTrue(queue.queue().isEmpty());
     }
 

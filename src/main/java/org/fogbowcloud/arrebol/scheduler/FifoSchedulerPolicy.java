@@ -42,7 +42,7 @@ public class FifoSchedulerPolicy implements SchedulerPolicy {
 
         for (Resource resource: availableResources) {
             if (resource.match(task.getSpecification())) {
-                //logger.info("allocation made for task={} using resource={}", task, resource);
+                logger.info("allocation made for task={" + task + "} using resource={" + resource + "}");
                 return new AllocationPlan(task, resource, AllocationPlan.Type.RUN);
             }
         }

@@ -1,19 +1,21 @@
 package org.fogbowcloud.arrebol.resource;
 
+import org.apache.log4j.Logger;
 import org.fogbowcloud.arrebol.models.command.Command;
 import org.fogbowcloud.arrebol.models.task.Task;
+import org.fogbowcloud.arrebol.scheduler.SchedulerPolicy;
 
 import java.io.IOException;
 import java.util.Arrays;
 
 public class RawWorker implements Worker {
 
-    //Logger logger = LogManager.getLogger(RawWorker.class);
+    private final Logger logger = Logger.getLogger(SchedulerPolicy.class);
 
     @Override
     public TaskExecutionResult execute(Task task) {
 
-        //logger.info("taskId={}", task.getId());
+        logger.info("taskId={" + task.getId() + "}");
 
         TaskExecutionResult.RESULT result = TaskExecutionResult.RESULT.SUCCESS;
 
@@ -27,9 +29,11 @@ public class RawWorker implements Worker {
         for(int i = 0; i < cmds.length; i++) {
             try {
                 exitValues[i] = executeCommand(cmds[i]);
-                //logger.debug("taskId={} cmd_index={} cmd={} result={}", task.getId(), i, cmds[i], exitValues[i]);
+                logger.debug("taskId={" + task.getId() + "} cmd_index={" + i + "}" +
+                        " cmd={" + cmds[i] + "} result={" + exitValues[i] + "}");
             } catch (Throwable t) {
-                //logger.error("error on executing taskId={} cmd_index={} cmd={}", task.getId(), i, cmds[i], t);
+                logger.error("taskId={" + task.getId() + "} cmd_index={" + i + "}" +
+                        " cmd={" + cmds[i], t);
                 result = TaskExecutionResult.RESULT.FAILURE;
             }
         }
