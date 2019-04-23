@@ -19,37 +19,24 @@ public class FifoSchedulerPolicy implements SchedulerPolicy {
     @Override
     public Collection<AllocationPlan> schedule(JobQueue queue, ResourcePool pool) {
 
-        //logger.info("queueId={} resourcePool={}", queue.getId(), pool.getId());
+        logger.info("queue={" + queue + "} resourcePool={" + pool + "}");
 
         Collection<Resource> availableResources = filterAvailable(pool);
+        Collection<Resource> copyOfAvailableResources = new LinkedList<Resource>(availableResources);
 
         Collection<AllocationPlan> queueAllocation = new LinkedList<AllocationPlan>();
-        for(Job job: queue.queue()) {
-            Collection<AllocationPlan> allocationPlans = scheduleJob(job, availableResources);
-            for (AllocationPlan plan : allocationPlans) {
-                queueAllocation.add(plan);
-                availableResources.remove(plan.getResource());
+
+        for(Task task: queue.queue()) {
+            if (TaskState.PENDING.equals(task.getState())) {
+                AllocationPlan taskAllocation = scheduleTask(task, copyOfAvailableResources);
+                if (taskAllocation != null) {
+                    copyOfAvailableResources.remove(taskAllocation.getResource());
+                    queueAllocation.add(taskAllocation);
+                }
             }
         }
 
         return queueAllocation;
-    }
-
-    private Collection<AllocationPlan> scheduleJob(Job job, Collection<Resource> availableResources) {
-        //obviously, not optimised
-
-        Collection<AllocationPlan> jobAllocation = new LinkedList<AllocationPlan>();
-
-        //we use a working copy to not modify the receive list
-        Collection<Resource> copyOfAvailableResources = new LinkedList<Resource>(availableResources);
-        for(Task pendingTask: filterPending(job)) {
-            AllocationPlan taskAllocation = scheduleTask(pendingTask, copyOfAvailableResources);
-            if (taskAllocation != null) {
-                copyOfAvailableResources.remove(taskAllocation.getResource());
-                jobAllocation.add(taskAllocation);
-            }
-        }
-        return jobAllocation;
     }
 
     private AllocationPlan scheduleTask(Task task, Collection<Resource> availableResources) {
@@ -62,16 +49,6 @@ public class FifoSchedulerPolicy implements SchedulerPolicy {
         }
 
         return null;
-    }
-
-    private Collection<Task> filterPending(Job job) {
-        Collection<Task> pending = new LinkedList<Task>();
-        for(Task task: job.tasks()) {
-            if (TaskState.PENDING.equals(task.getState())) {
-                pending.add(task);
-            }
-        }
-        return pending;
     }
 
     private Collection<Resource> filterAvailable(ResourcePool toFilter) {

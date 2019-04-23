@@ -26,7 +26,7 @@ public class RawWorkerIntegrationTest {
         //setup
 
         //create the queue
-        int queueId = 1;
+        String queueId = UUID.randomUUID().toString();
         String queueName = "defaultQueue";
         JobQueue queue = new JobQueue(queueId, queueName);
 
@@ -47,14 +47,19 @@ public class RawWorkerIntegrationTest {
         Job job2 = createJob(new String[]{"true", "true"});
         Job job3 = createJob(new String[]{"true", "true", "true"});
 
-        queue.addJob(job1);
-        queue.addJob(job2);
-        queue.addJob(job3);
+        Collection<Job> jobs = new LinkedList<Job>();
+        jobs.add(job1);
+        jobs.add(job2);
+        jobs.add(job3);
+
+        for (Job job : jobs) {
+            for (Task task: job.tasks()) {
+                queue.addTask(task);
+            }
+        }
 
         //exercise
-        scheduler.notifyAddedJob(job1.getJobId(), queue.getId());
-        scheduler.notifyAddedJob(job2.getJobId(), queue.getId());
-        scheduler.notifyAddedJob(job3.getJobId(), queue.getId());
+        new Thread(scheduler, "scheduler-thread").start();
 
         //verify
         //busy wait, all jobs should finished, eventually
@@ -62,6 +67,15 @@ public class RawWorkerIntegrationTest {
         while(!queue.queue().isEmpty()) {
             Thread.sleep(10000);
             LOGGER.info("waiting queue to become empty");
+
+            LOGGER.info("job1: " + job1);
+            LOGGER.info("tasks job1: " + job1.tasks());
+
+            LOGGER.info("job2: " + job2);
+            LOGGER.info("tasks job2: " + job2.tasks());
+
+            LOGGER.info("job3: " + job3);
+            LOGGER.info("tasks job3: " + job3.tasks());
         }
     }
 

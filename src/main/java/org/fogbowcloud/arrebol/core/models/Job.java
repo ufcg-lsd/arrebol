@@ -22,4 +22,9 @@ public class Job {
     public Set<Task> tasks() {
         return new HashSet<Task>(task);
     }
+
+    @Override
+    public String toString() {
+        return "id={" + getJobId() + "}";
+    }
 }

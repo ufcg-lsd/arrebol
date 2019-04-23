@@ -26,4 +26,9 @@ public class StaticPool implements ResourcePool {
     public Collection<Resource> getResources() {
         return new LinkedList<Resource>(this.resources);
     }
+
+    @Override
+    public String toString() {
+        return "id={" + getId() + "}";
+    }
 }

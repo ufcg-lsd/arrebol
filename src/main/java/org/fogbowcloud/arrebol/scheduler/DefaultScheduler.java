@@ -11,9 +11,10 @@ import org.fogbowcloud.arrebol.queue.QueueObserver;
 import org.fogbowcloud.arrebol.resource.ResourceObserver;
 import org.fogbowcloud.arrebol.resource.ResourcePool;
 
+import javax.sound.midi.SysexMessage;
 import java.util.Collection;
 
-public class DefaultScheduler implements ResourceObserver, QueueObserver {
+public class DefaultScheduler implements Runnable {
 
     //TODO: to pick a better name (maybe silly-scheduler? :))
 
@@ -45,27 +46,17 @@ public class DefaultScheduler implements ResourceObserver, QueueObserver {
     }
 
     @Override
-    public void notifyAddedJob(int jobId, int queueId) {
-        //logger.info("job={} queueId={}", jobId, queueId);
-        act();
-    }
+    public void run() {
 
-    @Override
-    public void notifyAvailableResource(String resourceId, int poolId) {
-        //logger.info("resourceId={} poolId={}", resourceId, poolId);
-        act();
-    }
-
-    @Override
-    public void notifyFailedResource(String resourceId, int poolId) {
-        //logger.info("resourceId={} poolId={}", resourceId, poolId);
-        //just ignore this for a while
-    }
-
-    private void act() {
-        synchronized (this) {
-            Collection<AllocationPlan> plan = this.policy.schedule(this.queue, this.pool);
-            this.planExecutor.execute(plan);
+        while (true) {
+            try {
+                Collection<AllocationPlan> plan = this.policy.schedule(this.queue, this.pool);
+                this.planExecutor.execute(plan);
+                Thread.sleep(5000);
+            } catch (Throwable  e) {
+                LOGGER.error("Scheduler execution aborted", e);
+                System.exit(1);
+            }
         }
     }
 

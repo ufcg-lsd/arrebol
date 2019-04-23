@@ -14,10 +14,7 @@ import org.fogbowcloud.arrebol.resource.StaticPool;
 import org.fogbowcloud.arrebol.scheduler.DefaultScheduler;
 import org.fogbowcloud.arrebol.scheduler.FifoSchedulerPolicy;
 
-import java.util.Collection;
-import java.util.LinkedList;
-import java.util.Map;
-import java.util.Properties;
+import java.util.*;
 
 public class ArrebolController {
 
@@ -29,7 +26,7 @@ public class ArrebolController {
     public ArrebolController(Properties properties) {
         this.properties = properties;
 
-        int queueId = 1;
+        String queueId = UUID.randomUUID().toString();
         String queueName = "defaultQueue";
         JobQueue queue = new JobQueue(queueId, queueName);
 

@@ -71,6 +71,6 @@ public class Task {
 
     @Override
     public String toString() {
-        return "id={" + getId() + "}";
+        return "id={" + getId() + "}  state={" + getState() + "}";
     }
 }
