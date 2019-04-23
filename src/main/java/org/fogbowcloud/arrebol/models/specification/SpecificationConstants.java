@@ -1,4 +1,4 @@
-package org.fogbowcloud.arrebol.core.models.specification;
+package org.fogbowcloud.arrebol.models.specification;
 
 public class SpecificationConstants {
     public static final String REQUIREMENTS_MAP_STR = "requirements";

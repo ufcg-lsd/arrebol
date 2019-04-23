@@ -1,10 +1,4 @@
-package org.fogbowcloud.arrebol.core.models.specification;
-
-import com.google.gson.Gson;
-import org.json.JSONObject;
-
-import java.io.*;
-import java.util.*;
+package org.fogbowcloud.arrebol.models.specification;
 
 
 public class SpecificationUtils {

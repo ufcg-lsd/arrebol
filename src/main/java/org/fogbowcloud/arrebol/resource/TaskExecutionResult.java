@@ -1,6 +1,6 @@
 package org.fogbowcloud.arrebol.resource;
 
-import org.fogbowcloud.arrebol.core.models.command.Command;
+import org.fogbowcloud.arrebol.models.command.Command;
 
 import java.util.Arrays;
 

@@ -1,14 +1,10 @@
-package org.fogbowcloud.arrebol.core.models.job;
+package org.fogbowcloud.arrebol.models.job;
 
 import org.apache.log4j.Logger;
-import org.fogbowcloud.arrebol.core.models.command.Command;
-import org.fogbowcloud.arrebol.core.models.specification.Specification;
-import org.fogbowcloud.arrebol.core.models.task.Task;
-import org.fogbowcloud.arrebol.core.models.task.TaskSpec;
+import org.fogbowcloud.arrebol.models.task.TaskSpec;
 
 import java.io.Serializable;
 import java.util.List;
-import java.util.Map;
 
 public class JobSpec implements Serializable {
 

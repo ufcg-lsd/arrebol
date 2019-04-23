@@ -1,7 +1,7 @@
 package org.fogbowcloud.arrebol.resource;
 
-import org.fogbowcloud.arrebol.core.models.command.Command;
-import org.fogbowcloud.arrebol.core.models.task.Task;
+import org.fogbowcloud.arrebol.models.command.Command;
+import org.fogbowcloud.arrebol.models.task.Task;
 
 import java.io.IOException;
 import java.util.Arrays;

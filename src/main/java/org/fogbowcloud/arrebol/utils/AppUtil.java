@@ -1,4 +1,4 @@
-package org.fogbowcloud.arrebol.core.utils;
+package org.fogbowcloud.arrebol.utils;
 
 import org.json.JSONObject;
 

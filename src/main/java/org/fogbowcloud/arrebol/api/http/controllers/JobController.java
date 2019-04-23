@@ -3,8 +3,8 @@ package org.fogbowcloud.arrebol.api.http.controllers;
 import org.apache.log4j.Logger;
 import org.fogbowcloud.arrebol.api.constants.ApiDocumentation;
 import org.fogbowcloud.arrebol.api.http.services.JobService;
-import org.fogbowcloud.arrebol.core.models.job.Job;
-import org.fogbowcloud.arrebol.core.models.job.JobSpec;
+import org.fogbowcloud.arrebol.models.job.Job;
+import org.fogbowcloud.arrebol.models.job.JobSpec;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;

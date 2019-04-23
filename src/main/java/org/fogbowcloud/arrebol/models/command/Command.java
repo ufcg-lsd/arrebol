@@ -1,4 +1,4 @@
-package org.fogbowcloud.arrebol.core.models.command;
+package org.fogbowcloud.arrebol.models.command;
 
 import org.json.JSONException;
 import org.json.JSONObject;

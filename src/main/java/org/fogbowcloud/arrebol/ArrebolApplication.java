@@ -1,7 +1,5 @@
 package org.fogbowcloud.arrebol;
 
-import org.fogbowcloud.arrebol.core.ArrebolController;
-import org.fogbowcloud.arrebol.core.ArrebolFacade;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;

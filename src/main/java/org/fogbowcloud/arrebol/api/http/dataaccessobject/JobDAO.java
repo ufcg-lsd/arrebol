@@ -1,8 +1,8 @@
 package org.fogbowcloud.arrebol.api.http.dataaccessobject;
 
 import org.apache.log4j.Logger;
-import org.fogbowcloud.arrebol.core.models.job.Job;
-import org.fogbowcloud.arrebol.core.repositories.JobRepository;
+import org.fogbowcloud.arrebol.models.job.Job;
+import org.fogbowcloud.arrebol.repositories.JobRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 

@@ -1,6 +1,6 @@
-package org.fogbowcloud.arrebol.core.repositories;
+package org.fogbowcloud.arrebol.repositories;
 
-import org.fogbowcloud.arrebol.core.models.job.Job;
+import org.fogbowcloud.arrebol.models.job.Job;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

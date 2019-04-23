@@ -1,6 +1,6 @@
-package org.fogbowcloud.arrebol.core.models.specification;
+package org.fogbowcloud.arrebol.models.specification;
 
-import org.fogbowcloud.arrebol.core.utils.AppUtil;
+import org.fogbowcloud.arrebol.utils.AppUtil;
 import org.json.JSONException;
 import org.json.JSONObject;
 import javax.persistence.*;

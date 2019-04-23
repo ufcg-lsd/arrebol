@@ -1,6 +1,6 @@
 package org.fogbowcloud.arrebol.resource;
 
-import org.fogbowcloud.arrebol.core.models.task.Task;
+import org.fogbowcloud.arrebol.models.task.Task;
 
 public interface Worker {
 

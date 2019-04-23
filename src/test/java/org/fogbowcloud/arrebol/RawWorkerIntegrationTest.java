@@ -1,12 +1,12 @@
 package org.fogbowcloud.arrebol;
 
-import org.fogbowcloud.arrebol.core.models.Job;
-import org.fogbowcloud.arrebol.core.models.command.Command;
-import org.fogbowcloud.arrebol.core.models.specification.Specification;
-import org.fogbowcloud.arrebol.core.models.task.Task;
+import org.fogbowcloud.arrebol.models.Job;
+import org.fogbowcloud.arrebol.models.command.Command;
+import org.fogbowcloud.arrebol.models.specification.Specification;
+import org.fogbowcloud.arrebol.models.task.Task;
 import org.fogbowcloud.arrebol.resource.MatchAnyResource;
 import org.fogbowcloud.arrebol.resource.Resource;
-import org.fogbowcloud.arrebol.queue.JobQueue;
+import org.fogbowcloud.arrebol.queue.TaskQueue;
 import org.fogbowcloud.arrebol.resource.StaticPool;
 import org.fogbowcloud.arrebol.resource.ResourcePool;
 import org.fogbowcloud.arrebol.scheduler.DefaultScheduler;
@@ -28,7 +28,7 @@ public class RawWorkerIntegrationTest {
         //create the queue
         String queueId = UUID.randomUUID().toString();
         String queueName = "defaultQueue";
-        JobQueue queue = new JobQueue(queueId, queueName);
+        TaskQueue queue = new TaskQueue(queueId, queueName);
 
         //create the pool
         //FIXME: we are missing something related to worker/resource func

@@ -1,6 +1,6 @@
 package org.fogbowcloud.arrebol.resource;
 
-import org.fogbowcloud.arrebol.core.models.specification.Specification;
+import org.fogbowcloud.arrebol.models.specification.Specification;
 
 public class MatchAnyResource implements Resource {
 

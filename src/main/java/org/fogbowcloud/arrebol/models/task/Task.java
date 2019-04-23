@@ -1,7 +1,7 @@
-package org.fogbowcloud.arrebol.core.models.task;
+package org.fogbowcloud.arrebol.models.task;
 
-import org.fogbowcloud.arrebol.core.models.command.Command;
-import org.fogbowcloud.arrebol.core.models.specification.Specification;
+import org.fogbowcloud.arrebol.models.command.Command;
+import org.fogbowcloud.arrebol.models.specification.Specification;
 
 import javax.persistence.*;
 import java.util.ArrayList;

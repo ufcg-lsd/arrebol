@@ -1,8 +1,7 @@
-package org.fogbowcloud.arrebol.core;
+package org.fogbowcloud.arrebol;
 
-import org.fogbowcloud.arrebol.core.models.job.Job;
-import org.fogbowcloud.arrebol.core.models.job.JobSpec;
-import org.fogbowcloud.arrebol.core.models.task.TaskState;
+import org.fogbowcloud.arrebol.models.job.Job;
+import org.fogbowcloud.arrebol.models.task.TaskState;
 
 public class ArrebolFacade {
 

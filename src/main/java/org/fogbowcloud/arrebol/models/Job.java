@@ -1,6 +1,6 @@
-package org.fogbowcloud.arrebol.core.models;
+package org.fogbowcloud.arrebol.models;
 
-import org.fogbowcloud.arrebol.core.models.task.Task;
+import org.fogbowcloud.arrebol.models.task.Task;
 
 import java.util.HashSet;
 import java.util.Set;
