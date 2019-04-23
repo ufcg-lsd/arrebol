@@ -48,28 +48,12 @@ public class ArrebolController {
         Collection<Resource> resources = createPool(5, poolId);
         ResourcePool pool = new StaticPool(poolId, resources);
 
-        //create the scheduler
-        //bind the pieces together
+        //create the scheduler bind the pieces together
         FifoSchedulerPolicy policy = new FifoSchedulerPolicy();
         this.scheduler = new DefaultScheduler(queue, pool, policy);
 
         this.jobPool = new HashMap<String,  Job>();
-
         this.jobDatabaseCommitter = new Timer(true);
-    }
-
-    private class JobDatabaseCommitter implements Runnable {
-
-        private final Map<String, Job> poolToCommit;
-
-        private JobDatabaseCommitter(Map<String, Job> jobPool) {
-            this.poolToCommit = jobPool;
-        }
-
-        @Override
-        public void run() {
-
-        }
     }
 
     private Collection<Resource> createPool(int size, int poolId) {
@@ -89,7 +73,6 @@ public class ArrebolController {
 
         //commit the job pool to DB using a COMMIT_PERIOD_MILLIS PERIOD between successive commits
         //(I also specified the delay to the start the fist commit to be COMMIT_PERIOD_MILLIS)
-
         this.jobDatabaseCommitter.schedule(new TimerTask() {
                     public void run() {
                         LOGGER.info("Commit job pool to the database");
