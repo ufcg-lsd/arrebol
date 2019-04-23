@@ -1,3 +1,5 @@
 .idea/
 target/
 arrebol-service.iml
+
+logs/*
