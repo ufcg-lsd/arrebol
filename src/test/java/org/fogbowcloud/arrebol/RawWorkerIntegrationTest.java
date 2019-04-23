@@ -1,6 +1,5 @@
 package org.fogbowcloud.arrebol;
 
-import org.apache.log4j.Logger;
 import org.fogbowcloud.arrebol.core.models.Job;
 import org.fogbowcloud.arrebol.core.models.command.Command;
 import org.fogbowcloud.arrebol.core.models.specification.Specification;
@@ -13,6 +12,7 @@ import org.fogbowcloud.arrebol.resource.ResourcePool;
 import org.fogbowcloud.arrebol.scheduler.DefaultScheduler;
 import org.fogbowcloud.arrebol.scheduler.FifoSchedulerPolicy;
 import org.junit.Test;
+import org.apache.log4j.Logger;
 
 import java.util.*;
 

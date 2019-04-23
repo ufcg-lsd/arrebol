@@ -1,9 +1,6 @@
 package org.fogbowcloud.arrebol.api.http.controllers;
 
-
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
+import org.apache.log4j.Logger;
 import org.fogbowcloud.arrebol.api.constants.ApiDocumentation;
 import org.fogbowcloud.arrebol.api.http.services.JobService;
 import org.fogbowcloud.arrebol.core.models.job.Job;
@@ -17,10 +14,8 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping(value = ApiDocumentation.ApiEndpoints.JOB_ENDPOINT)
 public class JobController {
-    /**
-    private final Logger LOGGER = Logger.getLogger(JobController.class);
-    //Logger logger = LogManager.getLogger(ExecutionBroker.class);
 
+    private final Logger LOGGER = Logger.getLogger(JobController.class);
 
     @Autowired
     private JobService jobService;
@@ -57,6 +52,6 @@ public class JobController {
         }
         public void setIt(String id) { this.id = id;}
     }
-    */
+
 }
 
