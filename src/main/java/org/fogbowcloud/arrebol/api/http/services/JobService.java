@@ -42,7 +42,9 @@ public class JobService {
     }
 
     private Job createJobFromSpec(JobSpec jobSpec){
-        Map<String, Task> taskList = new HashMap<>();
+
+        Collection<Task> taskList = new LinkedList<>();
+
         for(TaskSpec taskSpec : jobSpec.getTasksSpecs()){
             String taskId = UUID.randomUUID().toString();
             List<Command> commands = taskSpec.getCommands();
@@ -50,7 +52,7 @@ public class JobService {
             Map<String, String> metadata = taskSpec.getMetadata();
 
             Task task = new Task(taskId, spec, commands, metadata);
-            taskList.put(taskId, task);
+            taskList.add(task);
         }
         Job job = new Job(jobSpec.getLabel(), taskList);
         LOGGER.debug("Created job object of " + job.getLabel() + " with " + taskList.size() + " tasks.");

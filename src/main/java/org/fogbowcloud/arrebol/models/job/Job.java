@@ -24,11 +24,16 @@ public class Job implements Serializable {
 	@MapKey(name = "id")
 	private Map<String, Task> tasks;
 
-	public Job(String label, Map<String, Task> tasks){
+	public Job(String label, Collection<Task> tasks){
 		this.id = UUID.randomUUID().toString();
 		this.jobState = JobState.SUBMITTED;
 		this.label = label;
-		this.tasks = tasks;
+
+		this.tasks = new HashMap<>();
+
+		for(Task task: tasks) {
+			this.tasks.put(task.getId(), task);
+		}
 	}
 
 	Job(){

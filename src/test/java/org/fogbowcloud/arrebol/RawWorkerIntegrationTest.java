@@ -1,7 +1,7 @@
 package org.fogbowcloud.arrebol;
 
-import org.fogbowcloud.arrebol.models.Job;
 import org.fogbowcloud.arrebol.models.command.Command;
+import org.fogbowcloud.arrebol.models.job.Job;
 import org.fogbowcloud.arrebol.models.specification.Specification;
 import org.fogbowcloud.arrebol.models.task.Task;
 import org.fogbowcloud.arrebol.models.task.TaskState;
@@ -45,9 +45,9 @@ public class RawWorkerIntegrationTest {
 
         //submit job1 (one task, /usr/bin/true), job2 (two tasks /usr/bin/true), job3 (three tasks /usr/bin/true)
         //job1
-        Job job1 = createJob(new String[]{"true"});
-        Job job2 = createJob(new String[]{"true", "true"});
-        Job job3 = createJob(new String[]{"true", "true", "true"});
+        Job job1 = createJob("job1", new String[]{"true"});
+        Job job2 = createJob("job2", new String[]{"true", "true"});
+        Job job3 = createJob("job3", new String[]{"true", "true", "true"});
 
         Collection<Job> jobs = new LinkedList<Job>();
         jobs.add(job1);
@@ -55,7 +55,7 @@ public class RawWorkerIntegrationTest {
         jobs.add(job3);
 
         for (Job job : jobs) {
-            for (Task task: job.tasks()) {
+            for (Task task: job.getTasks().values()) {
                 queue.addTask(task);
             }
         }
@@ -87,7 +87,7 @@ public class RawWorkerIntegrationTest {
 
     private boolean finished(Job job) {
         boolean allFinished = true;
-        for(Task task : job.tasks()) {
+        for(Task task : job.getTasks().values()) {
             if (!task.getState().equals(TaskState.FINISHED)) {
                 allFinished = false;
             }
@@ -95,15 +95,15 @@ public class RawWorkerIntegrationTest {
         return allFinished;
     }
 
-    private Job createJob(String[] cmdsStr) {
+    private Job createJob(String jobId, String[] cmdsStr) {
 
-        Set<Task> tasks = new HashSet<Task>();
+        Collection<Task> tasks = new LinkedList<>();
         for(String cmd : cmdsStr) {
             Task task = createTask(cmd);
             tasks.add(task);
         }
 
-        Job job = new Job(1, tasks);
+        Job job = new Job(jobId, tasks);
         return job;
     }
 
