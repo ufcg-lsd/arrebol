@@ -4,10 +4,7 @@ import org.fogbowcloud.arrebol.models.command.Command;
 import org.fogbowcloud.arrebol.models.specification.Specification;
 
 import javax.persistence.*;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Entity
 public class Task {
@@ -72,5 +69,19 @@ public class Task {
     @Override
     public String toString() {
         return "id={" + getId() + "}  state={" + getState() + "}";
+    }
+
+    //FIXME: humm ... maybe this equals/hash should consider the other instance variable
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Task task = (Task) o;
+        return Objects.equals(id, task.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
     }
 }

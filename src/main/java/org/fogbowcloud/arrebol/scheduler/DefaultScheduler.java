@@ -23,8 +23,6 @@ public class DefaultScheduler implements Runnable {
     private final TaskQueue queue;
     private final ResourcePool pool;
     private final SchedulerPolicy policy;
-    private final PlanExecutor planExecutor;
-
     private final ExecutionBroker executionBroker;
 
     public DefaultScheduler(TaskQueue queue, ResourcePool pool, SchedulerPolicy policy) {
@@ -38,7 +36,6 @@ public class DefaultScheduler implements Runnable {
         this.queue = queue;
         this.pool = pool;
         this.policy = policy;
-        this.planExecutor = new DefaultPlanExecutor();
         this.executionBroker = new ExecutionBroker();
     }
 
@@ -48,47 +45,38 @@ public class DefaultScheduler implements Runnable {
         while (true) {
             try {
                 Collection<AllocationPlan> plan = this.policy.schedule(this.queue, this.pool);
-                this.planExecutor.execute(plan);
+                executePlan(plan);
                 Thread.sleep(SCHEDULER_PERIOD_MILLIS);
-            } catch (Throwable  e) {
+            } catch (Throwable e) {
                 LOGGER.error("Scheduler execution aborted", e);
                 System.exit(1);
             }
         }
     }
 
-    //I've created this PlanExecutor abstraction (it was a public interface before).
-    //Not sure we need this or the good design is to just have a function to be used by all the possible schedulers.
-    //For now, I'll suspend the judgment and create a private implementation here.
-    private interface PlanExecutor {
+    //below method was an independent abstraction some commits ago. Maybe, we can make it again
+    private void executePlan(Collection<AllocationPlan> plans) {
 
-        void execute (Collection<AllocationPlan> plans);
-    }
+        for (AllocationPlan plan : plans) {
 
-    private class DefaultPlanExecutor implements PlanExecutor {
+            switch (plan.getType()) {
+                case RUN: {
 
-        @Override
-        public void execute(Collection<AllocationPlan> plans) {
+                    Task task = plan.getTask();
+                    task.setState(TaskState.RUNNING);
+                    this.queue.removeTask(task);
 
-            for(AllocationPlan plan : plans) {
+                    Resource resource = plan.getResource();
+                    resource.setState(ResourceState.ALLOCATED);
 
-                switch (plan.getType()) {
-                    case RUN: {
-                        Task task = plan.getTask();
-                        task.setState(TaskState.RUNNING);
+                    executionBroker.execute(plan.getTask(), resource);
+                    break;
+                }
+                case STOP: {
+                    break;
+                }
+                default: {
 
-                        Resource resource = plan.getResource();
-                        resource.setState(ResourceState.ALLOCATED);
-
-                        executionBroker.execute(plan.getTask(), resource);
-                        break;
-                    }
-                    case STOP: {
-                        break;
-                    }
-                    default: {
-
-                    }
                 }
             }
         }

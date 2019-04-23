@@ -4,6 +4,7 @@ import org.fogbowcloud.arrebol.models.Job;
 import org.fogbowcloud.arrebol.models.command.Command;
 import org.fogbowcloud.arrebol.models.specification.Specification;
 import org.fogbowcloud.arrebol.models.task.Task;
+import org.fogbowcloud.arrebol.models.task.TaskState;
 import org.fogbowcloud.arrebol.resource.MatchAnyResource;
 import org.fogbowcloud.arrebol.resource.Resource;
 import org.fogbowcloud.arrebol.queue.TaskQueue;
@@ -11,6 +12,7 @@ import org.fogbowcloud.arrebol.resource.StaticPool;
 import org.fogbowcloud.arrebol.resource.ResourcePool;
 import org.fogbowcloud.arrebol.scheduler.DefaultScheduler;
 import org.fogbowcloud.arrebol.scheduler.FifoSchedulerPolicy;
+import org.junit.Assert;
 import org.junit.Test;
 import org.apache.log4j.Logger;
 
@@ -64,19 +66,34 @@ public class RawWorkerIntegrationTest {
         //verify
         //busy wait, all jobs should finished, eventually
         //assert the exitValues
-        while(!queue.queue().isEmpty()) {
-            Thread.sleep(10000);
+        while (! allFinished(jobs)) {
             LOGGER.info("waiting queue to become empty");
-
-            LOGGER.info("job1: " + job1);
-            LOGGER.info("tasks job1: " + job1.tasks());
-
-            LOGGER.info("job2: " + job2);
-            LOGGER.info("tasks job2: " + job2.tasks());
-
-            LOGGER.info("job3: " + job3);
-            LOGGER.info("tasks job3: " + job3.tasks());
+            Thread.sleep(10000);
         }
+
+        LOGGER.info("queue.tasks: " + queue.queue());
+        Assert.assertTrue(queue.queue().isEmpty());
+    }
+
+    private boolean allFinished(Collection<Job> jobs) {
+        boolean allFinished = true;
+        for(Job job : jobs) {
+            if (!finished(job)) {
+                allFinished = false;
+                break;
+            }
+        }
+        return allFinished;
+    }
+
+    private boolean finished(Job job) {
+        boolean allFinished = true;
+        for(Task task : job.tasks()) {
+            if (!task.getState().equals(TaskState.FINISHED)) {
+                allFinished = false;
+            }
+        }
+        return allFinished;
     }
 
     private Job createJob(String[] cmdsStr) {

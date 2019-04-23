@@ -21,6 +21,10 @@ public class TaskQueue {
         return this.pendingTasks.add(task);
     }
 
+    public boolean removeTask(Task task) {
+        return this.pendingTasks.remove(task);
+    }
+
     public Queue<Task> queue() {
         return new LinkedList<Task>(this.pendingTasks);
     }
