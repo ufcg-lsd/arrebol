@@ -1,9 +1,9 @@
 package org.fogbowcloud.arrebol.scheduler;
 
 import org.apache.log4j.Logger;
+import org.fogbowcloud.arrebol.execution.ExecutionBroker;
 import org.fogbowcloud.arrebol.models.task.Task;
 import org.fogbowcloud.arrebol.models.task.TaskState;
-import org.fogbowcloud.arrebol.execution.ExecutionBroker;
 import org.fogbowcloud.arrebol.queue.TaskQueue;
 import org.fogbowcloud.arrebol.resource.Resource;
 import org.fogbowcloud.arrebol.resource.ResourcePool;
@@ -12,7 +12,6 @@ import org.fogbowcloud.arrebol.resource.ResourceState;
 import java.util.Collection;
 
 public class DefaultScheduler implements Runnable {
-
     //TODO: to pick a better name (maybe silly-scheduler? :))
 
     private final Logger LOGGER = Logger.getLogger(DefaultScheduler.class);

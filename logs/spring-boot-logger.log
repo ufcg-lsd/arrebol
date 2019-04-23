@@ -1,0 +1,51 @@
+2019-04-23 14:51:40,914 INFO org.springframework.boot.StartupInfoLogger [restartedMain] Starting ArrebolApplication on Thiagos-MacBook-Pro-2.local with PID 66376 (/Users/manel/code/arrebol/target/classes started by manel in /Users/manel/code/arrebol)
+2019-04-23 14:51:40,918 DEBUG org.springframework.boot.StartupInfoLogger [restartedMain] Running with Spring Boot v1.4.2.RELEASE, Spring v4.3.4.RELEASE
+2019-04-23 14:51:40,919 INFO org.springframework.boot.SpringApplication [restartedMain] No active profile set, falling back to default profiles: default
+2019-04-23 14:51:41,066 INFO org.springframework.context.support.AbstractApplicationContext [restartedMain] Refreshing org.springframework.boot.context.embedded.AnnotationConfigEmbeddedWebApplicationContext@7882d5f6: startup date [Tue Apr 23 14:51:41 BRT 2019]; root of context hierarchy
+2019-04-23 14:51:41,264 INFO org.hibernate.validator.internal.util.Version [background-preinit] HV000001: Hibernate Validator 5.2.4.Final
+2019-04-23 14:51:43,478 INFO org.springframework.context.support.PostProcessorRegistrationDelegate$BeanPostProcessorChecker [restartedMain] Bean 'org.springframework.transaction.annotation.ProxyTransactionManagementConfiguration' of type [class org.springframework.transaction.annotation.ProxyTransactionManagementConfiguration$$EnhancerBySpringCGLIB$$bb7eb74f] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying)
+2019-04-23 14:51:44,262 INFO org.springframework.boot.context.embedded.tomcat.TomcatEmbeddedServletContainer [restartedMain] Tomcat initialized with port(s): 8080 (http)
+2019-04-23 14:51:44,279 INFO org.apache.juli.logging.DirectJDKLog [restartedMain] Starting service Tomcat
+2019-04-23 14:51:44,282 INFO org.apache.juli.logging.DirectJDKLog [restartedMain] Starting Servlet Engine: Apache Tomcat/8.5.6
+2019-04-23 14:51:44,419 INFO org.apache.juli.logging.DirectJDKLog [localhost-startStop-1] Initializing Spring embedded WebApplicationContext
+2019-04-23 14:51:44,419 INFO org.springframework.boot.context.embedded.EmbeddedWebApplicationContext [localhost-startStop-1] Root WebApplicationContext: initialization completed in 3353 ms
+2019-04-23 14:51:44,752 INFO org.springframework.boot.web.servlet.ServletRegistrationBean [localhost-startStop-1] Mapping servlet: 'dispatcherServlet' to [/]
+2019-04-23 14:51:44,754 INFO org.springframework.boot.web.servlet.ServletRegistrationBean [localhost-startStop-1] Mapping servlet: 'webServlet' to [/h2-console/*]
+2019-04-23 14:51:44,759 INFO org.springframework.boot.web.servlet.AbstractFilterRegistrationBean [localhost-startStop-1] Mapping filter: 'characterEncodingFilter' to: [/*]
+2019-04-23 14:51:44,760 INFO org.springframework.boot.web.servlet.AbstractFilterRegistrationBean [localhost-startStop-1] Mapping filter: 'hiddenHttpMethodFilter' to: [/*]
+2019-04-23 14:51:44,760 INFO org.springframework.boot.web.servlet.AbstractFilterRegistrationBean [localhost-startStop-1] Mapping filter: 'httpPutFormContentFilter' to: [/*]
+2019-04-23 14:51:44,760 INFO org.springframework.boot.web.servlet.AbstractFilterRegistrationBean [localhost-startStop-1] Mapping filter: 'requestContextFilter' to: [/*]
+2019-04-23 14:51:45,523 INFO org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean [restartedMain] Building JPA container EntityManagerFactory for persistence unit 'default'
+2019-04-23 14:51:45,552 INFO org.hibernate.jpa.internal.util.LogHelper [restartedMain] HHH000204: Processing PersistenceUnitInfo [
+	name: default
+	...]
+2019-04-23 14:51:45,715 INFO org.hibernate.Version [restartedMain] HHH000412: Hibernate Core {5.0.11.Final}
+2019-04-23 14:51:45,717 INFO org.hibernate.cfg.Environment [restartedMain] HHH000206: hibernate.properties not found
+2019-04-23 14:51:45,720 INFO org.hibernate.cfg.Environment [restartedMain] HHH000021: Bytecode provider name : javassist
+2019-04-23 14:51:46,080 INFO org.hibernate.annotations.common.reflection.java.JavaReflectionManager [restartedMain] HCANN000001: Hibernate Commons Annotations {5.0.1.Final}
+2019-04-23 14:51:46,338 INFO org.hibernate.dialect.Dialect [restartedMain] HHH000400: Using dialect: org.hibernate.dialect.H2Dialect
+2019-04-23 14:51:46,694 INFO org.hibernate.dialect.Dialect [restartedMain] HHH000400: Using dialect: org.hibernate.dialect.HSQLDialect
+2019-04-23 14:51:47,063 INFO org.hibernate.tool.hbm2ddl.SchemaExport [restartedMain] HHH000227: Running hbm2ddl schema export
+2019-04-23 14:51:47,107 INFO org.hibernate.tool.hbm2ddl.SchemaExport [restartedMain] HHH000230: Schema export complete
+2019-04-23 14:51:47,181 INFO org.springframework.orm.jpa.AbstractEntityManagerFactoryBean [restartedMain] Initialized JPA EntityManagerFactory for persistence unit 'default'
+2019-04-23 14:51:48,176 INFO org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter [restartedMain] Looking for @ControllerAdvice: org.springframework.boot.context.embedded.AnnotationConfigEmbeddedWebApplicationContext@7882d5f6: startup date [Tue Apr 23 14:51:41 BRT 2019]; root of context hierarchy
+2019-04-23 14:51:48,291 INFO org.springframework.web.servlet.handler.AbstractHandlerMethodMapping$MappingRegistry [restartedMain] Mapped "{[/job],methods=[POST]}" onto public org.springframework.http.ResponseEntity<java.lang.String> org.fogbowcloud.arrebol.api.http.controllers.JobController.addJob(org.fogbowcloud.arrebol.models.job.JobSpec)
+2019-04-23 14:51:48,293 INFO org.springframework.web.servlet.handler.AbstractHandlerMethodMapping$MappingRegistry [restartedMain] Mapped "{[/job/{id}],methods=[GET]}" onto public org.springframework.http.ResponseEntity<java.lang.String> org.fogbowcloud.arrebol.api.http.controllers.JobController.getJob(java.lang.String)
+2019-04-23 14:51:48,295 INFO org.springframework.web.servlet.handler.AbstractHandlerMethodMapping$MappingRegistry [restartedMain] Mapped "{[/version],methods=[GET],produces=[application/json]}" onto public org.springframework.http.ResponseEntity<java.util.Map> org.fogbowcloud.arrebol.api.http.controllers.VersionController.getVersion()
+2019-04-23 14:51:48,298 INFO org.springframework.web.servlet.handler.AbstractHandlerMethodMapping$MappingRegistry [restartedMain] Mapped "{[/error]}" onto public org.springframework.http.ResponseEntity<java.util.Map<java.lang.String, java.lang.Object>> org.springframework.boot.autoconfigure.web.BasicErrorController.error(javax.servlet.http.HttpServletRequest)
+2019-04-23 14:51:48,299 INFO org.springframework.web.servlet.handler.AbstractHandlerMethodMapping$MappingRegistry [restartedMain] Mapped "{[/error],produces=[text/html]}" onto public org.springframework.web.servlet.ModelAndView org.springframework.boot.autoconfigure.web.BasicErrorController.errorHtml(javax.servlet.http.HttpServletRequest,javax.servlet.http.HttpServletResponse)
+2019-04-23 14:51:48,351 INFO org.springframework.web.servlet.handler.AbstractUrlHandlerMapping [restartedMain] Mapped URL path [/webjars/**] onto handler of type [class org.springframework.web.servlet.resource.ResourceHttpRequestHandler]
+2019-04-23 14:51:48,351 INFO org.springframework.web.servlet.handler.AbstractUrlHandlerMapping [restartedMain] Mapped URL path [/**] onto handler of type [class org.springframework.web.servlet.resource.ResourceHttpRequestHandler]
+2019-04-23 14:51:48,546 INFO org.springframework.web.servlet.handler.AbstractUrlHandlerMapping [restartedMain] Mapped URL path [/**/favicon.ico] onto handler of type [class org.springframework.web.servlet.resource.ResourceHttpRequestHandler]
+2019-04-23 14:51:48,901 INFO org.springframework.boot.devtools.autoconfigure.OptionalLiveReloadServer [restartedMain] LiveReload server is running on port 35729
+2019-04-23 14:51:48,963 INFO org.springframework.jmx.export.MBeanExporter [restartedMain] Registering beans for JMX exposure on startup
+2019-04-23 14:51:48,989 INFO org.apache.juli.logging.DirectJDKLog [restartedMain] Initializing ProtocolHandler ["http-nio-8080"]
+2019-04-23 14:51:49,005 INFO org.apache.juli.logging.DirectJDKLog [restartedMain] Starting ProtocolHandler [http-nio-8080]
+2019-04-23 14:51:49,043 INFO org.apache.juli.logging.DirectJDKLog [restartedMain] Using a shared selector for servlet write/read
+2019-04-23 14:51:49,065 INFO org.springframework.boot.context.embedded.tomcat.TomcatEmbeddedServletContainer [restartedMain] Tomcat started on port(s): 8080 (http)
+2019-04-23 14:51:49,073 INFO org.springframework.boot.StartupInfoLogger [restartedMain] Started ArrebolApplication in 9.326 seconds (JVM running for 10.465)
+2019-04-23 14:52:00,366 INFO org.springframework.context.support.AbstractApplicationContext [Thread-10] Closing org.springframework.boot.context.embedded.AnnotationConfigEmbeddedWebApplicationContext@7882d5f6: startup date [Tue Apr 23 14:51:41 BRT 2019]; root of context hierarchy
+2019-04-23 14:52:00,372 INFO org.springframework.jmx.export.MBeanExporter [Thread-10] Unregistering JMX-exposed beans on shutdown
+2019-04-23 14:52:00,375 INFO org.springframework.orm.jpa.AbstractEntityManagerFactoryBean [Thread-10] Closing JPA EntityManagerFactory for persistence unit 'default'
+2019-04-23 14:52:00,375 INFO org.hibernate.tool.hbm2ddl.SchemaExport [Thread-10] HHH000227: Running hbm2ddl schema export
+2019-04-23 14:52:00,383 INFO org.hibernate.tool.hbm2ddl.SchemaExport [Thread-10] HHH000230: Schema export complete

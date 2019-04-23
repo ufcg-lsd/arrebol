@@ -27,6 +27,7 @@ public class ArrebolFacade {
         arrebolController.stopJob(job);
     }
 
+    //TODO: do we really need this?
     public TaskState getTaskState(String taskId){
         return arrebolController.getTaskState(taskId);
     }
