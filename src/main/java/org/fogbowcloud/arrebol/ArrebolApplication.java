@@ -1,5 +1,6 @@
 package org.fogbowcloud.arrebol;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
@@ -15,10 +16,13 @@ public class ArrebolApplication {
         return new Properties();
     }
 
+    @Autowired
+    private ArrebolController arrebolController;
+
     @Bean
     @Lazy
     public ArrebolFacade arrebolFacade(Properties properties) {
-        ArrebolController arrebolController = new ArrebolController(properties);
+        //ArrebolController arrebolController = new ArrebolController(properties);
         ArrebolFacade arrebolFacade = new ArrebolFacade(arrebolController);
         try {
             arrebolFacade.start();

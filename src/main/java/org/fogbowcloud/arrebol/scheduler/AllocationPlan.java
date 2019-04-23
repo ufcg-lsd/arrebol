@@ -29,4 +29,9 @@ public class AllocationPlan {
     public Type getType() {
         return this.type;
     }
+
+    @Override
+    public String toString() {
+        return "type={" + getType() + "}" + "task={" + getTask() + "} resource={" + getResource() + "}" ;
+    }
 }

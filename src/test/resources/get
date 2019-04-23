@@ -1,0 +1,8 @@
+#!/bin/bash
+
+JOB_ID=$1
+
+curl -X GET \
+ http://localhost:8080/job/${JOB_ID} \
+  -H 'Postman-Token: f897c71d-e54e-4751-a191-d3ff1431a722' \
+  -H 'cache-control: no-cache'

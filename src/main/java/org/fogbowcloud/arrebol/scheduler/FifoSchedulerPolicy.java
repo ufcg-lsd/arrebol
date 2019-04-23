@@ -23,6 +23,9 @@ public class FifoSchedulerPolicy implements SchedulerPolicy {
         Collection<Resource> availableResources = filterAvailable(pool);
         Collection<Resource> copyOfAvailableResources = new LinkedList<Resource>(availableResources);
 
+        logger.info("queue={" + queue + "} resourcePool={" + pool + "} " +
+                "availableResources={" + availableResources.size() + "}");
+
         Collection<AllocationPlan> queueAllocation = new LinkedList<AllocationPlan>();
 
         for(Task task: queue.queue()) {
@@ -34,6 +37,9 @@ public class FifoSchedulerPolicy implements SchedulerPolicy {
                 }
             }
         }
+
+        logger.info("queue={" + queue + "} resourcePool={" + pool + "} " +
+                "allocationPlan={" + queueAllocation + "}");
 
         return queueAllocation;
     }

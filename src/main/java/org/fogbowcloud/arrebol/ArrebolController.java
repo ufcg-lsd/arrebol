@@ -15,9 +15,11 @@ import org.fogbowcloud.arrebol.resource.StaticPool;
 import org.fogbowcloud.arrebol.scheduler.DefaultScheduler;
 import org.fogbowcloud.arrebol.scheduler.FifoSchedulerPolicy;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import java.util.*;
 
+@Component
 public class ArrebolController {
 
     private final Logger LOGGER = Logger.getLogger(ArrebolController.class);
@@ -33,7 +35,6 @@ public class ArrebolController {
 
     @Autowired
     private JobRepository jobRepository;
-
 
     public ArrebolController(Properties properties) {
         this.properties = properties;

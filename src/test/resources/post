@@ -1,0 +1,33 @@
+#/bin/bash
+
+JOB_NAME=$1
+
+curl -X POST \
+ http://localhost:8080/job \
+ -H 'Content-Type: application/json' \
+ -H 'Postman-Token: 3761110d-b8e3-45b7-93cd-cd092e70263c' \
+ -H 'cache-control: no-cache' \
+ -d '{
+ "label":"${JOB_NAME}",
+ "tasksSpecs":[
+   {
+       "spec":{
+           "cloudName":"cloud4",
+           "image":"ubuntu 18.04",
+           "username":"thiagoepdc",
+           "publicKey":"ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCryIrky2QYX1v4usB9rCQ3HtHD57nsw3FGRSkjHUB+zmnybHAsxcuRgCLt/+m0JvBDP++TQX5XUpeeNulBn5zpw9co5zK1F9ea0yrZ693BbQPawBuAFp9PsfL/XRaaCUs5KZsxqWttZVOfP3/5ioJQEjw+BaY+bHtgJnB38ukEMByE+WU0coJNdo3Z2CC9U9sxn70GJm0Y2xEm4vr/bhx7Dy1EEOuhTmgzztHJrhgIvpn1yOFl2F2NjZk5uTlBpLulqv4WKgysT9ffF0D3du5+l6aIWJzm3h3ugwZfCSzU2JAevm++HIcBEtER5Q+kNbByPNiFGgu4LxO4Vv7dZI3R fogbow@sapupara-pc-159",
+           "privateKeyFilePath":"/home/emanueljbm/.ssh/fogbow_priv",
+           "requirements":{
+               "Glue2RAM":"1024"
+           }
+       },
+     "commands":["sleep 10",
+               "sleep 20",
+               "sleep 30"
+       ],
+     "metadata": {
+       "time":"mytime"
+     }
+   }
+   ]
+}'
