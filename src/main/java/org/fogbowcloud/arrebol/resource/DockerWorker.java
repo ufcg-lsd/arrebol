@@ -3,13 +3,6 @@ package org.fogbowcloud.arrebol.resource;
 import org.fogbowcloud.arrebol.core.models.command.Command;
 import org.fogbowcloud.arrebol.core.models.task.Task;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 public class DockerWorker implements Worker {
 
     private String containerId;
@@ -20,56 +13,49 @@ public class DockerWorker implements Worker {
 
     @Override
     public TaskExecutionResult execute(Task task) {
-        List<Command> commands = task.getCommands();
-        int[] commandsResults = new int[commands.size()];
-        for(int i = 0; i < commands.size(); i++) {
-            Command c = commands.get(i);
-            Map<String, String> status = executeCommand(c);
-            if(status.containsKey("EXIT_CODE")) {
-                commandsResults[i] = Integer.parseInt(status.get("EXIT_CODE"));
-            }
+        int commandsSize = task.getCommands().size();
+        Command[] commands = task.getCommands().toArray(new Command[commandsSize]);
+        int[] commandsResults = new int[commandsSize];
+        for(int i = 0; i < commandsSize; i++) {
+            Command c = commands[i];
+            Integer exitCode = executeCommand(this.containerId, c);
+            commandsResults[i] = exitCode;
         }
+
         TaskExecutionResult.RESULT result = TaskExecutionResult.RESULT.SUCCESS;
         for(int i : commandsResults) {
             if (i != 0) {
                 result = TaskExecutionResult.RESULT.FAILURE;
+                break;
             }
-
         }
-        Command[] commandsArr = new Command[commands.size()];
-        commandsArr = commands.toArray(commandsArr);
-        TaskExecutionResult ter = new TaskExecutionResult(result, commandsResults, commandsArr);
-        return ter;
+        
+        TaskExecutionResult taskExecutionResult = new TaskExecutionResult(result, commandsResults, commands);
+        return taskExecutionResult;
     }
 
-    private Map<String, String> executeCommand(String containerId, Command command){
-        Map<String, String> output = new HashMap<String, String>();
+    private Integer executeCommand(String containerId, Command command){
+        Integer exitCode = new Integer(111);
         try {
             String commandString = command.getCommand();
             String[] cmd = {
                     "/bin/bash",
                     "-c",
-                    "sudo docker exec -it " + containerId + " " + commandString
+                    "sudo docker exec " + containerId + " " + commandString
             };
 
             Process p = Runtime.getRuntime().exec(cmd);
 
-            int exitCode = p.waitFor();
+            exitCode = p.waitFor();
 
-            output.put("EXIT_CODE", Integer.toString(exitCode));
-            System.out.println("Result:");
-            BufferedReader reader = new BufferedReader(new InputStreamReader(p.getInputStream()));
-
-            String result = "";
-            String line = "";
-            while ((line = reader.readLine()) != null) {
-                result += line + System.lineSeparator();
-            }
-            output.put("RESULT", result);
         } catch(Exception e){
             e.printStackTrace();
         }
-        return output;
+        return exitCode;
 
+    }
+
+    public String getContainerId(){
+        return this.containerId;
     }
 }
