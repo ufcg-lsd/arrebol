@@ -41,7 +41,7 @@ public class DefaultScheduler implements ResourceObserver, QueueObserver {
         this.pool = pool;
         this.policy = policy;
         this.planExecutor = new DefaultPlanExecutor();
-        this.executionBroker = new ExecutionBroker(this);
+        this.executionBroker = new ExecutionBroker();
     }
 
     @Override
