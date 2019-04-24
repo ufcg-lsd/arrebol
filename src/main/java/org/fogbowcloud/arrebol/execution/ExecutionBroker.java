@@ -3,10 +3,7 @@ package org.fogbowcloud.arrebol.execution;
 import org.apache.log4j.Logger;
 import org.fogbowcloud.arrebol.models.task.Task;
 import org.fogbowcloud.arrebol.models.task.TaskState;
-import org.fogbowcloud.arrebol.resource.RawWorker;
-import org.fogbowcloud.arrebol.resource.Resource;
 import org.fogbowcloud.arrebol.resource.ResourceState;
-import org.fogbowcloud.arrebol.resource.TaskExecutionResult;
 
 import java.util.UUID;
 
@@ -16,9 +13,9 @@ public class ExecutionBroker {
 
     //Now, this broker is vey simple, e.g we do not keep state. In the future we may want to monitor execution
 
-    public void execute(final Task task, final Resource resource) {
+    public void execute(final Task task, final Worker worker) {
 
-        logger.info("task={" + task + "} resource={" + resource + "}");
+        logger.info("task={" + task + "} worker={" + worker + "}");
 
         //spawn a new thread to exec the task.
         String workerThreadId = "worker-tid-" + UUID.randomUUID().toString();
@@ -32,7 +29,7 @@ public class ExecutionBroker {
                 try {
 
                     //FIXME: we should not know the specific implementation here
-                    result = new RawWorker().execute(task);
+                    result = new RawTaskExecutor().execute(task);
 
                     switch (result.getResult()) {
                         case FAILURE: {
@@ -44,19 +41,19 @@ public class ExecutionBroker {
                             break;
                         }
                         default: {
-                            logger.error("inconsistent results for task={" + task + "} resource={" + resource + "}");
+                            logger.error("inconsistent results for task={" + task + "} worker={" + worker + "}");
                             //TODO: I guess the task should be rolled be to its previous (before run) state
                         }
                     }
                 } catch (Throwable t) {
-                    logger.error("task={" + task + "} resource={" + resource + "}", t);
+                    logger.error("task={" + task + "} worker={" + worker + "}", t);
                 }
             }
 
             private void onFinish() {
-                logger.info("task={" + task + "} resource={" + resource + "}");
+                logger.info("task={" + task + "} worker={" + worker + "}");
                 task.setState(TaskState.FINISHED);
-                resource.setState(ResourceState.IDLE);
+                worker.setState(ResourceState.IDLE);
             }
 
             private void onFailure() {

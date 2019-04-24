@@ -1,8 +1,16 @@
 package org.fogbowcloud.arrebol.resource;
 
+import org.fogbowcloud.arrebol.execution.TaskExecutionResult;
+import org.fogbowcloud.arrebol.execution.TaskExecutor;
+import org.fogbowcloud.arrebol.execution.Worker;
 import org.fogbowcloud.arrebol.models.specification.Specification;
+import org.fogbowcloud.arrebol.models.task.Task;
 
-public class MatchAnyResource implements Resource {
+/**
+ * This @{link Worker} implementation matches any @{link Specification}.
+ * It delegates @{link TaskExecutor} behaviour to received object.
+ */
+public class MatchAnyWorker implements Worker {
 
     //simple resource that accepts any request
 
@@ -10,12 +18,14 @@ public class MatchAnyResource implements Resource {
     private final Specification spec;
     private final String id;
     private final int poolId;
+    private final TaskExecutor executor;
 
-    public MatchAnyResource(Specification spec, String id, int poolId) {
+    public MatchAnyWorker(Specification spec, String id, int poolId, TaskExecutor delegatedExecutor) {
         this.spec = spec;
         this.id = id;
         this.poolId = poolId;
         this.state = ResourceState.IDLE;
+        this.executor = delegatedExecutor;
     }
 
     @Override
@@ -51,5 +61,10 @@ public class MatchAnyResource implements Resource {
     @Override
     public String toString() {
         return "id={" + this.id + "} poolId={" + poolId + "}";
+    }
+
+    @Override
+    public TaskExecutionResult execute(Task task) {
+        return this.executor.execute(task);
     }
 }

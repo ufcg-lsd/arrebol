@@ -1,5 +1,6 @@
 package org.fogbowcloud.arrebol.scheduler;
 
+import org.fogbowcloud.arrebol.execution.Worker;
 import org.fogbowcloud.arrebol.models.task.Task;
 import org.fogbowcloud.arrebol.resource.Resource;
 
@@ -9,12 +10,12 @@ public class AllocationPlan {
     public enum Type {RUN, STOP};
 
     private Task task;
-    private Resource resource;
+    private Worker worker;
     private Type type;
 
-    public AllocationPlan(Task t, Resource r, Type type) {
+    public AllocationPlan(Task t, Worker r, Type type) {
         this.task = t;
-        this.resource = r;
+        this.worker = r;
         this.type = type;
     }
 
@@ -22,8 +23,8 @@ public class AllocationPlan {
         return this.task;
     }
 
-    public Resource getResource() {
-        return this.resource;
+    public Worker getWorker() {
+        return this.worker;
     }
 
     public Type getType() {
@@ -32,6 +33,6 @@ public class AllocationPlan {
 
     @Override
     public String toString() {
-        return "type={" + getType() + "}" + "task={" + getTask() + "} resource={" + getResource() + "}" ;
+        return "type={" + getType() + "}" + "task={" + getTask() + "} worker={" + getWorker() + "}" ;
     }
 }

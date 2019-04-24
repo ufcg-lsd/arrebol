@@ -2,11 +2,12 @@ package org.fogbowcloud.arrebol.scheduler;
 
 import org.apache.log4j.Logger;
 import org.fogbowcloud.arrebol.execution.ExecutionBroker;
+import org.fogbowcloud.arrebol.execution.Worker;
 import org.fogbowcloud.arrebol.models.task.Task;
 import org.fogbowcloud.arrebol.models.task.TaskState;
 import org.fogbowcloud.arrebol.queue.TaskQueue;
 import org.fogbowcloud.arrebol.resource.Resource;
-import org.fogbowcloud.arrebol.resource.ResourcePool;
+import org.fogbowcloud.arrebol.resource.WorkerPool;
 import org.fogbowcloud.arrebol.resource.ResourceState;
 
 import java.util.Collection;
@@ -20,11 +21,11 @@ public class DefaultScheduler implements Runnable {
     private static final int SCHEDULER_PERIOD_MILLIS = 5000;
 
     private final TaskQueue queue;
-    private final ResourcePool pool;
+    private final WorkerPool pool;
     private final SchedulerPolicy policy;
     private final ExecutionBroker executionBroker;
 
-    public DefaultScheduler(TaskQueue queue, ResourcePool pool, SchedulerPolicy policy) {
+    public DefaultScheduler(TaskQueue queue, WorkerPool pool, SchedulerPolicy policy) {
 
         //this implementation is super-naive: we create a new allocation plan whenever
         //a notification is received (notifyAddedJob or notifyAvailableResource). Failures are just ignored.
@@ -65,10 +66,10 @@ public class DefaultScheduler implements Runnable {
                     task.setState(TaskState.RUNNING);
                     this.queue.removeTask(task);
 
-                    Resource resource = plan.getResource();
-                    resource.setState(ResourceState.ALLOCATED);
+                    Worker worker = plan.getWorker();
+                    worker.setState(ResourceState.ALLOCATED);
 
-                    executionBroker.execute(plan.getTask(), resource);
+                    executionBroker.execute(plan.getTask(), worker);
                     break;
                 }
                 case STOP: {

@@ -1,16 +1,18 @@
 package org.fogbowcloud.arrebol;
 
 import org.apache.log4j.Logger;
+import org.fogbowcloud.arrebol.execution.RawTaskExecutor;
+import org.fogbowcloud.arrebol.execution.TaskExecutor;
+import org.fogbowcloud.arrebol.execution.Worker;
 import org.fogbowcloud.arrebol.models.job.Job;
 import org.fogbowcloud.arrebol.models.job.JobState;
 import org.fogbowcloud.arrebol.models.specification.Specification;
 import org.fogbowcloud.arrebol.models.task.Task;
 import org.fogbowcloud.arrebol.models.task.TaskState;
 import org.fogbowcloud.arrebol.repositories.JobRepository;
-import org.fogbowcloud.arrebol.resource.MatchAnyResource;
-import org.fogbowcloud.arrebol.resource.Resource;
+import org.fogbowcloud.arrebol.resource.MatchAnyWorker;
 import org.fogbowcloud.arrebol.queue.TaskQueue;
-import org.fogbowcloud.arrebol.resource.ResourcePool;
+import org.fogbowcloud.arrebol.resource.WorkerPool;
 import org.fogbowcloud.arrebol.resource.StaticPool;
 import org.fogbowcloud.arrebol.scheduler.DefaultScheduler;
 import org.fogbowcloud.arrebol.scheduler.FifoSchedulerPolicy;
@@ -46,8 +48,8 @@ public class ArrebolController {
 
         //FIXME: we are missing something related to worker/resource func
         int poolId = 1;
-        Collection<Resource> resources = createPool(5, poolId);
-        ResourcePool pool = new StaticPool(poolId, resources);
+        Collection<Worker> workers = createPool(5, poolId);
+        WorkerPool pool = new StaticPool(poolId, workers);
 
         //create the scheduler bind the pieces together
         FifoSchedulerPolicy policy = new FifoSchedulerPolicy();
@@ -57,14 +59,15 @@ public class ArrebolController {
         this.jobDatabaseCommitter = new Timer(true);
     }
 
-    private Collection<Resource> createPool(int size, int poolId) {
-        Collection<Resource> resources = new LinkedList<Resource>();
+    private Collection<Worker> createPool(int size, int poolId) {
+        Collection<Worker> workers = new LinkedList<Worker>();
         int poolSize = 5;
         Specification resourceSpec = null;
         for (int i = 0; i < poolSize; i++) {
-            resources.add(new MatchAnyResource(resourceSpec, "resourceId-"+i, poolId));
+            TaskExecutor taskExecutor = new RawTaskExecutor();
+            workers.add(new MatchAnyWorker(resourceSpec, "resourceId-"+i, poolId,  taskExecutor));
         }
-        return resources;
+        return workers;
     }
 
     public void start() {

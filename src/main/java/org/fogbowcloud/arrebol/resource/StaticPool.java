@@ -1,20 +1,22 @@
 package org.fogbowcloud.arrebol.resource;
 
+import org.fogbowcloud.arrebol.execution.Worker;
+
 import java.util.Collection;
 import java.util.LinkedList;
 
-public class StaticPool implements ResourcePool {
+public class StaticPool implements WorkerPool {
 
     //this is a very simple pool implementation: we receive the workers at
     //the construction time, so the pool does not change.
-    //also, we do not expose any information about how resources are being used (to that we can help pool growth)
+    //also, we do not expose any information about how workers are being used (to that we can help pool growth)
 
     private final int poolId;
-    private final Collection<Resource> resources;
+    private final Collection<Worker> workers;
 
-    public StaticPool(int poolId, Collection<Resource> resources) {
+    public StaticPool(int poolId, Collection<Worker> workers) {
         this.poolId = poolId;
-        this.resources = resources;
+        this.workers = workers;
     }
 
     @Override
@@ -23,8 +25,8 @@ public class StaticPool implements ResourcePool {
     }
 
     @Override
-    public Collection<Resource> getResources() {
-        return new LinkedList<Resource>(this.resources);
+    public Collection<Worker> getWorkers() {
+        return new LinkedList<Worker>(this.workers);
     }
 
     @Override

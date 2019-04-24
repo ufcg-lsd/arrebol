@@ -1,4 +1,4 @@
-package org.fogbowcloud.arrebol.resource;
+package org.fogbowcloud.arrebol.execution;
 
 import org.fogbowcloud.arrebol.models.command.Command;
 
@@ -33,7 +33,7 @@ public class TaskExecutionResult {
 
     /**
      * It returns the exit codes for the execution of the commands.
-     * When the @{link Worker} was not able to execute the command, the exit code is
+     * When the @{link TaskExecutor} was not able to execute the command, the exit code is
      * is {@link TaskExecutionResult#UNDETERMINED_RESULT}.
      *
      * @return

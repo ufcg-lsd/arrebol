@@ -1,4 +1,4 @@
-package org.fogbowcloud.arrebol.resource;
+package org.fogbowcloud.arrebol.execution;
 
 import org.apache.log4j.Logger;
 import org.fogbowcloud.arrebol.models.command.Command;
@@ -9,7 +9,7 @@ import org.fogbowcloud.arrebol.scheduler.SchedulerPolicy;
 import java.io.IOException;
 import java.util.Arrays;
 
-public class RawWorker implements Worker {
+public class RawTaskExecutor implements TaskExecutor {
 
     private final Logger logger = Logger.getLogger(SchedulerPolicy.class);
 

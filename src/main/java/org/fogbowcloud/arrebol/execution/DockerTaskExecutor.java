@@ -1,11 +1,11 @@
-package org.fogbowcloud.arrebol.resource;
+package org.fogbowcloud.arrebol.execution;
 
 import org.apache.log4j.Logger;
 import org.fogbowcloud.arrebol.models.command.Command;
 import org.fogbowcloud.arrebol.models.task.Task;
-import org.fogbowcloud.arrebol.resource.exceptions.DockerStartException;
+import org.fogbowcloud.arrebol.execution.exceptions.DockerStartException;
 
-public class DockerWorker implements Worker {
+public class DockerTaskExecutor implements TaskExecutor {
 
     private String imageId;
     private String containerName;
@@ -15,9 +15,9 @@ public class DockerWorker implements Worker {
     private final String DOCKER_RUN = "sudo docker run --rm -idt --name";
     private final String DOCKER_STOP = "sudo docker stop";
 
-    private final Logger LOGGER = Logger.getLogger(DockerWorker.class);
+    private final Logger LOGGER = Logger.getLogger(DockerTaskExecutor.class);
 
-    public DockerWorker(String imageId, String containerName) {
+    public DockerTaskExecutor(String imageId, String containerName) {
         this.imageId = imageId;
         this.containerName = containerName;
     }

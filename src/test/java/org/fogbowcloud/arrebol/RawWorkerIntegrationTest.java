@@ -1,15 +1,18 @@
 package org.fogbowcloud.arrebol;
 
+import org.fogbowcloud.arrebol.execution.RawTaskExecutor;
+import org.fogbowcloud.arrebol.execution.TaskExecutor;
+import org.fogbowcloud.arrebol.execution.Worker;
 import org.fogbowcloud.arrebol.models.command.Command;
 import org.fogbowcloud.arrebol.models.job.Job;
 import org.fogbowcloud.arrebol.models.specification.Specification;
 import org.fogbowcloud.arrebol.models.task.Task;
 import org.fogbowcloud.arrebol.models.task.TaskState;
-import org.fogbowcloud.arrebol.resource.MatchAnyResource;
+import org.fogbowcloud.arrebol.resource.MatchAnyWorker;
 import org.fogbowcloud.arrebol.resource.Resource;
 import org.fogbowcloud.arrebol.queue.TaskQueue;
 import org.fogbowcloud.arrebol.resource.StaticPool;
-import org.fogbowcloud.arrebol.resource.ResourcePool;
+import org.fogbowcloud.arrebol.resource.WorkerPool;
 import org.fogbowcloud.arrebol.scheduler.DefaultScheduler;
 import org.fogbowcloud.arrebol.scheduler.FifoSchedulerPolicy;
 import org.junit.Assert;
@@ -35,8 +38,8 @@ public class RawWorkerIntegrationTest {
         //create the pool
         //FIXME: we are missing something related to worker/resource func
         int poolId = 1;
-        Collection<Resource> resources = createPool(5, poolId);
-        ResourcePool pool = new StaticPool(poolId, resources);
+        Collection<Worker> workers = createPool(5, poolId);
+        WorkerPool pool = new StaticPool(poolId, workers);
 
         //create the scheduler
         //bind the pieces together
@@ -120,14 +123,15 @@ public class RawWorkerIntegrationTest {
         return task;
     }
 
-    private Collection<Resource> createPool(int size, int poolId){
-        Collection<Resource> resources = new LinkedList<Resource>();
+    private Collection<Worker> createPool(int size, int poolId){
+        Collection<Worker> workers = new LinkedList<Worker>();
         int poolSize = 5;
         Specification resourceSpec = null;
         for (int i = 0; i < poolSize; i++) {
-            resources.add(new MatchAnyResource(resourceSpec, "resourceId-"+i, poolId));
+            TaskExecutor taskExecutor = new RawTaskExecutor();
+            workers.add(new MatchAnyWorker(resourceSpec, "resourceId-"+i, poolId, taskExecutor));
         }
-        return resources;
+        return workers;
     }
 
     private class DummySpec extends Specification {
