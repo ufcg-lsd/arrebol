@@ -2,6 +2,7 @@ package org.fogbowcloud.arrebol.resource;
 
 import org.apache.log4j.Logger;
 import org.fogbowcloud.arrebol.models.command.Command;
+import org.fogbowcloud.arrebol.models.command.CommandState;
 import org.fogbowcloud.arrebol.models.task.Task;
 import org.fogbowcloud.arrebol.scheduler.SchedulerPolicy;
 
@@ -45,8 +46,13 @@ public class RawWorker implements Worker {
 
         //TODO: there are plenty of room to improve this code: working directories, stdout/stderr gathering, env vars
         String cmdStr = command.getCommand();
+        command.setState(CommandState.RUNNING);
+
         Process process = Runtime.getRuntime().exec(cmdStr);
         int exitValue = process.waitFor();
+
+        command.setState(CommandState.FINISHED);
+
         return exitValue;
     }
 }
