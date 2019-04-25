@@ -2,6 +2,7 @@ package org.fogbowcloud.arrebol.execution;
 
 import org.apache.log4j.Logger;
 import org.fogbowcloud.arrebol.models.command.Command;
+import org.fogbowcloud.arrebol.models.command.CommandState;
 import org.fogbowcloud.arrebol.models.task.Task;
 import org.fogbowcloud.arrebol.execution.exceptions.DockerStartException;
 
@@ -11,9 +12,9 @@ public class DockerTaskExecutor implements TaskExecutor {
     private String containerName;
 
     private final String BASH = "/bin/bash";
-    private final String DOCKER_EXEC = "sudo docker exec";
-    private final String DOCKER_RUN = "sudo docker run --rm -idt --name";
-    private final String DOCKER_STOP = "sudo docker stop";
+    private final String DOCKER_EXEC = "docker exec";
+    private final String DOCKER_RUN = "docker run --rm -idt --name";
+    private final String DOCKER_STOP = "docker stop";
 
     private final Logger LOGGER = Logger.getLogger(DockerTaskExecutor.class);
 
@@ -106,9 +107,14 @@ public class DockerTaskExecutor implements TaskExecutor {
                     DOCKER_EXEC + " " + this.containerName + " " + commandStr
             };
 
+            command.setState(CommandState.RUNNING);
+
             Process p = Runtime.getRuntime().exec(cmd);
 
             Integer exitCode = p.waitFor();
+
+            command.setState(CommandState.FINISHED);
+
             return exitCode;
 
         } catch(Exception e){
@@ -122,5 +128,10 @@ public class DockerTaskExecutor implements TaskExecutor {
 
     public String getContainerName() {
         return this.containerName;
+    }
+
+    @Override
+    public String toString() {
+        return "DockerTaskExecutor imageId={" + getImageId() + "} containerName={" + containerName + "}";
     }
 }

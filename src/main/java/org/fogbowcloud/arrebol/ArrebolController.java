@@ -87,10 +87,12 @@ public class ArrebolController {
         for (int i = 0; i < poolSize; i++) {
             TaskExecutor executor = createTaskExecutor(poolType, properties);
             Specification resourceSpec = null;
-            workers.add(new MatchAnyWorker(resourceSpec, "resourceId-"+i, poolId, executor));
+            Worker worker = new MatchAnyWorker(resourceSpec, "resourceId-"+i, poolId, executor);
+            workers.add(worker);
         }
 
         WorkerPool pool = new StaticPool(poolId, workers);
+        LOGGER.info("pool={" + pool + "} created with workers={" + workers + "}");
 
         return pool;
     }

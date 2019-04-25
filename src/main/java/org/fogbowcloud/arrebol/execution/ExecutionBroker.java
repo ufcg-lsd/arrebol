@@ -28,8 +28,7 @@ public class ExecutionBroker {
                 TaskExecutionResult result = null;
                 try {
 
-                    //FIXME: we should not know the specific implementation here
-                    result = new RawTaskExecutor().execute(task);
+                    result = worker.execute(task);
 
                     switch (result.getResult()) {
                         case FAILURE: {

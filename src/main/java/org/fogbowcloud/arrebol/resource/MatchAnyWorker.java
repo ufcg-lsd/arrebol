@@ -60,7 +60,8 @@ public class MatchAnyWorker implements Worker {
 
     @Override
     public String toString() {
-        return "id={" + this.id + "} poolId={" + poolId + "}";
+        return "id={" + this.id + "} poolId={" + poolId + "} " +
+                "executor={" + this.executor + "}";
     }
 
     @Override
