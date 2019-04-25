@@ -1,6 +1,7 @@
 package org.fogbowcloud.arrebol;
 
 import org.apache.log4j.Logger;
+import org.fogbowcloud.arrebol.execution.DockerTaskExecutor;
 import org.fogbowcloud.arrebol.execution.RawTaskExecutor;
 import org.fogbowcloud.arrebol.execution.TaskExecutor;
 import org.fogbowcloud.arrebol.execution.Worker;
@@ -19,6 +20,11 @@ import org.fogbowcloud.arrebol.scheduler.FifoSchedulerPolicy;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
 import java.util.*;
 
 @Component
@@ -41,15 +47,23 @@ public class ArrebolController {
     public ArrebolController(Properties properties) {
         this.properties = properties;
 
+        String path = Thread.currentThread().getContextClassLoader().getResource("").getPath();
+        Properties arrebolProperties = new Properties();
+
+        try (InputStream input = new FileInputStream(path + File.separator + "arrebol.conf")) {
+            arrebolProperties.load(input);
+        } catch (IOException ex) {
+            LOGGER.error("Error on loading properties file path=" + path, ex);
+            System.exit(1);
+        }
+
         String queueId = UUID.randomUUID().toString();
         String queueName = "defaultQueue";
 
         this.queue = new TaskQueue(queueId, queueName);
 
-        //FIXME: we are missing something related to worker/resource func
         int poolId = 1;
-        Collection<Worker> workers = createPool(5, poolId);
-        WorkerPool pool = new StaticPool(poolId, workers);
+        WorkerPool pool = createPool(arrebolProperties, poolId);
 
         //create the scheduler bind the pieces together
         FifoSchedulerPolicy policy = new FifoSchedulerPolicy();
@@ -59,15 +73,40 @@ public class ArrebolController {
         this.jobDatabaseCommitter = new Timer(true);
     }
 
-    private Collection<Worker> createPool(int size, int poolId) {
-        Collection<Worker> workers = new LinkedList<Worker>();
-        int poolSize = 5;
-        Specification resourceSpec = null;
+    private static final String RAW_TYPE = "raw";
+    private static final String DOCKER_TYPE = "docker";
+
+    private WorkerPool createPool(Properties properties, int poolId) {
+
+        //we need to deal with missing/wrong properties
+
+        Collection<Worker> workers = new LinkedList<>();
+        String poolType = properties.getProperty("pool.type");
+
+        int poolSize = new Integer(properties.getProperty("pool.size"));
         for (int i = 0; i < poolSize; i++) {
-            TaskExecutor taskExecutor = new RawTaskExecutor();
-            workers.add(new MatchAnyWorker(resourceSpec, "resourceId-"+i, poolId,  taskExecutor));
+            TaskExecutor executor = createTaskExecutor(poolType, properties);
+            Specification resourceSpec = null;
+            workers.add(new MatchAnyWorker(resourceSpec, "resourceId-"+i, poolId, executor));
         }
-        return workers;
+
+        WorkerPool pool = new StaticPool(poolId, workers);
+
+        return pool;
+    }
+
+    private TaskExecutor createTaskExecutor(String type, Properties properties) {
+
+        TaskExecutor executor = null;
+
+        if (type.equals(RAW_TYPE)) {
+            executor = new RawTaskExecutor();
+        } else if (type.equals(DOCKER_TYPE)) {
+            String imageId = properties.getProperty("pool.image_id");
+            executor = new DockerTaskExecutor(imageId, "docker-executor-" + UUID.randomUUID().toString());
+        }
+
+        return executor;
     }
 
     public void start() {
