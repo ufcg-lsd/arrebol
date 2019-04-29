@@ -12,28 +12,16 @@ public class Task {
     @Id
     private String id;
 
-    @OneToOne(cascade = CascadeType.ALL)
-    private Specification specification;
-
-    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Command> commands;
-
     @Enumerated(EnumType.STRING)
     private TaskState state;
 
-    @ElementCollection
-    private Map<String, String> metadata;
+    @OneToOne(cascade = CascadeType.ALL)
+    private TaskSpec taskSpec;
 
-    public Task(String id, Specification spec, List<Command> commands) {
-        this(id, spec, commands, new HashMap<String, String>());
-    }
-
-    public Task(String id, Specification spec, List<Command> commands, Map<String, String> metadata) {
+    public Task(String id, TaskSpec taskSpec) {
         this.id = id;
-        this.specification = spec;
+        this.taskSpec = taskSpec;
         this.state = TaskState.PENDING;
-        this.commands = commands;
-        this.metadata = metadata;
     }
 
     Task(){
@@ -45,7 +33,7 @@ public class Task {
     }
 
     public Specification getSpecification() {
-        return this.specification;
+        return this.taskSpec.getSpec();
     }
 
     public TaskState getState() {
@@ -57,12 +45,12 @@ public class Task {
     }
 
     public List<Command> getCommands() {
-        List<Command> commandsClone = new ArrayList<>(this.commands);
+        List<Command> commandsClone = new ArrayList<>(this.taskSpec.getCommands());
         return commandsClone;
     }
 
     public Map<String, String> getMetadata() {
-        Map<String, String> metadataClone = new HashMap<>(this.metadata);
+        Map<String, String> metadataClone = new HashMap<>(this.taskSpec.getMetadata());
         return metadataClone;
     }
 
