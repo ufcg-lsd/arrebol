@@ -1,14 +1,12 @@
 #/bin/bash
 
-JOB_NAME=$1
-
 curl -X POST \
  http://localhost:8080/job \
  -H 'Content-Type: application/json' \
  -H 'Postman-Token: 3761110d-b8e3-45b7-93cd-cd092e70263c' \
  -H 'cache-control: no-cache' \
  -d '{
- "label":"${JOB_NAME}",
+ "label": "jid",
  "tasksSpecs":[
    {
        "id": "tid-1",
