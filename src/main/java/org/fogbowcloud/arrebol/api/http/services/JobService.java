@@ -3,10 +3,8 @@ package org.fogbowcloud.arrebol.api.http.services;
 import org.apache.log4j.Logger;
 import org.fogbowcloud.arrebol.api.http.dataaccessobject.JobDAO;
 import org.fogbowcloud.arrebol.ArrebolFacade;
-import org.fogbowcloud.arrebol.models.command.Command;
 import org.fogbowcloud.arrebol.models.job.Job;
 import org.fogbowcloud.arrebol.models.job.JobSpec;
-import org.fogbowcloud.arrebol.models.specification.Specification;
 import org.fogbowcloud.arrebol.models.task.Task;
 import org.fogbowcloud.arrebol.models.task.TaskSpec;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,11 +45,8 @@ public class JobService {
 
         for(TaskSpec taskSpec : jobSpec.getTasksSpecs()){
             String taskId = UUID.randomUUID().toString();
-            List<Command> commands = taskSpec.getCommands();
-            Specification spec = taskSpec.getSpec();
-            Map<String, String> metadata = taskSpec.getMetadata();
 
-            Task task = new Task(taskId, spec, commands, metadata);
+            Task task = new Task(taskId, taskSpec);
             taskList.add(task);
         }
         Job job = new Job(jobSpec.getLabel(), taskList);
