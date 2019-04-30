@@ -136,16 +136,8 @@ public class RawWorkerIntegrationTest {
     }
 
     private class DummySpec extends Specification {
-
         public DummySpec() {
-            this(null, null, null, null, null);
-        }
-        public DummySpec(String image, String username, String publicKey, String privateKeyFilePath, Map<String, String> requirements) {
-            super(image, username, publicKey, privateKeyFilePath, requirements);
-        }
-
-        public DummySpec(String image, String username, String publicKey, String privateKeyFilePath, Map<String, String> requirements, String cloudName) {
-            super(image, username, publicKey, privateKeyFilePath, requirements, cloudName);
+            super(null);
         }
     }
 }

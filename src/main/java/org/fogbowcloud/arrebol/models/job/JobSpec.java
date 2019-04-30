@@ -30,4 +30,8 @@ public class JobSpec implements Serializable {
         return this.tasksSpecs;
     }
 
+    @Override
+    public String toString() {
+        return "label={" + label + "} taskSpecs={" + tasksSpecs + "}";
+    }
 }

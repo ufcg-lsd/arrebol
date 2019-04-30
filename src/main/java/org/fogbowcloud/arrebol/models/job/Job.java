@@ -11,7 +11,6 @@ import java.util.*;
 public class Job implements Serializable {
 
 	private static final long serialVersionUID = -6111900503095749695L;
-	private static final Logger LOGGER = Logger.getLogger(Job.class);
 
 	@Id
 	private String id;

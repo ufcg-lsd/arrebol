@@ -11,12 +11,8 @@ curl -X POST \
  "label":"${JOB_NAME}",
  "tasksSpecs":[
    {
+       "id": "tid-1",
        "spec":{
-           "cloudName":"cloud4",
-           "image":"ubuntu 18.04",
-           "username":"thiagoepdc",
-           "publicKey":"ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCryIrky2QYX1v4usB9rCQ3HtHD57nsw3FGRSkjHUB+zmnybHAsxcuRgCLt/+m0JvBDP++TQX5XUpeeNulBn5zpw9co5zK1F9ea0yrZ693BbQPawBuAFp9PsfL/XRaaCUs5KZsxqWttZVOfP3/5ioJQEjw+BaY+bHtgJnB38ukEMByE+WU0coJNdo3Z2CC9U9sxn70GJm0Y2xEm4vr/bhx7Dy1EEOuhTmgzztHJrhgIvpn1yOFl2F2NjZk5uTlBpLulqv4WKgysT9ffF0D3du5+l6aIWJzm3h3ugwZfCSzU2JAevm++HIcBEtER5Q+kNbByPNiFGgu4LxO4Vv7dZI3R fogbow@sapupara-pc-159",
-           "privateKeyFilePath":"/home/emanueljbm/.ssh/fogbow_priv",
            "requirements":{
                "Glue2RAM":"1024"
            }

@@ -27,7 +27,7 @@ public class JobController {
 
     @RequestMapping(method = RequestMethod.POST)
     public ResponseEntity<String> addJob(@RequestBody JobSpec jobSpec){
-        LOGGER.info("Adding new Job: " + jobSpec.getLabel() + ".");
+        LOGGER.info("Adding new Job: " + jobSpec + ".");
 
         String jobId = jobService.addJob(jobSpec);
         JobResponse jobResponse = new JobResponse(jobId);

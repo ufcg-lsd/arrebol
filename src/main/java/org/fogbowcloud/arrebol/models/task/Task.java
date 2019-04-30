@@ -4,10 +4,13 @@ import org.fogbowcloud.arrebol.models.command.Command;
 import org.fogbowcloud.arrebol.models.specification.Specification;
 
 import javax.persistence.*;
+import java.io.Serializable;
 import java.util.*;
 
 @Entity
-public class Task {
+public class Task implements Serializable {
+
+    private static final long serialVersionUID = -6111900503456749695L;
 
     @Id
     private String id;

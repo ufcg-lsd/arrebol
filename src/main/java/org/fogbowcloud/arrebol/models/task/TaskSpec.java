@@ -22,9 +22,6 @@ public class TaskSpec implements Serializable {
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Command> commands;
 
-    @Enumerated(EnumType.STRING)
-    private TaskState state;
-
     @ElementCollection
     private Map<String, String> metadata;
 
