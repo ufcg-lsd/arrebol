@@ -32,9 +32,13 @@ public class TaskSpec implements Serializable {
         this.metadata = metadata;
     }
 
-    public TaskSpec(){
+    public TaskSpec() {
         //Default constructor.
     }
+
+    public String getId() { return this.id; }
+
+    public void setId(String id) { this.id = id; }
 
     public List<Command> getCommands(){
         return this.commands;
