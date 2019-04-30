@@ -8,6 +8,7 @@ import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
 
+@Entity
 public class TaskSpec implements Serializable {
 
     private static final long serialVersionUID = -6111900503456749695L;

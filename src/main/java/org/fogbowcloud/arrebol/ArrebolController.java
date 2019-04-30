@@ -10,11 +10,11 @@ import org.fogbowcloud.arrebol.models.job.JobState;
 import org.fogbowcloud.arrebol.models.specification.Specification;
 import org.fogbowcloud.arrebol.models.task.Task;
 import org.fogbowcloud.arrebol.models.task.TaskState;
+import org.fogbowcloud.arrebol.queue.TaskQueue;
 import org.fogbowcloud.arrebol.repositories.JobRepository;
 import org.fogbowcloud.arrebol.resource.MatchAnyWorker;
-import org.fogbowcloud.arrebol.queue.TaskQueue;
-import org.fogbowcloud.arrebol.resource.WorkerPool;
 import org.fogbowcloud.arrebol.resource.StaticPool;
+import org.fogbowcloud.arrebol.resource.WorkerPool;
 import org.fogbowcloud.arrebol.scheduler.DefaultScheduler;
 import org.fogbowcloud.arrebol.scheduler.FifoSchedulerPolicy;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,7 +24,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.file.Files;
 import java.util.*;
 
 @Component
