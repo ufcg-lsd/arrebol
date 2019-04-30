@@ -1,5 +1,6 @@
 package org.fogbowcloud.arrebol;
 
+import org.apache.log4j.Logger;
 import org.fogbowcloud.arrebol.execution.RawTaskExecutor;
 import org.fogbowcloud.arrebol.execution.TaskExecutor;
 import org.fogbowcloud.arrebol.execution.Worker;
@@ -7,17 +8,16 @@ import org.fogbowcloud.arrebol.models.command.Command;
 import org.fogbowcloud.arrebol.models.job.Job;
 import org.fogbowcloud.arrebol.models.specification.Specification;
 import org.fogbowcloud.arrebol.models.task.Task;
+import org.fogbowcloud.arrebol.models.task.TaskSpec;
 import org.fogbowcloud.arrebol.models.task.TaskState;
-import org.fogbowcloud.arrebol.resource.MatchAnyWorker;
-import org.fogbowcloud.arrebol.resource.Resource;
 import org.fogbowcloud.arrebol.queue.TaskQueue;
+import org.fogbowcloud.arrebol.resource.MatchAnyWorker;
 import org.fogbowcloud.arrebol.resource.StaticPool;
 import org.fogbowcloud.arrebol.resource.WorkerPool;
 import org.fogbowcloud.arrebol.scheduler.DefaultScheduler;
 import org.fogbowcloud.arrebol.scheduler.FifoSchedulerPolicy;
 import org.junit.Assert;
 import org.junit.Test;
-import org.apache.log4j.Logger;
 
 import java.util.*;
 
@@ -118,7 +118,8 @@ public class RawWorkerIntegrationTest {
         cmds.add(new Command((cmd)));
 
         String taskId = "taskId-"+ idCount++;
-        Task task = new Task(taskId, new DummySpec(), cmds);
+        TaskSpec taskSpec = new TaskSpec(taskId+"spec", new DummySpec(), cmds, new HashMap<>());
+        Task task = new Task(taskId, taskSpec);
 
         return task;
     }

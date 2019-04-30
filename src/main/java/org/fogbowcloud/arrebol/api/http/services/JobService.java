@@ -47,11 +47,7 @@ public class JobService {
 
         for(TaskSpec taskSpec : jobSpec.getTasksSpecs()){
             String taskId = UUID.randomUUID().toString();
-            List<Command> commands = taskSpec.getCommands();
-            Specification spec = taskSpec.getSpec();
-            Map<String, String> metadata = taskSpec.getMetadata();
-
-            Task task = new Task(taskId, spec, commands, metadata);
+            Task task = new Task(taskId, taskSpec);
             taskList.add(task);
         }
         Job job = new Job(jobSpec.getLabel(), taskList);
