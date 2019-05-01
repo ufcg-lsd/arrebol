@@ -24,4 +24,4 @@ curl -X POST \
      }
    }
    ]
-}'
+}' | python -m json.tool
