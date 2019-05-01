@@ -1,0 +1,34 @@
+#/bin/bash
+
+curl -X POST \
+ http://localhost:8080/job \
+ -H 'Content-Type: application/json' \
+ -H 'Postman-Token: 3761110d-b8e3-45b7-93cd-cd092e70263c' \
+ -H 'cache-control: no-cache' \
+ -d '{
+  "label": "ProcessImgs",
+  "tasksSpecs": [
+    {
+      "id": "TaskNumber-0-1691b152-d936-453c-9205-832ced645392",
+      "spec": {
+        "image": "ubuntu",
+        "username": "thiagoepdc",
+        "requirements": {
+          "FogbowRequirements": "",
+          "RequestType": "one-time"
+        }
+      },
+      "commands": [
+        "\u0027server\u003ddatastore.lsd.ufcg.edu.br; token\u003dn5ihRgs1yTUcQOK4N47PRjX7C6pO7uDfLD2OkuhurvPD5rsryHB37PZ2DYhkDEHj;  full_response\u003d$(curl --write-out %{http_code} --header \"Authorization:Bearer $token\"  http://$server/remote.php/webdav/Experiments/ProcessImgJan/bin/run.sh --silent --output run.sh /dev/null); http_code\u003d${full_response:0:3};  if [ \\$http_code \u003d\u003d 401 ] ; then token\u003d$(curl --request GET --url https://iguassu-api.lsd.ufcg.edu.br/api/v1/oauthtoken/thiagoepdc);   full_response\u003d$(curl --write-out %{http_code} --header \"Authorization:Bearer $token\"  http://$server/remote.php/webdav/Experiments/ProcessImgJan/bin/run.sh --silent --output run.sh /dev/null);  fi \u0027",
+        "\u0027server\u003ddatastore.lsd.ufcg.edu.br; token\u003dn5ihRgs1yTUcQOK4N47PRjX7C6pO7uDfLD2OkuhurvPD5rsryHB37PZ2DYhkDEHj;  full_response\u003d$(curl --write-out %{http_code} --header \"Authorization:Bearer $token\"  http://$server/remote.php/webdav/Experiments/ProcessImgJan/input.tar.gz --silent --output input.tar.gz /dev/null); http_code\u003d${full_response:0:3};  if [ \\$http_code \u003d\u003d 401 ] ; then token\u003d$(curl --request GET --url https://iguassu-api.lsd.ufcg.edu.br/api/v1/oauthtoken/thiagoepdc);   full_response\u003d$(curl --write-out %{http_code} --header \"Authorization:Bearer $token\"  http://$server/remote.php/webdav/Experiments/ProcessImgJan/input.tar.gz --silent --output input.tar.gz /dev/null);  fi \u0027",
+        "sudo bash run.sh input.tar.gz ndvi-ProcessImgJan.png",
+        "\u0027server\u003ddatastore.lsd.ufcg.edu.br; token\u003dn5ihRgs1yTUcQOK4N47PRjX7C6pO7uDfLD2OkuhurvPD5rsryHB37PZ2DYhkDEHj;  http_code\u003d$(curl --write-out %{http_code} -X PUT --header \"Authorization:Bearer $token\"  --data-binary @ndvi-ProcessImgJan.png --silent --output /dev/null  http://$server/remote.php/webdav/Experiments/ProcessImgJan/output.png);  if [ \\$http_code \u003d\u003d 401 ] ; then token\u003d$(curl --request GET --url https://iguassu-api.lsd.ufcg.edu.br/api/v1/oauthtoken/thiagoepdc);  http_code\u003d$(curl --write-out %{http_code} -X PUT --header \"Authorization:Bearer $token\"  --data-binary @ndvi-ProcessImgJan.png --silent --output /dev/null  http://$server/remote.php/webdav/Experiments/ProcessImgJan/output.png);  fi \u0027"
+      ],
+      "metadata": {
+        "owner": "thiagoepdc",
+        "jobID": "1dcaa59b-23d8-454c-9184-5f3b7d9f437e",
+        "remote_command_exit_path": "null/exit"
+      }
+    }
+  ]
+}' | python -m json.tool

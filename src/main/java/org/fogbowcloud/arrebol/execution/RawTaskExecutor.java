@@ -33,13 +33,17 @@ public class RawTaskExecutor implements TaskExecutor {
         Arrays.fill(exitValues, TaskExecutionResult.UNDETERMINED_RESULT);
 
         for(int i = 0; i < cmds.length; i++) {
+            Command commandToExec = cmds[i];
             try {
-                exitValues[i] = executeCommand(cmds[i]);
+                commandToExec.setState(CommandState.RUNNING);
+                exitValues[i] = executeCommand(commandToExec);
+                commandToExec.setState(CommandState.FINISHED);
                 logger.debug("taskId={" + task.getId() + "} cmd_index={" + i + "}" +
                         " cmd={" + cmds[i] + "} result={" + exitValues[i] + "}");
             } catch (Throwable t) {
                 logger.error("taskId={" + task.getId() + "} cmd_index={" + i + "}" +
                         " cmd={" + cmds[i], t);
+                commandToExec.setState(CommandState.FAILED);
                 result = TaskExecutionResult.RESULT.FAILURE;
             }
         }
@@ -48,16 +52,10 @@ public class RawTaskExecutor implements TaskExecutor {
     }
 
     private int executeCommand(Command command) throws IOException, InterruptedException {
-
         //TODO: there are plenty of room to improve this code: working directories, stdout/stderr gathering, env vars
         String cmdStr = command.getCommand();
-        command.setState(CommandState.RUNNING);
-
         Process process = Runtime.getRuntime().exec(cmdStr);
         int exitValue = process.waitFor();
-
-        command.setState(CommandState.FINISHED);
-
         return exitValue;
     }
 }

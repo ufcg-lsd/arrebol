@@ -7,6 +7,7 @@ import org.fogbowcloud.arrebol.models.task.Task;
 import org.fogbowcloud.arrebol.execution.exceptions.DockerStartException;
 import org.fogbowcloud.arrebol.models.task.TaskSpec;
 
+import java.util.Arrays;
 import java.util.List;
 
 public class DockerTaskExecutor implements TaskExecutor {
@@ -28,6 +29,10 @@ public class DockerTaskExecutor implements TaskExecutor {
 
     @Override
     public TaskExecutionResult execute(Task task) {
+
+        //FIXME: We should catch the errors when starting/finishing the container and move the task to its FAILURE state
+        //FIXME: also, follow the SAME log format we used in the RawTaskExecutor
+
         TaskExecutionResult taskExecutionResult;
         Integer startStatus = this.start();
 
@@ -44,12 +49,20 @@ public class DockerTaskExecutor implements TaskExecutor {
         int commandsSize = commandsList.size();
         Command[] commands = commandsList.toArray(new Command[commandsSize]);
         int[] commandsResults = new int[commandsSize];
+        Arrays.fill(commandsResults, TaskExecutionResult.UNDETERMINED_RESULT);
 
         LOGGER.info("Starting to execute commands of task " + task.getId());
         for (int i = 0; i < commandsSize; i++) {
             Command c = commands[i];
-            Integer exitCode = executeCommand(c);
-            commandsResults[i] = exitCode;
+            c.setState(CommandState.RUNNING);
+            try {
+                Integer exitCode = executeCommand(c);
+                commandsResults[i] = exitCode;
+                c.setState(CommandState.FINISHED);
+            } catch (Throwable t) {
+                c.setState(CommandState.FAILED);
+            }
+
         }
 
         Integer stopStatus = this.stop();
@@ -112,15 +125,9 @@ public class DockerTaskExecutor implements TaskExecutor {
                     "-c",
                     DOCKER_EXEC + " " + this.containerName + " " + commandStr
             };
-
-            command.setState(CommandState.RUNNING);
-
             Process p = Runtime.getRuntime().exec(cmd);
 
             Integer exitCode = p.waitFor();
-
-            command.setState(CommandState.FINISHED);
-
             return exitCode;
 
         } catch(Exception e){
@@ -128,12 +135,8 @@ public class DockerTaskExecutor implements TaskExecutor {
         }
     }
 
-    public String getImageId(){
+    private String getImageId(){
         return this.imageId;
-    }
-
-    public String getContainerName() {
-        return this.containerName;
     }
 
     @Override

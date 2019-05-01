@@ -1,0 +1,26 @@
+"label": "",
+  "tasksSpecs": [
+    {
+      "id": "TaskNumber-0-d1af0403-2c44-4415-b6c6-2888828de22b",
+      "spec": {
+        "image": "ubuntu",
+        "username": "admin",
+        "requirements": {
+          "FogbowRequirements": "",
+          "RequestType": "one-time"
+        }
+      },
+      "commands": [
+        "\u0027server\u003ddatastore.lsd.ufcg.edu.br; token\u003dyROTyH3GQB8cTrRuGZwR3rrcOOgBx89J9Cyp64MGUO0305LkbN6xfEMXgCY1XSQC;  full_response\u003d$(curl --write-out %{http_code} --header \"Authorization:Bearer $token\"  http://$server/remote.php/webdav/Experiments/ProcessImgJan/bin/run.sh --silent --output run.sh /dev/null); http_code\u003d${full_response:0:3};  if [ \\$http_code \u003d\u003d 401 ] ; then token\u003d$(curl --request GET --url https://iguassu-api.lsd.ufcg.edu.br/api/v1/oauthtoken/admin);   full_response\u003d$(curl --write-out %{http_code} --header \"Authorization:Bearer $token\"  http://$server/remote.php/webdav/Experiments/ProcessImgJan/bin/run.sh --silent --output run.sh /dev/null);  fi \u0027",
+        "\u0027server\u003ddatastore.lsd.ufcg.edu.br; token\u003dyROTyH3GQB8cTrRuGZwR3rrcOOgBx89J9Cyp64MGUO0305LkbN6xfEMXgCY1XSQC;  full_response\u003d$(curl --write-out %{http_code} --header \"Authorization:Bearer $token\"  http://$server/remote.php/webdav/Experiments/ProcessImgJan/input.tar.gz --silent --output input.tar.gz /dev/null); http_code\u003d${full_response:0:3};  if [ \\$http_code \u003d\u003d 401 ] ; then token\u003d$(curl --request GET --url https://iguassu-api.lsd.ufcg.edu.br/api/v1/oauthtoken/admin);   full_response\u003d$(curl --write-out %{http_code} --header \"Authorization:Bearer $token\"  http://$server/remote.php/webdav/Experiments/ProcessImgJan/input.tar.gz --silent --output input.tar.gz /dev/null);  fi \u0027",
+        "sudo bash run.sh input.tar.gz ndvi-ProcessImgJan.png",
+        "\u0027server\u003ddatastore.lsd.ufcg.edu.br; token\u003dyROTyH3GQB8cTrRuGZwR3rrcOOgBx89J9Cyp64MGUO0305LkbN6xfEMXgCY1XSQC;  http_code\u003d$(curl --write-out %{http_code} -X PUT --header \"Authorization:Bearer $token\"  --data-binary @ndvi-ProcessImgJan.png --silent --output /dev/null  http://$server/remote.php/webdav/Experiments/ProcessImgJan/output.png);  if [ \\$http_code \u003d\u003d 401 ] ; then token\u003d$(curl --request GET --url https://iguassu-api.lsd.ufcg.edu.br/api/v1/oauthtoken/admin);  http_code\u003d$(curl --write-out %{http_code} -X PUT --header \"Authorization:Bearer $token\"  --data-binary @ndvi-ProcessImgJan.png --silent --output /dev/null  http://$server/remote.php/webdav/Experiments/ProcessImgJan/output.png);  fi \u0027"
+      ],
+      "metadata": {
+        "owner": "admin",
+        "jobID": "62d1fcee-1cc5-4504-a16d-ae8788857d1a",
+        "remote_command_exit_path": "null/exit"
+      }
+    }
+  ]
+}

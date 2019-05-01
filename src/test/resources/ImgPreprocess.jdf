@@ -1,0 +1,7 @@
+job:
+label: ProcessImgs
+task:
+get run.sh Experiments/ProcessImgJan/bin/run.sh
+get input.tar.gz Experiments/ProcessImgJan/input.tar.gz
+sudo bash run.sh input.tar.gz ndvi-ProcessImgJan.png
+put ndvi-ProcessImgJan.png Experiments/ProcessImgJan/output.png
