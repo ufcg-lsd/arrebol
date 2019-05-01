@@ -7,7 +7,9 @@ import org.fogbowcloud.arrebol.models.task.Task;
 import org.fogbowcloud.arrebol.models.task.TaskSpec;
 import org.fogbowcloud.arrebol.scheduler.SchedulerPolicy;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.Arrays;
 import java.util.List;
 
@@ -54,8 +56,10 @@ public class RawTaskExecutor implements TaskExecutor {
     private int executeCommand(Command command) throws IOException, InterruptedException {
         //TODO: there are plenty of room to improve this code: working directories, stdout/stderr gathering, env vars
         String cmdStr = command.getCommand();
-        Process process = Runtime.getRuntime().exec(cmdStr);
+        ProcessBuilder builder = new ProcessBuilder("/bin/bash", "-c", cmdStr);
+        Process process = builder.start();
         int exitValue = process.waitFor();
         return exitValue;
     }
+
 }

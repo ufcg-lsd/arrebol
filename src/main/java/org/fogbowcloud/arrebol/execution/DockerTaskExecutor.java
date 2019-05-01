@@ -125,9 +125,9 @@ public class DockerTaskExecutor implements TaskExecutor {
                     "-c",
                     DOCKER_EXEC + " " + this.containerName + " " + commandStr
             };
-            Process p = Runtime.getRuntime().exec(cmd);
-
-            Integer exitCode = p.waitFor();
+            ProcessBuilder builder = new ProcessBuilder(cmd);
+            Process process = builder.start();
+            Integer exitCode = process.waitFor();
             return exitCode;
 
         } catch(Exception e){
