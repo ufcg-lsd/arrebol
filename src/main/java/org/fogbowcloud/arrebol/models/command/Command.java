@@ -11,6 +11,7 @@ public class Command {
     @GeneratedValue(strategy=GenerationType.IDENTITY)
     private Integer id;
 
+    @Column(length=10240)
     private String command;
     @Enumerated(EnumType.STRING)
     private CommandState state;
