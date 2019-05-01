@@ -71,8 +71,8 @@ public class DockerTaskExecutor implements TaskExecutor {
         }
 
         TaskExecutionResult.RESULT result = TaskExecutionResult.RESULT.SUCCESS;
-        for (int i : commandsResults) {
-            if (i != 0) {
+        for (Command cmd : commands) {
+            if (cmd.getState().equals(CommandState.FAILED)) {
                 result = TaskExecutionResult.RESULT.FAILURE;
                 break;
             }
