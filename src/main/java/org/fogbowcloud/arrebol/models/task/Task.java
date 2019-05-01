@@ -1,11 +1,8 @@
 package org.fogbowcloud.arrebol.models.task;
 
-import org.fogbowcloud.arrebol.models.command.Command;
-import org.fogbowcloud.arrebol.models.specification.Specification;
-
 import javax.persistence.*;
 import java.io.Serializable;
-import java.util.*;
+import java.util.Objects;
 
 @Entity
 public class Task implements Serializable {
@@ -35,10 +32,6 @@ public class Task implements Serializable {
         return this.id;
     }
 
-    public Specification getSpecification() {
-        return this.taskSpec.getSpec();
-    }
-
     public TaskState getState() {
         return this.state;
     }
@@ -47,32 +40,27 @@ public class Task implements Serializable {
         this.state = newState;
     }
 
-    public List<Command> getCommands() {
-        List<Command> commandsClone = new ArrayList<>(this.taskSpec.getCommands());
-        return commandsClone;
+    public TaskSpec getTaskSpec() {
+        return taskSpec;
     }
 
-    public Map<String, String> getMetadata() {
-        Map<String, String> metadataClone = new HashMap<>(this.taskSpec.getMetadata());
-        return metadataClone;
-    }
-
-    @Override
-    public String toString() {
-        return "id={" + getId() + "}  state={" + getState() + "}";
-    }
-
-    //FIXME: humm ... maybe this equals/hash should consider the other instance variable
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Task task = (Task) o;
-        return Objects.equals(id, task.id);
+        return Objects.equals(id, task.id) &&
+                state == task.state &&
+                Objects.equals(taskSpec, task.taskSpec);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id);
+        return Objects.hash(id, state, taskSpec);
+    }
+
+    @Override
+    public String toString() {
+        return "id={" + getId() + "}  state={" + getState() + "} taskSpec={" + getTaskSpec() + "}";
     }
 }

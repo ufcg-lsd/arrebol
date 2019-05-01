@@ -5,6 +5,9 @@ import org.fogbowcloud.arrebol.models.command.Command;
 import org.fogbowcloud.arrebol.models.command.CommandState;
 import org.fogbowcloud.arrebol.models.task.Task;
 import org.fogbowcloud.arrebol.execution.exceptions.DockerStartException;
+import org.fogbowcloud.arrebol.models.task.TaskSpec;
+
+import java.util.List;
 
 public class DockerTaskExecutor implements TaskExecutor {
 
@@ -35,8 +38,11 @@ public class DockerTaskExecutor implements TaskExecutor {
 
         LOGGER.info("Successful started container " + this.containerName);
 
-        int commandsSize = task.getCommands().size();
-        Command[] commands = task.getCommands().toArray(new Command[commandsSize]);
+        TaskSpec taskSpec = task.getTaskSpec();
+        List<Command> commandsList = taskSpec.getCommands();
+
+        int commandsSize = commandsList.size();
+        Command[] commands = commandsList.toArray(new Command[commandsSize]);
         int[] commandsResults = new int[commandsSize];
 
         LOGGER.info("Starting to execute commands of task " + task.getId());

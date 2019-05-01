@@ -4,10 +4,12 @@ import org.apache.log4j.Logger;
 import org.fogbowcloud.arrebol.models.command.Command;
 import org.fogbowcloud.arrebol.models.command.CommandState;
 import org.fogbowcloud.arrebol.models.task.Task;
+import org.fogbowcloud.arrebol.models.task.TaskSpec;
 import org.fogbowcloud.arrebol.scheduler.SchedulerPolicy;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.List;
 
 public class RawTaskExecutor implements TaskExecutor {
 
@@ -21,8 +23,11 @@ public class RawTaskExecutor implements TaskExecutor {
         TaskExecutionResult.RESULT result = TaskExecutionResult.RESULT.SUCCESS;
 
         //converting to array to make bellow code simple?
-        Command[] cmds = new Command[task.getCommands().size()];
-        task.getCommands().toArray(cmds);
+        TaskSpec taskSpec = task.getTaskSpec();
+        List<Command> commandsList = taskSpec.getCommands();
+
+        Command[] cmds = new Command[commandsList.size()];
+        commandsList.toArray(cmds);
 
         int [] exitValues = new int[cmds.length];
         Arrays.fill(exitValues, TaskExecutionResult.UNDETERMINED_RESULT);

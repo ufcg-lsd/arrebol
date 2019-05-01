@@ -51,7 +51,7 @@ public class TaskUtils {
             taskJSON.put(JSON_KEY_IS_FINISHED, task.isFinished());
             taskJSON.put(JSON_KEY_IS_FAILED, task.isFailed());
             taskJSON.put(JSON_KEY_ID, task.getId());
-            taskJSON.put(JSON_KEY_SPEC, task.getSpecification().toJSON());
+            taskJSON.put(JSON_KEY_SPEC, task.getSpec().toJSON());
             taskJSON.put(JSON_KEY_RETRIES, task.getRetries());
             taskJSON.put(JSON_KEY_UUID, task.getUUID());
             JSONArray commands = new JSONArray();

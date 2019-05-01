@@ -38,8 +38,6 @@ public class TaskSpec implements Serializable {
 
     public String getId() { return this.id; }
 
-    public void setId(String id) { this.id = id; }
-
     public List<Command> getCommands(){
         return this.commands;
     }

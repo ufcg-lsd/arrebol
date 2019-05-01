@@ -5,7 +5,6 @@ import org.fogbowcloud.arrebol.execution.Worker;
 import org.fogbowcloud.arrebol.models.task.Task;
 import org.fogbowcloud.arrebol.models.task.TaskState;
 import org.fogbowcloud.arrebol.queue.TaskQueue;
-import org.fogbowcloud.arrebol.resource.Resource;
 import org.fogbowcloud.arrebol.resource.WorkerPool;
 import org.fogbowcloud.arrebol.resource.ResourceState;
 
@@ -48,7 +47,7 @@ public class FifoSchedulerPolicy implements SchedulerPolicy {
     private AllocationPlan scheduleTask(Task task, Collection<Worker> availableWorkers) {
 
         for (Worker worker : availableWorkers) {
-            if (worker.match(task.getSpecification())) {
+            if (worker.match(task.getTaskSpec().getSpec())) {
                 logger.info("allocation made for task={" + task + "} using worker={" + worker + "}");
                 return new AllocationPlan(task, worker, AllocationPlan.Type.RUN);
             }
