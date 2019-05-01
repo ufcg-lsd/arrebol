@@ -50,13 +50,15 @@ public class ExecutionBroker {
             }
 
             private void onFinish() {
-                logger.info("task={" + task + "} worker={" + worker + "}");
+                logger.info("task={" + task + "} worker={" + worker + "} has finished successfully");
                 task.setState(TaskState.FINISHED);
                 worker.setState(ResourceState.IDLE);
             }
 
             private void onFailure() {
-                //
+                logger.info("task={" + task + "} worker={" + worker + "} has failed");
+                task.setState(TaskState.FAILED);
+                worker.setState(ResourceState.IDLE);
             }
         },
         workerThreadId).start();
