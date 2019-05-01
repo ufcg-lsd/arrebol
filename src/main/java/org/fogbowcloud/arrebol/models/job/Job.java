@@ -20,19 +20,14 @@ public class Job implements Serializable {
 	private JobState jobState;
 
 	@OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
-	@MapKey(name = "id")
-	private Map<String, Task> tasks;
+	private Collection<Task> tasks;
 
 	public Job(String label, Collection<Task> tasks){
 		this.id = UUID.randomUUID().toString();
 		this.jobState = JobState.SUBMITTED;
 		this.label = label;
 
-		this.tasks = new HashMap<>();
-
-		for(Task task: tasks) {
-			this.tasks.put(task.getId(), task);
-		}
+		this.tasks = tasks;
 	}
 
 	Job(){
@@ -55,8 +50,7 @@ public class Job implements Serializable {
 		this.jobState = jobState;
 	}
 
-	public Map<String, Task> getTasks(){
-		Map<String, Task> mapTasks = new HashMap<>(this.tasks);
-		return mapTasks;
+	public Collection<Task> getTasks(){
+		return this.tasks;
 	}
 }

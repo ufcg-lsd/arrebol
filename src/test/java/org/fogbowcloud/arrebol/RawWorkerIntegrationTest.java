@@ -58,7 +58,7 @@ public class RawWorkerIntegrationTest {
         jobs.add(job3);
 
         for (Job job : jobs) {
-            for (Task task: job.getTasks().values()) {
+            for (Task task: job.getTasks()) {
                 queue.addTask(task);
             }
         }
@@ -90,7 +90,7 @@ public class RawWorkerIntegrationTest {
 
     private boolean finished(Job job) {
         boolean allFinished = true;
-        for(Task task : job.getTasks().values()) {
+        for(Task task : job.getTasks()) {
             if (!task.getState().equals(TaskState.FINISHED)) {
                 allFinished = false;
             }

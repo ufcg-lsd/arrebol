@@ -139,7 +139,7 @@ public class ArrebolController {
         job.setJobState(JobState.READY);
         this.jobPool.put(job.getId(), job);
 
-        for(Task task : job.getTasks().values()){
+        for(Task task : job.getTasks()){
             this.queue.addTask(task);
         }
 
@@ -148,8 +148,7 @@ public class ArrebolController {
 
     public String stopJob(Job job) {
 
-        Map<String, Task> taskMap = job.getTasks();
-        for(Task task : taskMap.values()){
+        for(Task task : job.getTasks()){
          //
         }
         return job.getId();
