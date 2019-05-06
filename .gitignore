@@ -1,5 +1,6 @@
 .idea/
 target/
 arrebol-service.iml
+nohup.out
 
 logs/*
