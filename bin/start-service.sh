@@ -3,6 +3,6 @@
 DIRNAME=`dirname $0`
 cd $DIRNAME/..
 
-mvn clean install
-nohup mvn spring-boot:run -Drun.profiles=staging &
+sudo mvn clean install
+sudo nohup mvn spring-boot:run -Drun.profiles=staging &
 exit 0
