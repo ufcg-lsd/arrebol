@@ -3,6 +3,7 @@ package org.fogbowcloud.arrebol;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.system.ApplicationPidFileWriter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Lazy;
 
@@ -33,7 +34,9 @@ public class ArrebolApplication {
     }
 
     public static void main(String[] args) {
-        SpringApplication.run(ArrebolApplication.class, args);
+        SpringApplication springApplication = new SpringApplication(ArrebolApplication.class);
+        springApplication.addListeners(new ApplicationPidFileWriter("./bin/shutdown.pid"));
+        springApplication.run(args);
     }
 
 }
