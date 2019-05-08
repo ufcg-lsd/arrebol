@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 @ResponseStatus(value = HttpStatus.NOT_FOUND)
 public class JobNotFoundException extends RuntimeException{
 
-    public JobNotFoundException(String id){
-        super("Job id not found : " + id);
+    public JobNotFoundException(String message){
+        super(message);
     }
 }

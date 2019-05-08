@@ -2,10 +2,10 @@ package org.fogbowcloud.arrebol.api.http.controllers;
 
 import org.apache.log4j.Logger;
 import org.fogbowcloud.arrebol.api.constants.ApiDocumentation;
+import org.fogbowcloud.arrebol.api.constants.Messages;
 import org.fogbowcloud.arrebol.api.http.services.JobService;
 import org.fogbowcloud.arrebol.models.job.Job;
 import org.fogbowcloud.arrebol.models.job.JobSpec;
-import org.fogbowcloud.arrebol.api.exceptions.JobNotFoundException;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -30,22 +30,29 @@ public class JobController {
     public ResponseEntity<String> addJob(@RequestBody JobSpec jobSpec){
         LOGGER.info("Adding new Job: " + jobSpec + ".");
 
-        String jobId = jobService.addJob(jobSpec);
-        JobResponse jobResponse = new JobResponse(jobId);
+        try{
+            String jobId = jobService.addJob(jobSpec);
+            JobResponse jobResponse = new JobResponse(jobId);
 
-        LOGGER.info("Added " + jobSpec.getLabel() + " with id " + jobId + ".");
-        return new ResponseEntity(jobResponse, HttpStatus.CREATED);
+            LOGGER.info("Added " + jobSpec.getLabel() + " with id " + jobId + ".");
+            return new ResponseEntity(jobResponse, HttpStatus.CREATED);
+        } catch (Exception e){
+            LOGGER.error(String.format(Messages.Exception.GENERIC_EXCEPTION, e.getMessage()), e);
+            throw e;
+        }
     }
 
     @RequestMapping(value = ApiDocumentation.ApiEndpoints.JOB_PATH, method = RequestMethod.GET)
     public ResponseEntity<String> getJob(@PathVariable String id){
         LOGGER.info("Getting an job with id: " + id);
 
-        Job job = jobService.getJobById(id);
-        if(job == null){
-            throw new JobNotFoundException(id);
+        try {
+            Job job = jobService.getJobById(id);
+            return new ResponseEntity(job, HttpStatus.CREATED);
+        } catch(Exception e){
+            LOGGER.error(String.format(Messages.Exception.GENERIC_EXCEPTION, e.getMessage()), e);
+            throw e;
         }
-        return new ResponseEntity(job, HttpStatus.CREATED);
     }
 
     public class JobResponse {

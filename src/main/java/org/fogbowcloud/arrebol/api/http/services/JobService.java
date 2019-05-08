@@ -2,6 +2,9 @@ package org.fogbowcloud.arrebol.api.http.services;
 
 import org.apache.log4j.Logger;
 import org.fogbowcloud.arrebol.ArrebolFacade;
+import org.fogbowcloud.arrebol.api.constants.Messages;
+import org.fogbowcloud.arrebol.api.exceptions.InvalidJobSpecException;
+import org.fogbowcloud.arrebol.api.exceptions.JobNotFoundException;
 import org.fogbowcloud.arrebol.api.http.dataaccessobject.JobDAO;
 import org.fogbowcloud.arrebol.models.job.Job;
 import org.fogbowcloud.arrebol.models.job.JobSpec;
@@ -13,6 +16,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.Collection;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.UUID;
 
 @Lazy
@@ -28,16 +32,22 @@ public class JobService {
 
     private final Logger LOGGER = Logger.getLogger(JobService.class);
 
-    public String addJob(JobSpec jobSpec){
+    public String addJob(JobSpec jobSpec) {
         LOGGER.debug("Creating job object from job specification.");
+        validateJobSpec(jobSpec);
         Job job = createJobFromSpec(jobSpec);
         String id = this.arrebolFacade.addJob(job);
         this.jobDAO.addJob(job);
         return id;
     }
 
-    public Job getJobById(String id){
+    public Job getJobById(String id) {
         Job job = this.jobDAO.getJobById(id);
+        if(job == null){
+            String message = String.format(Messages.Exception.JOB_NOT_FOUND, id);
+            LOGGER.info(message);
+            throw new JobNotFoundException(message);
+        }
         return job;
     }
 
@@ -53,6 +63,23 @@ public class JobService {
         Job job = new Job(jobSpec.getLabel(), taskList);
         LOGGER.debug("Created job object of " + job.getLabel() + " with " + taskList.size() + " tasks.");
         return job;
+    }
+
+    private void validateJobSpec(JobSpec jobSpec){
+        if(jobSpec == null || jobSpec.getTasksSpecs() == null || jobSpec.getTasksSpecs().isEmpty() ||
+                ! validateTasksSpecs(jobSpec.getTasksSpecs())){
+            String message = String.format(Messages.Exception.INVALID_JOB_SPEC);
+            throw new InvalidJobSpecException(message);
+        }
+    }
+
+    private boolean validateTasksSpecs(List<TaskSpec> tasksSpecsList){
+        for(TaskSpec taskSpec : tasksSpecsList){
+            if(taskSpec == null || taskSpec.getCommands() == null || taskSpec.getCommands().isEmpty()){
+                return false;
+            }
+        }
+        return true;
     }
 
 }

@@ -1,6 +1,7 @@
 package org.fogbowcloud.arrebol.api.http.dataaccessobject;
 
 import org.apache.log4j.Logger;
+import org.fogbowcloud.arrebol.api.exceptions.JobNotFoundException;
 import org.fogbowcloud.arrebol.models.job.Job;
 import org.fogbowcloud.arrebol.repositories.JobRepository;
 import org.springframework.beans.factory.annotation.Autowired;
