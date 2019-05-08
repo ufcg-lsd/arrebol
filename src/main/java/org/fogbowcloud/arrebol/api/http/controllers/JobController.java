@@ -5,6 +5,7 @@ import org.fogbowcloud.arrebol.api.constants.ApiDocumentation;
 import org.fogbowcloud.arrebol.api.http.services.JobService;
 import org.fogbowcloud.arrebol.models.job.Job;
 import org.fogbowcloud.arrebol.models.job.JobSpec;
+import org.fogbowcloud.arrebol.api.exceptions.JobNotFoundException;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -41,6 +42,9 @@ public class JobController {
         LOGGER.info("Getting an job with id: " + id);
 
         Job job = jobService.getJobById(id);
+        if(job == null){
+            throw new JobNotFoundException(id);
+        }
         return new ResponseEntity(job, HttpStatus.CREATED);
     }
 
