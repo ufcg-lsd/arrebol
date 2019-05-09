@@ -45,7 +45,7 @@ public class JobService {
         Job job = this.jobDAO.getJobById(id);
         if(job == null){
             String message = String.format(Messages.Exception.JOB_NOT_FOUND, id);
-            LOGGER.info(message);
+            LOGGER.error(message);
             throw new JobNotFoundException(message);
         }
         return job;
@@ -69,6 +69,7 @@ public class JobService {
         if(jobSpec == null || jobSpec.getTasksSpecs() == null || jobSpec.getTasksSpecs().isEmpty() ||
                 ! validateTasksSpecs(jobSpec.getTasksSpecs())){
             String message = String.format(Messages.Exception.INVALID_JOB_SPEC);
+            LOGGER.error(message);
             throw new InvalidJobSpecException(message);
         }
     }
