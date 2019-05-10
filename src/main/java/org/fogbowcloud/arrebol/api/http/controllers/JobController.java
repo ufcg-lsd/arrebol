@@ -28,30 +28,30 @@ public class JobController {
 
     @RequestMapping(method = RequestMethod.POST)
     public ResponseEntity<String> addJob(@RequestBody JobSpec jobSpec){
-        LOGGER.info("Adding new Job: " + jobSpec + ".");
+        LOGGER.info(String.format(Messages.Info.JobController.ADDING_NEW_JOB, jobSpec));
 
         try{
             String jobId = jobService.addJob(jobSpec);
             JobResponse jobResponse = new JobResponse(jobId);
 
-            LOGGER.info("Added " + jobSpec.getLabel() + " with id " + jobId + ".");
+            LOGGER.info(String.format(Messages.Info.JobController.ADDED_JOB, jobSpec.getLabel(), jobId));
             return new ResponseEntity(jobResponse, HttpStatus.CREATED);
-        } catch (Exception e){
-            LOGGER.error(String.format(Messages.Exception.GENERIC_EXCEPTION, e.getMessage()), e);
-            throw e;
+        } catch (Throwable t){
+            LOGGER.error(String.format(Messages.Exception.GENERIC_EXCEPTION, t.getMessage()), t);
+            throw t;
         }
     }
 
     @RequestMapping(value = ApiDocumentation.ApiEndpoints.JOB_PATH, method = RequestMethod.GET)
     public ResponseEntity<String> getJob(@PathVariable String id){
-        LOGGER.info("Getting an job with id: " + id);
+        LOGGER.info(String.format(Messages.Info.JobController.GETTING_JOB, id));
 
         try {
             Job job = jobService.getJobById(id);
             return new ResponseEntity(job, HttpStatus.CREATED);
-        } catch(Exception e){
-            LOGGER.error(String.format(Messages.Exception.GENERIC_EXCEPTION, e.getMessage()), e);
-            throw e;
+        } catch(Throwable t){
+            LOGGER.error(String.format(Messages.Exception.GENERIC_EXCEPTION, t.getMessage()), t);
+            throw t;
         }
     }
 

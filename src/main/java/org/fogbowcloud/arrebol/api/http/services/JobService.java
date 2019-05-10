@@ -36,6 +36,7 @@ public class JobService {
         LOGGER.debug("Creating job object from job specification.");
         validateJobSpec(jobSpec);
         Job job = createJobFromSpec(jobSpec);
+        LOGGER.info("Created job [ " + job.getId() + " ] from jobSpec");
         String id = this.arrebolFacade.addJob(job);
         this.jobDAO.addJob(job);
         return id;
@@ -45,7 +46,6 @@ public class JobService {
         Job job = this.jobDAO.getJobById(id);
         if(job == null){
             String message = String.format(Messages.Exception.JOB_NOT_FOUND, id);
-            LOGGER.error(message);
             throw new JobNotFoundException(message);
         }
         return job;
@@ -68,9 +68,11 @@ public class JobService {
     private void validateJobSpec(JobSpec jobSpec){
         if(jobSpec == null || jobSpec.getTasksSpecs() == null || jobSpec.getTasksSpecs().isEmpty() ||
                 ! validateTasksSpecs(jobSpec.getTasksSpecs())){
-            String message = String.format(Messages.Exception.INVALID_JOB_SPEC);
+            String message = String.format(Messages.Exception.INVALID_JOB_SPEC, jobSpec.toString());
             LOGGER.error(message);
             throw new InvalidJobSpecException(message);
+        } else {
+            LOGGER.info(String.format("JobSpec was validate: %s", jobSpec.toString()));
         }
     }
 
