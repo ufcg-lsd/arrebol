@@ -28,13 +28,13 @@ public class JobController {
 
     @RequestMapping(method = RequestMethod.POST)
     public ResponseEntity<String> addJob(@RequestBody JobSpec jobSpec){
-        LOGGER.info(String.format(Messages.Info.JobController.ADDING_NEW_JOB, jobSpec));
+        LOGGER.info("Adding new Job: " + jobSpec + ".");
 
         try{
             String jobId = jobService.addJob(jobSpec);
             JobResponse jobResponse = new JobResponse(jobId);
 
-            LOGGER.info(String.format(Messages.Info.JobController.ADDED_JOB, jobSpec.getLabel(), jobId));
+            LOGGER.info("Added " + jobSpec.getLabel() + " with id " + jobId + ".");
             return new ResponseEntity(jobResponse, HttpStatus.CREATED);
         } catch (Throwable t){
             LOGGER.error(String.format(Messages.Exception.GENERIC_EXCEPTION, t.getMessage()), t);
@@ -44,7 +44,7 @@ public class JobController {
 
     @RequestMapping(value = ApiDocumentation.ApiEndpoints.JOB_PATH, method = RequestMethod.GET)
     public ResponseEntity<String> getJob(@PathVariable String id){
-        LOGGER.info(String.format(Messages.Info.JobController.GETTING_JOB, id));
+        LOGGER.info("Getting an job with id: " + id);
 
         try {
             Job job = jobService.getJobById(id);
