@@ -20,6 +20,7 @@ public class RemoteDockerTaskExecutor extends DockerTaskExecutorAbstract {
 
     protected Integer start(){
         try {
+            LOGGER.info("Starting RemoteDockerTaskExecutor " + super.getContainerName());
             this.workerDockerRequestHelper.start();
             return new Integer(0);
         } catch (Exception e) {

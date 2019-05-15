@@ -1,10 +1,7 @@
 package org.fogbowcloud.arrebol;
 
 import org.apache.log4j.Logger;
-import org.fogbowcloud.arrebol.execution.DockerTaskExecutor;
-import org.fogbowcloud.arrebol.execution.RawTaskExecutor;
-import org.fogbowcloud.arrebol.execution.TaskExecutor;
-import org.fogbowcloud.arrebol.execution.Worker;
+import org.fogbowcloud.arrebol.execution.*;
 import org.fogbowcloud.arrebol.models.job.Job;
 import org.fogbowcloud.arrebol.models.job.JobState;
 import org.fogbowcloud.arrebol.models.specification.Specification;
@@ -74,6 +71,7 @@ public class ArrebolController {
 
     private static final String RAW_TYPE = "raw";
     private static final String DOCKER_TYPE = "docker";
+    private static final String REMOTE_DOCKER_TYPE = "remote-docker";
 
     private WorkerPool createPool(Properties properties, int poolId) {
 
@@ -105,6 +103,10 @@ public class ArrebolController {
         } else if (type.equals(DOCKER_TYPE)) {
             String imageId = properties.getProperty("pool.image_id");
             executor = new DockerTaskExecutor(imageId, "docker-executor-" + UUID.randomUUID().toString());
+        } else if (type.equals(REMOTE_DOCKER_TYPE)) {
+            String imageId = properties.getProperty("pool.image_id");
+            String address = properties.getProperty("pool.address");
+            executor = new RemoteDockerTaskExecutor(imageId, "docker-executor-" + UUID.randomUUID().toString(), address);
         }
 
         return executor;

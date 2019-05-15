@@ -1,7 +1,9 @@
 package org.fogbowcloud.arrebol.execution.remoteWorker;
 
+import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
+import org.apache.log4j.Logger;
 import org.fogbowcloud.arrebol.utils.AppUtil;
 import org.json.JSONObject;
 
@@ -13,6 +15,8 @@ public class ContainerRequestHelper {
     private String image;
     private String containerName;
 
+    private final Logger LOGGER = Logger.getLogger(ContainerRequestHelper.class);
+
     public ContainerRequestHelper(String address, String containerName, String image) {
         this.httpWrapper = new HttpWrapper();
         this.address = address;
@@ -21,29 +25,30 @@ public class ContainerRequestHelper {
     }
 
     public String createContainer() throws Exception {
-        final String endPoint = String.format("%s/containers/create?name%s", address, containerName);
+        final String endPoint = String.format("%s/containers/create?name=%s", address, containerName);
         StringEntity body = jsonCreateContainer(image);
         String response = this.httpWrapper.doRequest(HttpPost.METHOD_NAME, endPoint, body);
         String containerId = AppUtil.getValueFromJsonStr("Id", response);
         return containerId;
     }
 
-    public String startContainer() throws Exception {
+    public void startContainer() throws Exception {
         final String endpoint = String.format("%s/containers/%s/start", address, containerName);
-        String message = post(endpoint);
-        return message;
+        post(endpoint);
     }
 
-    public String killContainer() throws Exception {
+    public void killContainer() throws Exception {
         final String endpoint = String.format("%s/containers/%s/kill", address, containerName);
-        String message = post(endpoint);
-        return message;
+        post(endpoint);
     }
 
-    private String post(String endpoint) throws Exception {
-        String response = this.httpWrapper.doRequest(HttpPost.METHOD_NAME, endpoint);
-        String message = AppUtil.getValueFromJsonStr("message", response);
-        return message;
+    public void removeContainer() throws Exception {
+        final String endpoint = String.format("%s/containers/%s", address, containerName);
+        this.httpWrapper.doRequest(HttpDelete.METHOD_NAME, endpoint);
+    }
+
+    private void post(String endpoint) throws Exception {
+        this.httpWrapper.doRequest(HttpPost.METHOD_NAME, endpoint);
     }
 
     private StringEntity jsonCreateContainer(String image) throws UnsupportedEncodingException {

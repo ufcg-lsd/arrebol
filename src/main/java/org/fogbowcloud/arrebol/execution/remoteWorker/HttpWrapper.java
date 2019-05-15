@@ -14,6 +14,7 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.HttpClients;
+import org.apache.http.message.BasicHeader;
 import org.apache.http.util.EntityUtils;
 
 public class HttpWrapper {
@@ -56,6 +57,8 @@ public class HttpWrapper {
             ((HttpPost) request).setEntity(body);
         }
 
+        Header h = new BasicHeader("Content-Type", HTTP_CONTENT_JSON);
+        request.addHeader(h);
         for (Header header : additionalHeaders) {
             request.addHeader(header);
         }
