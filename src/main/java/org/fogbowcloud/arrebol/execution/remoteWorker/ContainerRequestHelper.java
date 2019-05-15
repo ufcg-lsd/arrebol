@@ -20,38 +20,23 @@ public class ContainerRequestHelper {
         this.image = image;
     }
 
-    public String createContainer() {
+    public String createContainer() throws Exception {
         final String endPoint = String.format("%s/containers/create?name%s", address, containerName);
-        String containerId = null;
-        try {
-            StringEntity body = jsonCreateContainer(image);
-            String response = this.httpWrapper.doRequest(HttpPost.METHOD_NAME, endPoint, body);
-            containerId = AppUtil.getValueFromJsonStr("Id", response);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        StringEntity body = jsonCreateContainer(image);
+        String response = this.httpWrapper.doRequest(HttpPost.METHOD_NAME, endPoint, body);
+        String containerId = AppUtil.getValueFromJsonStr("Id", response);
         return containerId;
     }
 
-    public String startContainer(){
+    public String startContainer() throws Exception {
         final String endpoint = String.format("%s/containers/%s/start", address, containerName);
-        String message = null;
-        try {
-            message = post(endpoint);
-        } catch(Exception e){
-            e.printStackTrace();
-        }
+        String message = post(endpoint);
         return message;
     }
 
-    public String killContainer(){
+    public String killContainer() throws Exception {
         final String endpoint = String.format("%s/containers/%s/kill", address, containerName);
-        String message = null;
-        try {
-            message = post(endpoint);
-        } catch(Exception e){
-            e.printStackTrace();
-        }
+        String message = post(endpoint);
         return message;
     }
 

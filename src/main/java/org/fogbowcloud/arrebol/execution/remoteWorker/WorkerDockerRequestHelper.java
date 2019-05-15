@@ -25,52 +25,37 @@ public class WorkerDockerRequestHelper {
         this.containerRequestHelper = new ContainerRequestHelper(address, containerName, image);
     }
 
-    public String start(){
+    public String start() throws Exception {
         String containerId = this.containerRequestHelper.createContainer();
         this.containerRequestHelper.startContainer();
         return containerId;
     }
 
-    public String stop(){
+    public String stop() throws Exception {
         String message = this.containerRequestHelper.killContainer();
         return message;
     }
 
-    public String createExecInstance(String command) {
+    public String createExecInstance(String command) throws Exception {
         final String endpoint = String.format("%s/containers/%s/exec", this.address, this.containerName);
-        String execId = null;
-        try {
-            StringEntity body = jsonCreateExecInstance(command);
-            String response = this.httpWrapper.doRequest(HttpPost.METHOD_NAME, endpoint, body);
-            execId = AppUtil.getValueFromJsonStr("Id", response);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        StringEntity body = jsonCreateExecInstance(command);
+        String response = this.httpWrapper.doRequest(HttpPost.METHOD_NAME, endpoint, body);
+        String execId = AppUtil.getValueFromJsonStr("Id", response);
         return execId;
     }
 
-    public String startExecInstance(String execId) {
+    public String startExecInstance(String execId) throws Exception {
         final String endpoint = String.format("%s/exec/%s/start", this.address, execId);
-        String message = null;
-        try {
-            StringEntity body = jsonStartExecInstance();
-            String response = this.httpWrapper.doRequest(HttpPost.METHOD_NAME, endpoint, body);
-            message = AppUtil.getValueFromJsonStr("message", response);
-        } catch (Exception e){
-            e.printStackTrace();
-        }
+        StringEntity body = jsonStartExecInstance();
+        String response = this.httpWrapper.doRequest(HttpPost.METHOD_NAME, endpoint, body);
+        String message = AppUtil.getValueFromJsonStr("message", response);
         return message;
     }
 
-    public ExecInstanceResult inspectExecInstance(String execId) {
+    public ExecInstanceResult inspectExecInstance(String execId) throws Exception {
         final String endpoint = String.format("%s/exec/%s/json", this.address, execId);
-        ExecInstanceResult execInstanceResult = null;
-        try {
-            String response = this.httpWrapper.doRequest(HttpGet.METHOD_NAME, endpoint);
-            execInstanceResult = instanceExecResult(response);
-        } catch(Exception e){
-            e.printStackTrace();
-        }
+        String response = this.httpWrapper.doRequest(HttpGet.METHOD_NAME, endpoint);
+        ExecInstanceResult execInstanceResult = instanceExecResult(response);
         return execInstanceResult;
     }
 
