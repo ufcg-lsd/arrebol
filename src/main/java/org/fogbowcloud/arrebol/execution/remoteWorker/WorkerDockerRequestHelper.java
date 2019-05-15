@@ -26,11 +26,14 @@ public class WorkerDockerRequestHelper {
     }
 
     public String start(){
-        return null;
+        String containerId = this.containerRequestHelper.createContainer();
+        this.containerRequestHelper.startContainer();
+        return containerId;
     }
 
     public String stop(){
-        return  null;
+        String message = this.containerRequestHelper.killContainer();
+        return message;
     }
 
     public String createExecInstance(String command) {
@@ -93,9 +96,8 @@ public class WorkerDockerRequestHelper {
         String execId = jsonObject.getString("ID");
         Integer exitCode = jsonObject.getInt("ExitCode");
         boolean running = jsonObject.getBoolean("Running");
-        ExecInstanceResult execInstanceResult = new ExecInstanceResult(execId, execId, running);
+        ExecInstanceResult execInstanceResult = new ExecInstanceResult(execId, exitCode, running);
         return execInstanceResult;
     }
-
 
 }

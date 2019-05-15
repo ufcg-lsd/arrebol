@@ -3,10 +3,10 @@ package org.fogbowcloud.arrebol.execution.remoteWorker;
 public class ExecInstanceResult {
 
     private String execInstanceId;
-    private String exitCode;
+    private Integer exitCode;
     private boolean running;
 
-    public ExecInstanceResult(String execInstanceId, String exitCode, boolean running) {
+    public ExecInstanceResult(String execInstanceId, Integer exitCode, boolean running) {
         this.execInstanceId = execInstanceId;
         this.exitCode = exitCode;
         this.running = running;
@@ -16,7 +16,7 @@ public class ExecInstanceResult {
         return execInstanceId;
     }
 
-    public String getExitCode() {
+    public Integer getExitCode() {
         return exitCode;
     }
 
