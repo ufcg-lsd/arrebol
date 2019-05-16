@@ -1,0 +1,8 @@
+{
+  "poolType":"remote-docker",
+  "poolSize":"5",
+  "imageId":"wesleymonte/simple-worker:latest",
+  "workers":[
+    "http://127.0.0.1:5555"
+  ]
+}

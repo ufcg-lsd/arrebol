@@ -12,17 +12,12 @@ import java.util.Properties;
 @SpringBootApplication
 public class ArrebolApplication {
 
-    @Bean
-    public Properties properties() {
-        return new Properties();
-    }
-
     @Autowired
     private ArrebolController arrebolController;
 
     @Bean
     @Lazy
-    public ArrebolFacade arrebolFacade(Properties properties) {
+    public ArrebolFacade arrebolFacade() {
         //ArrebolController arrebolController = new ArrebolController(properties);
         ArrebolFacade arrebolFacade = new ArrebolFacade(arrebolController);
         try {

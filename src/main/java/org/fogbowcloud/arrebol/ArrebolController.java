@@ -1,5 +1,7 @@
 package org.fogbowcloud.arrebol;
 
+import com.google.gson.Gson;
+import com.google.gson.stream.JsonReader;
 import org.apache.log4j.Logger;
 import org.fogbowcloud.arrebol.execution.*;
 import org.fogbowcloud.arrebol.models.job.Job;
@@ -14,13 +16,15 @@ import org.fogbowcloud.arrebol.resource.StaticPool;
 import org.fogbowcloud.arrebol.resource.WorkerPool;
 import org.fogbowcloud.arrebol.scheduler.DefaultScheduler;
 import org.fogbowcloud.arrebol.scheduler.FifoSchedulerPolicy;
+import org.hibernate.jdbc.Work;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.util.*;
 
 @Component
@@ -28,7 +32,7 @@ public class ArrebolController {
 
     private final Logger LOGGER = Logger.getLogger(ArrebolController.class);
 
-    private final Properties properties;
+    private Configuration configuration;
     private final DefaultScheduler scheduler;
     private final Map<String, Job> jobPool;
     private final TaskQueue queue;
@@ -40,16 +44,17 @@ public class ArrebolController {
     @Autowired
     private JobRepository jobRepository;
 
-    public ArrebolController(Properties properties) {
-        this.properties = properties;
+    public ArrebolController() {
 
         String path = Thread.currentThread().getContextClassLoader().getResource("").getPath();
-        Properties arrebolProperties = new Properties();
+        //Configuration arrebolConfiguration
+        try {
+            Gson gson = new Gson();
+            BufferedReader bufferedReader = new BufferedReader(new FileReader(path + File.separator + "arrebol.json"));
+            this.configuration = gson.fromJson(bufferedReader, Configuration.class);
 
-        try (InputStream input = new FileInputStream(path + File.separator + "arrebol.conf")) {
-            arrebolProperties.load(input);
-        } catch (IOException ex) {
-            LOGGER.error("Error on loading properties file path=" + path, ex);
+        } catch (FileNotFoundException e) {
+            LOGGER.error("Error on loading properties file path=" + path, e);
             System.exit(1);
         }
 
@@ -59,7 +64,7 @@ public class ArrebolController {
         this.queue = new TaskQueue(queueId, queueName);
 
         int poolId = 1;
-        WorkerPool pool = createPool(arrebolProperties, poolId);
+        WorkerPool pool = createPool(configuration, poolId);
 
         //create the scheduler bind the pieces together
         FifoSchedulerPolicy policy = new FifoSchedulerPolicy();
@@ -73,43 +78,46 @@ public class ArrebolController {
     private static final String DOCKER_TYPE = "docker";
     private static final String REMOTE_DOCKER_TYPE = "remote-docker";
 
-    private WorkerPool createPool(Properties properties, int poolId) {
+    private WorkerPool createPool(Configuration configuration, int poolId) {
 
         //we need to deal with missing/wrong properties
 
         Collection<Worker> workers = new LinkedList<>();
-        String poolType = properties.getProperty("pool.type");
+        int poolSize = new Integer(configuration.getPoolSize());
+        String poolType = configuration.getPoolType();
+        String imageId = configuration.getImageId();
 
-        int poolSize = new Integer(properties.getProperty("pool.size"));
-        for (int i = 0; i < poolSize; i++) {
-            TaskExecutor executor = createTaskExecutor(poolType, properties);
-            Specification resourceSpec = null;
-            Worker worker = new MatchAnyWorker(resourceSpec, "resourceId-"+i, poolId, executor);
-            workers.add(worker);
+        if(poolType.equals(REMOTE_DOCKER_TYPE)){
+            for(String address : configuration.getWorkers()){
+                for (int i = 0; i < poolSize; i++) {
+                    Worker worker = createDockerWorker(poolId, i, imageId, address);
+                    workers.add(worker);
+                }
+            }
+        } else {
+            for (int i = 0; i < poolSize; i++) {
+                Worker worker = createRawWorker(poolId, i, imageId);
+                workers.add(worker);
+            }
         }
-
         WorkerPool pool = new StaticPool(poolId, workers);
         LOGGER.info("pool={" + pool + "} created with workers={" + workers + "}");
 
         return pool;
     }
 
-    private TaskExecutor createTaskExecutor(String type, Properties properties) {
+    private Worker createDockerWorker(Integer poolId, int resourceId, String imageId, String address){
+        TaskExecutor executor = new RemoteDockerTaskExecutor(imageId, "docker-executor-" + UUID.randomUUID().toString(), address);
+        Specification resourceSpec = null;
+        Worker worker = new MatchAnyWorker(resourceSpec, "resourceId-"+resourceId, poolId, executor);
+        return worker;
+    }
 
-        TaskExecutor executor = null;
-
-        if (type.equals(RAW_TYPE)) {
-            executor = new RawTaskExecutor();
-        } else if (type.equals(DOCKER_TYPE)) {
-            String imageId = properties.getProperty("pool.image_id");
-            executor = new DockerTaskExecutor(imageId, "docker-executor-" + UUID.randomUUID().toString());
-        } else if (type.equals(REMOTE_DOCKER_TYPE)) {
-            String imageId = properties.getProperty("pool.image_id");
-            String address = properties.getProperty("pool.address");
-            executor = new RemoteDockerTaskExecutor(imageId, "docker-executor-" + UUID.randomUUID().toString(), address);
-        }
-
-        return executor;
+    private Worker createRawWorker(Integer poolId, int resourceId, String imageId){
+        TaskExecutor executor = new RawTaskExecutor();
+        Specification resourceSpec = null;
+        Worker worker = new MatchAnyWorker(resourceSpec, "resourceId-"+resourceId, poolId, executor);
+        return worker;
     }
 
     public void start() {
@@ -160,4 +168,6 @@ public class ArrebolController {
         //FIXME:
         return null;
     }
+
+
 }
