@@ -16,11 +16,6 @@ import org.fogbowcloud.arrebol.resource.StaticPool;
 import org.fogbowcloud.arrebol.resource.WorkerPool;
 import org.fogbowcloud.arrebol.scheduler.DefaultScheduler;
 import org.fogbowcloud.arrebol.scheduler.FifoSchedulerPolicy;
-import org.hibernate.jdbc.Work;
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -90,11 +85,12 @@ public class ArrebolController {
         if(poolType.equals(REMOTE_DOCKER_TYPE)){
             for(String address : configuration.getWorkers()){
                 for (int i = 0; i < poolSize; i++) {
+                    LOGGER.info("Creating worker with address=" + address);
                     Worker worker = createDockerWorker(poolId, i, imageId, address);
                     workers.add(worker);
                 }
             }
-        } else {
+        } else if(poolType.equals(RAW_TYPE)){
             for (int i = 0; i < poolSize; i++) {
                 Worker worker = createRawWorker(poolId, i, imageId);
                 workers.add(worker);
@@ -107,7 +103,7 @@ public class ArrebolController {
     }
 
     private Worker createDockerWorker(Integer poolId, int resourceId, String imageId, String address){
-        TaskExecutor executor = new RemoteDockerTaskExecutor(imageId, "docker-executor-" + UUID.randomUUID().toString(), address);
+        TaskExecutor executor = new DockerTaskExecutor(imageId, "docker-executor-" + UUID.randomUUID().toString(), address);
         Specification resourceSpec = null;
         Worker worker = new MatchAnyWorker(resourceSpec, "resourceId-"+resourceId, poolId, executor);
         return worker;

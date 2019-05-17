@@ -1,4 +1,4 @@
-package org.fogbowcloud.arrebol.execution.remoteWorker;
+package org.fogbowcloud.arrebol.execution.dockerworker;
 
 import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpPost;

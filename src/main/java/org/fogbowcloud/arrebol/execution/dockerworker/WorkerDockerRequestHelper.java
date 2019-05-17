@@ -1,6 +1,5 @@
-package org.fogbowcloud.arrebol.execution.remoteWorker;
+package org.fogbowcloud.arrebol.execution.dockerworker;
 
-import org.apache.http.Header;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;

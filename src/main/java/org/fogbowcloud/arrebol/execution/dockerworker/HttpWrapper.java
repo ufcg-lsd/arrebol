@@ -1,4 +1,4 @@
-package org.fogbowcloud.arrebol.execution.remoteWorker;
+package org.fogbowcloud.arrebol.execution.dockerworker;
 
 import java.util.ArrayList;
 import java.util.List;

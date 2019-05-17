@@ -1,4 +1,4 @@
-package org.fogbowcloud.arrebol.execution.remoteWorker;
+package org.fogbowcloud.arrebol.execution.dockerworker;
 
 public class ExecInstanceResult {
 
