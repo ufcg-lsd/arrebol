@@ -1,18 +1,13 @@
 package org.fogbowcloud.arrebol;
 
-import org.springframework.stereotype.Component;
-
 import java.util.List;
 
-@Component
 public class Configuration {
 
     private String poolType;
     private Integer poolSize;
     private String imageId;
     private List<String> workers;
-
-    public Configuration(){}
 
     public Configuration(String poolType, Integer poolSize, String imageId, List<String> workers) {
         this.poolType = poolType;

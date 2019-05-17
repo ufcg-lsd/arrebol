@@ -1,7 +1,6 @@
 package org.fogbowcloud.arrebol;
 
 import com.google.gson.Gson;
-import com.google.gson.stream.JsonReader;
 import org.apache.log4j.Logger;
 import org.fogbowcloud.arrebol.execution.*;
 import org.fogbowcloud.arrebol.models.job.Job;
@@ -76,28 +75,35 @@ public class ArrebolController {
         //we need to deal with missing/wrong properties
 
         Collection<Worker> workers = new LinkedList<>();
-        int poolSize = new Integer(configuration.getPoolSize());
-        String poolType = configuration.getPoolType();
-        String imageId = configuration.getImageId();
+        populatePool(workers, poolId, configuration);
 
-        if(poolType.equals(DOCKER_TYPE)){
-            for(String address : configuration.getWorkers()){
-                for (int i = 0; i < poolSize; i++) {
-                    LOGGER.info("Creating worker with address=" + address);
-                    Worker worker = createDockerWorker(poolId, i, imageId, address);
-                    workers.add(worker);
-                }
-            }
-        } else if(poolType.equals(RAW_TYPE)){
-            for (int i = 0; i < poolSize; i++) {
-                Worker worker = createRawWorker(poolId, i);
-                workers.add(worker);
-            }
-        }
         WorkerPool pool = new StaticPool(poolId, workers);
         LOGGER.info("pool={" + pool + "} created with workers={" + workers + "}");
 
         return pool;
+    }
+
+    private void populatePool(Collection<Worker> workers, int poolId, Configuration configuration){
+        String poolType = configuration.getPoolType();
+        if(poolType.equals(DOCKER_TYPE)){
+            workers.addAll(createDockerWorkers(poolId, configuration));
+        } else if(poolType.equals(RAW_TYPE)){
+            workers.addAll(createRawWorkers(poolId, configuration));
+        }
+    }
+
+    private Collection<Worker> createDockerWorkers(Integer poolId, Configuration configuration){
+        Collection<Worker> workers = new LinkedList<>();
+        int poolSize = new Integer(configuration.getPoolSize());
+        String imageId = configuration.getImageId();
+        for(String address : configuration.getWorkers()){
+            for (int i = 0; i < poolSize; i++) {
+                LOGGER.info("Creating docker worker with address=" + address);
+                Worker worker = createDockerWorker(poolId, i, imageId, address);
+                workers.add(worker);
+            }
+        }
+        return workers;
     }
 
     private Worker createDockerWorker(Integer poolId, int resourceId, String imageId, String address){
@@ -105,6 +111,17 @@ public class ArrebolController {
         Specification resourceSpec = null;
         Worker worker = new MatchAnyWorker(resourceSpec, "resourceId-"+resourceId, poolId, executor);
         return worker;
+    }
+
+    private Collection<Worker> createRawWorkers(Integer poolId, Configuration configuration){
+        Collection<Worker> workers = new LinkedList<>();
+        int poolSize = new Integer(configuration.getPoolSize());
+        for (int i = 0; i < poolSize; i++) {
+            LOGGER.info("Creating raw worker[" + i + "]");
+            Worker worker = createRawWorker(poolId, i);
+            workers.add(worker);
+        }
+        return workers;
     }
 
     private Worker createRawWorker(Integer poolId, int resourceId){
