@@ -1,7 +1,0 @@
-{
-  "poolType":"docker",
-  "poolSize":"5",
-  "imageId":"wesleymonte/simple-worker:latest",
-  "workers":[
-  ]
-}
