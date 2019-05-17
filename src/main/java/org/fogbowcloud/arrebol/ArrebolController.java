@@ -47,7 +47,6 @@ public class ArrebolController {
             Gson gson = new Gson();
             BufferedReader bufferedReader = new BufferedReader(new FileReader(path + File.separator + "arrebol.json"));
             this.configuration = gson.fromJson(bufferedReader, Configuration.class);
-
         } catch (FileNotFoundException e) {
             LOGGER.error("Error on loading properties file path=" + path, e);
             System.exit(1);
@@ -71,7 +70,6 @@ public class ArrebolController {
 
     private static final String RAW_TYPE = "raw";
     private static final String DOCKER_TYPE = "docker";
-    private static final String REMOTE_DOCKER_TYPE = "remote-docker";
 
     private WorkerPool createPool(Configuration configuration, int poolId) {
 
@@ -82,7 +80,7 @@ public class ArrebolController {
         String poolType = configuration.getPoolType();
         String imageId = configuration.getImageId();
 
-        if(poolType.equals(REMOTE_DOCKER_TYPE)){
+        if(poolType.equals(DOCKER_TYPE)){
             for(String address : configuration.getWorkers()){
                 for (int i = 0; i < poolSize; i++) {
                     LOGGER.info("Creating worker with address=" + address);
@@ -92,7 +90,7 @@ public class ArrebolController {
             }
         } else if(poolType.equals(RAW_TYPE)){
             for (int i = 0; i < poolSize; i++) {
-                Worker worker = createRawWorker(poolId, i, imageId);
+                Worker worker = createRawWorker(poolId, i);
                 workers.add(worker);
             }
         }
@@ -109,7 +107,7 @@ public class ArrebolController {
         return worker;
     }
 
-    private Worker createRawWorker(Integer poolId, int resourceId, String imageId){
+    private Worker createRawWorker(Integer poolId, int resourceId){
         TaskExecutor executor = new RawTaskExecutor();
         Specification resourceSpec = null;
         Worker worker = new MatchAnyWorker(resourceSpec, "resourceId-"+resourceId, poolId, executor);

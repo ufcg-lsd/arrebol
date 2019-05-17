@@ -44,7 +44,7 @@ public class DockerTaskExecutor implements TaskExecutor {
 
         LOGGER.info("Successful started container " + getContainerName());
         Command[] commands = getCommands(task);
-        LOGGER.info("Starting to execute commands of task " + task.getId());
+        LOGGER.info("Starting to execute commands [" + commands.length + "] of task " + task.getId());
         int[] commandsResults = executeCommands(commands);
 
         Integer stopStatus = this.stop();
@@ -110,6 +110,7 @@ public class DockerTaskExecutor implements TaskExecutor {
 
     protected Integer stop(){
         try {
+            LOGGER.info("Stopping DockerTaskExecutor " + this.getContainerName());
             this.workerDockerRequestHelper.stop();
             return new Integer(0);
         } catch (Exception e) {
@@ -120,17 +121,19 @@ public class DockerTaskExecutor implements TaskExecutor {
 
     protected Integer executeCommand(Command command){
         try {
+            LOGGER.info("Executing command [" + command.getCommand() + "] in worker [" + this.getContainerName() + "].");
             String execId = this.workerDockerRequestHelper.createExecInstance(command.getCommand());
             this.workerDockerRequestHelper.startExecInstance(execId);
             ExecInstanceResult execInstanceResult = this.workerDockerRequestHelper.inspectExecInstance(execId);
             while(execInstanceResult.getExitCode() == null){
                 execInstanceResult = this.workerDockerRequestHelper.inspectExecInstance(execId);
                 try {
-                    sleep(100);
+                    sleep(300);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
             }
+            LOGGER.info("Executed command [" + command.getCommand() + "] with exitcode=[" + execInstanceResult.getExitCode() + "] in worker [" + this.getContainerName() + "].");
             return execInstanceResult.getExitCode();
         } catch(Exception e){
             e.printStackTrace();
