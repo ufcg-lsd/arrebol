@@ -54,7 +54,7 @@ public class DockerTaskExecutor implements TaskExecutor {
 
         taskExecutionResult = getTaskResult(commands, commandsResults);
 
-        LOGGER.info("Result of task" + task.getId() + ": " + taskExecutionResult.getResult().toString());
+        LOGGER.info("Result of task [" + task.getId() + "]: " + taskExecutionResult.getResult().toString());
         return taskExecutionResult;
     }
 

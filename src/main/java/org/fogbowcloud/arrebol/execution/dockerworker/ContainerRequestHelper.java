@@ -54,6 +54,7 @@ public class ContainerRequestHelper {
     private StringEntity jsonCreateContainer(String image) throws UnsupportedEncodingException {
         JSONObject jsonObject = new JSONObject();
         AppUtil.makeBodyField(jsonObject, "Image", image);
+        AppUtil.makeBodyField(jsonObject, "Tty", true);
         return new StringEntity(jsonObject.toString());
     }
 

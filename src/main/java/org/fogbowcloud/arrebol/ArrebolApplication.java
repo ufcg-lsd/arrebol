@@ -18,7 +18,6 @@ public class ArrebolApplication {
     @Bean
     @Lazy
     public ArrebolFacade arrebolFacade() {
-        //ArrebolController arrebolController = new ArrebolController(properties);
         ArrebolFacade arrebolFacade = new ArrebolFacade(arrebolController);
         try {
             arrebolFacade.start();
