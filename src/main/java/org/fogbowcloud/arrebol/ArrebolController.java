@@ -46,6 +46,7 @@ public class ArrebolController {
             Gson gson = new Gson();
             BufferedReader bufferedReader = new BufferedReader(new FileReader(path + File.separator + "arrebol.json"));
             this.configuration = gson.fromJson(bufferedReader, Configuration.class);
+            DockerVariable.DEFAULT_IMAGE = this.configuration.getImageId();
         } catch (FileNotFoundException e) {
             LOGGER.error("Error on loading properties file path=" + path, e);
             System.exit(1);

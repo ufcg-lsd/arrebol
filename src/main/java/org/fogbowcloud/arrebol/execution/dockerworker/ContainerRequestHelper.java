@@ -8,12 +8,15 @@ import org.fogbowcloud.arrebol.utils.AppUtil;
 import org.json.JSONObject;
 
 import java.io.UnsupportedEncodingException;
+import java.util.HashMap;
+import java.util.Map;
 
 public class ContainerRequestHelper {
     private HttpWrapper httpWrapper;
     private String address;
     private String image;
     private String containerName;
+    private Map<String, String> requirements;
 
     private final Logger LOGGER = Logger.getLogger(ContainerRequestHelper.class);
 
@@ -22,11 +25,12 @@ public class ContainerRequestHelper {
         this.address = address;
         this.containerName = containerName;
         this.image = image;
+        this.requirements = new HashMap<>();
     }
 
     public String createContainer() throws Exception {
         final String endPoint = String.format("%s/containers/create?name=%s", address, containerName);
-        StringEntity body = jsonCreateContainer(image);
+        StringEntity body = jsonCreateContainer();
         String response = this.httpWrapper.doRequest(HttpPost.METHOD_NAME, endPoint, body);
         String containerId = AppUtil.getValueFromJsonStr("Id", response);
         return containerId;
@@ -51,10 +55,15 @@ public class ContainerRequestHelper {
         this.httpWrapper.doRequest(HttpPost.METHOD_NAME, endpoint);
     }
 
-    private StringEntity jsonCreateContainer(String image) throws UnsupportedEncodingException {
+    public void setRequirements(Map<String, String> requirements) {
+        this.requirements = requirements;
+    }
+
+    private StringEntity jsonCreateContainer() throws UnsupportedEncodingException {
         JSONObject jsonObject = new JSONObject();
         AppUtil.makeBodyField(jsonObject, "Image", image);
         AppUtil.makeBodyField(jsonObject, "Tty", true);
+        AppUtil.makeBodyField(jsonObject, "HostConfig", requirements);
         return new StringEntity(jsonObject.toString());
     }
 

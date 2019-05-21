@@ -14,10 +14,17 @@ public class Specification implements Serializable {
 
     @Id
     @GeneratedValue(strategy= GenerationType.IDENTITY)
-    String id;
+    private String id;
+
+    private String image;
 
     @ElementCollection
-    Map<String, String> requirements;
+    private Map<String, String> requirements;
+
+    public Specification(String image, Map<String, String> requirements){
+        this.image = image;
+        this.requirements = requirements;
+    }
 
     public Specification(Map<String, String> requirements) {
         this.requirements = requirements;
@@ -33,6 +40,10 @@ public class Specification implements Serializable {
 
     public Map<String, String> getRequirements() {
         return requirements;
+    }
+
+    public String getImage(){
+        return this.image;
     }
 
     @Override

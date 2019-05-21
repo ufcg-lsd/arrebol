@@ -11,7 +11,9 @@ import org.fogbowcloud.arrebol.models.task.TaskSpec;
 
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static java.lang.Thread.sleep;
 
@@ -35,7 +37,10 @@ public class DockerTaskExecutor implements TaskExecutor {
         //FIXME: We should catch the errors when starting/finishing the container and move the task to its FAILURE state
         //FIXME: also, follow the SAME log format we used in the RawTaskExecutor
         TaskExecutionResult taskExecutionResult;
+
         Integer startStatus = this.start();
+
+        updateRequirements(task.getTaskSpec());
 
         if(startStatus != 0){
             LOGGER.error("Exit code from container start: " + startStatus);
@@ -56,6 +61,36 @@ public class DockerTaskExecutor implements TaskExecutor {
 
         LOGGER.info("Result of task [" + task.getId() + "]: " + taskExecutionResult.getResult().toString());
         return taskExecutionResult;
+    }
+
+    private void updateRequirements(TaskSpec taskSpec){
+        verifyImage(taskSpec);
+        Map<String, String> mapRequirements = new HashMap<>();
+        String requirements[] = taskSpec.getSpec().getRequirements().get(DockerConstants.METADATA_DOCKER_REQUIREMENTS).split("&&");
+        for(String req : requirements){
+            switch (req){
+                case DockerConstants.DOCKER_MEMORY:
+                    mapRequirements.put(DockerConstants.JSON_KEY_MEMORY, req);
+                    LOGGER.info("Added requirement ["+DockerConstants.JSON_KEY_MEMORY+"] with value ["+req+"]");
+                    break;
+                case DockerConstants.DOCKER_CPU_WEIGHT:
+                    mapRequirements.put(DockerConstants.JSON_KEY_CPU_SHARES, req);
+                    LOGGER.info("Added requirement ["+DockerConstants.JSON_KEY_CPU_SHARES+"] with value ["+req+"]");
+                    break;
+            }
+        }
+        this.workerDockerRequestHelper.setRequirements(mapRequirements);
+    }
+
+    private void verifyImage(TaskSpec taskSpec){
+        String image = taskSpec.getImage();
+        if(image != null && !image.trim().isEmpty()){
+            this.imageId = image;
+            LOGGER.info("Setting image of "+containerName+" to image");
+        } else {
+            LOGGER.info("Using default image ["+ DockerVariable.DEFAULT_IMAGE + "] to start " + containerName);
+            this.imageId = DockerVariable.DEFAULT_IMAGE;
+        }
     }
 
     protected Command[] getCommands(Task task){

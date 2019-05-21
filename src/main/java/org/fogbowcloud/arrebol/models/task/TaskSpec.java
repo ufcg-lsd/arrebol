@@ -50,6 +50,10 @@ public class TaskSpec implements Serializable {
         return this.metadata;
     }
 
+    public String getImage(){
+        return this.spec.getImage();
+    }
+
     @Override
     public String toString() {
         return "TaskSpec{" +

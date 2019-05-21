@@ -3,12 +3,19 @@ package org.fogbowcloud.arrebol.utils;
 import org.json.JSONObject;
 
 import java.util.Collection;
+import java.util.Map;
 
 public class AppUtil {
 
     public static void makeBodyField(JSONObject json, String key, Boolean bool){
         if (bool != null) {
             json.put(key, bool);
+        }
+    }
+
+    public static void makeBodyField(JSONObject json, String key, Map map){
+        if (map != null){
+            json.put(key, map);
         }
     }
 
