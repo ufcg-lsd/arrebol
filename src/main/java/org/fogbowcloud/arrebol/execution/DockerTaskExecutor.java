@@ -1,6 +1,7 @@
 package org.fogbowcloud.arrebol.execution;
 
 import org.apache.log4j.Logger;
+import org.fogbowcloud.arrebol.execution.constans.DockerConstants;
 import org.fogbowcloud.arrebol.execution.exceptions.DockerStartException;
 import org.fogbowcloud.arrebol.execution.dockerworker.ExecInstanceResult;
 import org.fogbowcloud.arrebol.execution.dockerworker.WorkerDockerRequestHelper;
@@ -11,7 +12,9 @@ import org.fogbowcloud.arrebol.models.task.TaskSpec;
 
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static java.lang.Thread.sleep;
 
@@ -35,7 +38,10 @@ public class DockerTaskExecutor implements TaskExecutor {
         //FIXME: We should catch the errors when starting/finishing the container and move the task to its FAILURE state
         //FIXME: also, follow the SAME log format we used in the RawTaskExecutor
         TaskExecutionResult taskExecutionResult;
+
         Integer startStatus = this.start();
+
+        updateRequirements(task.getTaskSpec());
 
         if(startStatus != 0){
             LOGGER.error("Exit code from container start: " + startStatus);
@@ -56,6 +62,42 @@ public class DockerTaskExecutor implements TaskExecutor {
 
         LOGGER.info("Result of task [" + task.getId() + "]: " + taskExecutionResult.getResult().toString());
         return taskExecutionResult;
+    }
+
+    private void updateRequirements(TaskSpec taskSpec){
+        verifyImage(taskSpec);
+        Map<String, String> mapRequirements = new HashMap<>();
+        String dockerRequirements = taskSpec.getSpec().getRequirements().get(DockerConstants.METADATA_DOCKER_REQUIREMENTS);
+        if(dockerRequirements != null){
+            String requirements[] = dockerRequirements.split("&&");
+            for(String requirement : requirements){
+                String req[] = requirement.split("==");
+                String key = req[0].trim();
+                String value = req[1].trim();
+                switch (key){
+                    case DockerConstants.DOCKER_MEMORY:
+                        mapRequirements.put(DockerConstants.JSON_KEY_MEMORY, value);
+                        LOGGER.info("Added requirement ["+DockerConstants.JSON_KEY_MEMORY+"] with value ["+value+"]");
+                        break;
+                    case DockerConstants.DOCKER_CPU_WEIGHT:
+                        mapRequirements.put(DockerConstants.JSON_KEY_CPU_SHARES, value);
+                        LOGGER.info("Added requirement ["+DockerConstants.JSON_KEY_CPU_SHARES+"] with value ["+value+"]");
+                        break;
+                }
+            }
+            this.workerDockerRequestHelper.setRequirements(mapRequirements);
+        }
+    }
+
+    private void verifyImage(TaskSpec taskSpec){
+        String image = taskSpec.getImage();
+        if(image != null && !image.trim().isEmpty()){
+            LOGGER.info("Using image ["+ image +"] to start " +containerName);
+            this.setImage(image);
+        } else {
+            LOGGER.info("Using default image ["+ DockerVariable.DEFAULT_IMAGE + "] to start " + containerName);
+            this.setImage(DockerVariable.DEFAULT_IMAGE);
+        }
     }
 
     protected Command[] getCommands(Task task){
@@ -139,6 +181,11 @@ public class DockerTaskExecutor implements TaskExecutor {
             e.printStackTrace();
             return new Integer(127);
         }
+    }
+
+    private void setImage(String imageId){
+        this.imageId = imageId;
+        this.workerDockerRequestHelper.setImage(imageId);
     }
 
     @Override
