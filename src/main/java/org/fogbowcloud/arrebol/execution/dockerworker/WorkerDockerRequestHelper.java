@@ -9,7 +9,6 @@ import org.json.JSONObject;
 
 import java.io.UnsupportedEncodingException;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -64,6 +63,10 @@ public class WorkerDockerRequestHelper {
 
     public void setRequirements(Map<String, String> requirements){
         this.containerRequestHelper.setRequirements(requirements);
+    }
+
+    public void setImage(String image){
+        this.containerRequestHelper.setImage(image);
     }
 
     private StringEntity jsonCreateExecInstance(String command) throws UnsupportedEncodingException {

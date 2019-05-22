@@ -1,4 +1,4 @@
-package org.fogbowcloud.arrebol.execution;
+package org.fogbowcloud.arrebol.execution.constans;
 
 public class DockerConstants {
     public static final String METADATA_DOCKER_REQUIREMENTS = "DockerRequirements";

@@ -14,7 +14,7 @@ public class AppUtil {
     }
 
     public static void makeBodyField(JSONObject json, String key, Map map){
-        if (map != null){
+        if (map != null || !map.isEmpty()){
             json.put(key, map);
         }
     }

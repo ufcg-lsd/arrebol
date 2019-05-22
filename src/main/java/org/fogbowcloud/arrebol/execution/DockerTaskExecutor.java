@@ -1,6 +1,7 @@
 package org.fogbowcloud.arrebol.execution;
 
 import org.apache.log4j.Logger;
+import org.fogbowcloud.arrebol.execution.constans.DockerConstants;
 import org.fogbowcloud.arrebol.execution.exceptions.DockerStartException;
 import org.fogbowcloud.arrebol.execution.dockerworker.ExecInstanceResult;
 import org.fogbowcloud.arrebol.execution.dockerworker.WorkerDockerRequestHelper;
@@ -66,30 +67,36 @@ public class DockerTaskExecutor implements TaskExecutor {
     private void updateRequirements(TaskSpec taskSpec){
         verifyImage(taskSpec);
         Map<String, String> mapRequirements = new HashMap<>();
-        String requirements[] = taskSpec.getSpec().getRequirements().get(DockerConstants.METADATA_DOCKER_REQUIREMENTS).split("&&");
-        for(String req : requirements){
-            switch (req){
-                case DockerConstants.DOCKER_MEMORY:
-                    mapRequirements.put(DockerConstants.JSON_KEY_MEMORY, req);
-                    LOGGER.info("Added requirement ["+DockerConstants.JSON_KEY_MEMORY+"] with value ["+req+"]");
-                    break;
-                case DockerConstants.DOCKER_CPU_WEIGHT:
-                    mapRequirements.put(DockerConstants.JSON_KEY_CPU_SHARES, req);
-                    LOGGER.info("Added requirement ["+DockerConstants.JSON_KEY_CPU_SHARES+"] with value ["+req+"]");
-                    break;
+        String dockerRequirements = taskSpec.getSpec().getRequirements().get(DockerConstants.METADATA_DOCKER_REQUIREMENTS);
+        if(dockerRequirements != null){
+            String requirements[] = dockerRequirements.split("&&");
+            for(String requirement : requirements){
+                String req[] = requirement.split("==");
+                String key = req[0].trim();
+                String value = req[1].trim();
+                switch (key){
+                    case DockerConstants.DOCKER_MEMORY:
+                        mapRequirements.put(DockerConstants.JSON_KEY_MEMORY, value);
+                        LOGGER.info("Added requirement ["+DockerConstants.JSON_KEY_MEMORY+"] with value ["+value+"]");
+                        break;
+                    case DockerConstants.DOCKER_CPU_WEIGHT:
+                        mapRequirements.put(DockerConstants.JSON_KEY_CPU_SHARES, value);
+                        LOGGER.info("Added requirement ["+DockerConstants.JSON_KEY_CPU_SHARES+"] with value ["+value+"]");
+                        break;
+                }
             }
+            this.workerDockerRequestHelper.setRequirements(mapRequirements);
         }
-        this.workerDockerRequestHelper.setRequirements(mapRequirements);
     }
 
     private void verifyImage(TaskSpec taskSpec){
         String image = taskSpec.getImage();
         if(image != null && !image.trim().isEmpty()){
-            this.imageId = image;
-            LOGGER.info("Setting image of "+containerName+" to image");
+            LOGGER.info("Using image ["+ image +"] to start " +containerName);
+            this.setImage(image);
         } else {
             LOGGER.info("Using default image ["+ DockerVariable.DEFAULT_IMAGE + "] to start " + containerName);
-            this.imageId = DockerVariable.DEFAULT_IMAGE;
+            this.setImage(DockerVariable.DEFAULT_IMAGE);
         }
     }
 
@@ -174,6 +181,11 @@ public class DockerTaskExecutor implements TaskExecutor {
             e.printStackTrace();
             return new Integer(127);
         }
+    }
+
+    private void setImage(String imageId){
+        this.imageId = imageId;
+        this.workerDockerRequestHelper.setImage(imageId);
     }
 
     @Override
