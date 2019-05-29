@@ -118,11 +118,11 @@ public class DockerTaskExecutor implements TaskExecutor {
             try {
                 Integer exitCode = executeCommand(c);
                 commandsResults[i] = exitCode;
+                c.setExitcode(exitCode);
                 c.setState(CommandState.FINISHED);
             } catch (Throwable t) {
                 c.setState(CommandState.FAILED);
             }
-
         }
         return commandsResults;
     }
@@ -161,26 +161,21 @@ public class DockerTaskExecutor implements TaskExecutor {
         }
     }
 
-    protected Integer executeCommand(Command command){
-        try {
-            LOGGER.info("Executing command [" + command.getCommand() + "] in worker [" + this.getContainerName() + "].");
-            String execId = this.workerDockerRequestHelper.createExecInstance(command.getCommand());
-            this.workerDockerRequestHelper.startExecInstance(execId);
-            ExecInstanceResult execInstanceResult = this.workerDockerRequestHelper.inspectExecInstance(execId);
-            while(execInstanceResult.getExitCode() == null){
-                execInstanceResult = this.workerDockerRequestHelper.inspectExecInstance(execId);
-                try {
-                    sleep(300);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
+    protected Integer executeCommand(Command command) throws Exception {
+        LOGGER.info("Executing command [" + command.getCommand() + "] in worker [" + this.getContainerName() + "].");
+        String execId = this.workerDockerRequestHelper.createExecInstance(command.getCommand());
+        this.workerDockerRequestHelper.startExecInstance(execId);
+        ExecInstanceResult execInstanceResult = this.workerDockerRequestHelper.inspectExecInstance(execId);
+        while(execInstanceResult.getExitCode() == null){
+            execInstanceResult = this.workerDockerRequestHelper.inspectExecInstance(execId);
+            try {
+                sleep(300);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
             }
-            LOGGER.info("Executed command [" + command.getCommand() + "] with exitcode=[" + execInstanceResult.getExitCode() + "] in worker [" + this.getContainerName() + "].");
-            return execInstanceResult.getExitCode();
-        } catch(Exception e){
-            e.printStackTrace();
-            return new Integer(127);
         }
+        LOGGER.info("Executed command [" + command.getCommand() + "] with exitcode=[" + execInstanceResult.getExitCode() + "] in worker [" + this.getContainerName() + "].");
+        return execInstanceResult.getExitCode();
     }
 
     private void setImage(String imageId){

@@ -16,6 +16,8 @@ public class Command {
     @Enumerated(EnumType.STRING)
     private CommandState state;
 
+    private Integer exitcode;
+
     Command() {
         //default constructor
     }
@@ -48,6 +50,14 @@ public class Command {
         } catch (JSONException e) {
             return null;
         }
+    }
+
+    public Integer getExitcode() {
+        return exitcode;
+    }
+
+    public void setExitcode(Integer exitcode) {
+        this.exitcode = exitcode;
     }
 
     @Override
