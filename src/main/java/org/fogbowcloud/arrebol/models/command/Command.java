@@ -25,6 +25,7 @@ public class Command {
     public Command(String command) {
         this.command = command;
         this.state = CommandState.UNSTARTED;
+        this.exitcode = Integer.MAX_VALUE;
     }
 
     public String getCommand() {
