@@ -39,9 +39,9 @@ public class DockerTaskExecutor implements TaskExecutor {
         //FIXME: also, follow the SAME log format we used in the RawTaskExecutor
         TaskExecutionResult taskExecutionResult;
 
-        Integer startStatus = this.start();
-
         updateRequirements(task.getTaskSpec());
+        
+        Integer startStatus = this.start();
 
         if(startStatus != 0){
             LOGGER.error("Exit code from container start: " + startStatus);
