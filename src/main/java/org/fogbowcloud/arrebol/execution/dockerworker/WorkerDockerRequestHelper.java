@@ -40,6 +40,12 @@ public class WorkerDockerRequestHelper {
         this.containerRequestHelper.removeContainer();
     }
 
+    public String pullImage(String imageId) throws Exception {
+        final String endpoint = String.format("%s/images/create?fromImage=%s:latest", this.address, imageId);
+        String response = this.httpWrapper.doRequest(HttpPost.METHOD_NAME, endpoint);
+        return response;
+    }
+
     public String createExecInstance(String command) throws Exception {
         final String endpoint = String.format("%s/containers/%s/exec", this.address, this.containerName);
         StringEntity body = jsonCreateExecInstance(command);

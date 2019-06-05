@@ -98,6 +98,12 @@ public class DockerTaskExecutor implements TaskExecutor {
             LOGGER.info("Using default image ["+ DockerVariable.DEFAULT_IMAGE + "] to start " + containerName);
             this.setImage(DockerVariable.DEFAULT_IMAGE);
         }
+        try {
+            this.workerDockerRequestHelper.pullImage(image);
+        } catch (Exception e) {
+            e.printStackTrace();
+            LOGGER.info("Error to pull docker image");
+        }
     }
 
     protected Command[] getCommands(Task task){
