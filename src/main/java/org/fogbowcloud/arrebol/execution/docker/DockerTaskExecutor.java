@@ -38,16 +38,16 @@ public class DockerTaskExecutor implements TaskExecutor {
     }
 
     @Override
-    public TaskExecutionResult execute(Task task){
+    public TaskExecutionResult execute(Task task) {
         //FIXME: We should catch the errors when starting/finishing the container and move the task to its FAILURE state
         //FIXME: also, follow the SAME log format we used in the RawTaskExecutor
         TaskExecutionResult taskExecutionResult;
 
         updateRequirements(task.getTaskSpec());
-        
+
         Integer startStatus = this.start();
 
-        if(startStatus != SUCCESS_EXIT_CODE){
+        if (startStatus != SUCCESS_EXIT_CODE) {
             LOGGER.error("Exit code from container start: " + startStatus);
             throw new DockerStartException("Could not start container " + getContainerName());
         }
@@ -58,8 +58,9 @@ public class DockerTaskExecutor implements TaskExecutor {
         int[] commandsResults = executeCommands(commands);
 
         Integer stopStatus = this.stop();
-        if(stopStatus != SUCCESS_EXIT_CODE){
-            LOGGER.error("Exit code from container stop: " + stopStatus + " for the task " + task.getId());
+        if (stopStatus != SUCCESS_EXIT_CODE) {
+            LOGGER.error("Exit code from container " + getContainerName() + " stopped for the task "
+                    + task.getId() + " : " + stopStatus);
         }
 
         taskExecutionResult = getTaskResult(commands, commandsResults);
@@ -68,24 +69,24 @@ public class DockerTaskExecutor implements TaskExecutor {
         return taskExecutionResult;
     }
 
-    private void updateRequirements(TaskSpec taskSpec){
+    private void updateRequirements(TaskSpec taskSpec) {
         verifyImage(taskSpec);
         Map<String, String> mapRequirements = new HashMap<>();
         String dockerRequirements = taskSpec.getSpec().getRequirements().get(DockerConstants.METADATA_DOCKER_REQUIREMENTS);
-        if(dockerRequirements != null){
+        if (dockerRequirements != null) {
             String[] requirements = dockerRequirements.split("&&");
-            for(String requirement : requirements){
+            for (String requirement : requirements) {
                 String[] req = requirement.split("==");
                 String key = req[0].trim();
                 String value = req[1].trim();
-                switch (key){
+                switch (key) {
                     case DockerConstants.DOCKER_MEMORY:
                         mapRequirements.put(DockerConstants.JSON_KEY_MEMORY, value);
-                        LOGGER.info("Added requirement ["+DockerConstants.JSON_KEY_MEMORY+"] with value ["+value+"]");
+                        LOGGER.info("Added requirement [" + DockerConstants.JSON_KEY_MEMORY + "] with value [" + value + "]");
                         break;
                     case DockerConstants.DOCKER_CPU_WEIGHT:
                         mapRequirements.put(DockerConstants.JSON_KEY_CPU_SHARES, value);
-                        LOGGER.info("Added requirement ["+DockerConstants.JSON_KEY_CPU_SHARES+"] with value ["+value+"]");
+                        LOGGER.info("Added requirement [" + DockerConstants.JSON_KEY_CPU_SHARES + "] with value [" + value + "]");
                         break;
                 }
             }
@@ -93,13 +94,13 @@ public class DockerTaskExecutor implements TaskExecutor {
         }
     }
 
-    private void verifyImage(TaskSpec taskSpec){
+    private void verifyImage(TaskSpec taskSpec) {
         String image = taskSpec.getImage();
-        if(image != null && !image.trim().isEmpty()){
-            LOGGER.info("Using image ["+ image +"] to start " +containerName);
+        if (image != null && !image.trim().isEmpty()) {
+            LOGGER.info("Using image [" + image + "] to start " + containerName);
             this.setImage(image);
         } else {
-            LOGGER.info("Using default image ["+ DockerVariable.DEFAULT_IMAGE + "] to start " + containerName);
+            LOGGER.info("Using default image [" + DockerVariable.DEFAULT_IMAGE + "] to start " + containerName);
             this.setImage(DockerVariable.DEFAULT_IMAGE);
         }
         try {
@@ -110,7 +111,7 @@ public class DockerTaskExecutor implements TaskExecutor {
         }
     }
 
-    protected Command[] getCommands(Task task){
+    protected Command[] getCommands(Task task) {
         TaskSpec taskSpec = task.getTaskSpec();
         List<Command> commandsList = taskSpec.getCommands();
 
@@ -118,7 +119,7 @@ public class DockerTaskExecutor implements TaskExecutor {
         return commandsList.toArray(new Command[commandsSize]);
     }
 
-    protected int[] executeCommands(Command[] commands){
+    protected int[] executeCommands(Command[] commands) {
         int[] commandsResults = new int[commands.length];
         Arrays.fill(commandsResults, TaskExecutionResult.UNDETERMINED_RESULT);
         for (int i = 0; i < commands.length; i++) {
@@ -136,7 +137,7 @@ public class DockerTaskExecutor implements TaskExecutor {
         return commandsResults;
     }
 
-    protected TaskExecutionResult getTaskResult(Command[] commands, int[] commandsResults){
+    protected TaskExecutionResult getTaskResult(Command[] commands, int[] commandsResults) {
         TaskExecutionResult taskExecutionResult;
         TaskExecutionResult.RESULT result = TaskExecutionResult.RESULT.SUCCESS;
         for (Command cmd : commands) {
@@ -149,7 +150,7 @@ public class DockerTaskExecutor implements TaskExecutor {
         return taskExecutionResult;
     }
 
-    protected Integer start(){
+    protected Integer start() {
         try {
             LOGGER.info("Starting DockerTaskExecutor " + this.getContainerName());
             this.workerDockerRequestHelper.start();
@@ -159,7 +160,7 @@ public class DockerTaskExecutor implements TaskExecutor {
         }
     }
 
-    protected Integer stop(){
+    protected Integer stop() {
         try {
             LOGGER.info("Stopping DockerTaskExecutor " + this.getContainerName());
             this.workerDockerRequestHelper.stop();
@@ -175,7 +176,7 @@ public class DockerTaskExecutor implements TaskExecutor {
         String execId = this.workerDockerRequestHelper.createExecInstance(command.getCommand());
         this.workerDockerRequestHelper.startExecInstance(execId);
         ExecInstanceResult execInstanceResult = this.workerDockerRequestHelper.inspectExecInstance(execId);
-        while(execInstanceResult.getExitCode() == null){
+        while (execInstanceResult.getExitCode() == null) {
             execInstanceResult = this.workerDockerRequestHelper.inspectExecInstance(execId);
             try {
                 sleep(300);
@@ -187,7 +188,7 @@ public class DockerTaskExecutor implements TaskExecutor {
         return execInstanceResult.getExitCode();
     }
 
-    private void setImage(String imageId){
+    private void setImage(String imageId) {
         this.imageId = imageId;
         this.workerDockerRequestHelper.setImage(imageId);
     }
@@ -197,11 +198,11 @@ public class DockerTaskExecutor implements TaskExecutor {
         return "DockerTaskExecutor imageId={" + getImageId() + "} containerName={" + getContainerName() + "}";
     }
 
-    public String getContainerName(){
+    public String getContainerName() {
         return this.containerName;
     }
 
-    public String getImageId(){
+    public String getImageId() {
         return this.imageId;
     }
 
