@@ -33,7 +33,7 @@ public class JobService {
     private final Logger LOGGER = Logger.getLogger(JobService.class);
 
     public String addJob(JobSpec jobSpec) {
-        LOGGER.debug("Creating job object from job specification.");
+        LOGGER.debug("Create job object from job specification.");
         validateJobSpec(jobSpec);
         Job job = createJobFromSpec(jobSpec);
         LOGGER.info("Created job [ " + job.getId() + " ] from jobSpec");

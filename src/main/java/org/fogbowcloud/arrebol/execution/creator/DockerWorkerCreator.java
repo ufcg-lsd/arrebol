@@ -32,7 +32,7 @@ public class DockerWorkerCreator implements WorkerCreator{
         return workers;
     }
 
-    private Worker createDockerWorker(Integer poolId, int resourceId, String imageId, String address){
+    private Worker createDockerWorker(Integer poolId, int resourceId, String imageId, String address) {
         TaskExecutor executor = new DockerTaskExecutor(imageId, "docker-executor-" + UUID.randomUUID().toString(), address);
         Specification resourceSpec = null;
         Worker worker = new MatchAnyWorker(resourceSpec, "resourceId-"+resourceId, poolId, executor);

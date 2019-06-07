@@ -124,9 +124,8 @@ public class RawWorkerIntegrationTest {
         return task;
     }
 
-    private Collection<Worker> createPool(int size, int poolId){
-        Collection<Worker> workers = new LinkedList<Worker>();
-        int workerPoolSize = 5;
+    private Collection<Worker> createPool(int workerPoolSize, int poolId){
+        Collection<Worker> workers = new LinkedList<>();
         Specification resourceSpec = null;
         for (int i = 0; i < workerPoolSize; i++) {
             TaskExecutor taskExecutor = new RawTaskExecutor();

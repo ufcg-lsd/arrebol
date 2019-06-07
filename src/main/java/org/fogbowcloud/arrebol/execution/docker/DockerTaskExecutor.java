@@ -22,9 +22,11 @@ import static java.lang.Thread.sleep;
 
 public class DockerTaskExecutor implements TaskExecutor {
 
+    private static final int SUCCESS_EXIT_CODE = 0;
+    private static final int FAIL_EXIT_CODE = 127;
+
     private String imageId;
     private String containerName;
-
 
     private WorkerDockerRequestHelper workerDockerRequestHelper;
     private final Logger LOGGER = Logger.getLogger(DockerTaskExecutor.class);
@@ -45,7 +47,7 @@ public class DockerTaskExecutor implements TaskExecutor {
         
         Integer startStatus = this.start();
 
-        if(startStatus != 0){
+        if(startStatus != SUCCESS_EXIT_CODE){
             LOGGER.error("Exit code from container start: " + startStatus);
             throw new DockerStartException("Could not start container " + getContainerName());
         }
@@ -56,8 +58,8 @@ public class DockerTaskExecutor implements TaskExecutor {
         int[] commandsResults = executeCommands(commands);
 
         Integer stopStatus = this.stop();
-        if(stopStatus != 0){
-            LOGGER.error("Exit code from container stop: " + stopStatus);
+        if(stopStatus != SUCCESS_EXIT_CODE){
+            LOGGER.error("Exit code from container stop: " + stopStatus + " for the task " + task.getId());
         }
 
         taskExecutionResult = getTaskResult(commands, commandsResults);
@@ -71,9 +73,9 @@ public class DockerTaskExecutor implements TaskExecutor {
         Map<String, String> mapRequirements = new HashMap<>();
         String dockerRequirements = taskSpec.getSpec().getRequirements().get(DockerConstants.METADATA_DOCKER_REQUIREMENTS);
         if(dockerRequirements != null){
-            String requirements[] = dockerRequirements.split("&&");
+            String[] requirements = dockerRequirements.split("&&");
             for(String requirement : requirements){
-                String req[] = requirement.split("==");
+                String[] req = requirement.split("==");
                 String key = req[0].trim();
                 String value = req[1].trim();
                 switch (key){
@@ -113,8 +115,7 @@ public class DockerTaskExecutor implements TaskExecutor {
         List<Command> commandsList = taskSpec.getCommands();
 
         int commandsSize = commandsList.size();
-        Command[] commands = commandsList.toArray(new Command[commandsSize]);
-        return commands;
+        return commandsList.toArray(new Command[commandsSize]);
     }
 
     protected int[] executeCommands(Command[] commands){
@@ -152,9 +153,9 @@ public class DockerTaskExecutor implements TaskExecutor {
         try {
             LOGGER.info("Starting DockerTaskExecutor " + this.getContainerName());
             this.workerDockerRequestHelper.start();
-            return new Integer(0);
+            return SUCCESS_EXIT_CODE;
         } catch (Exception e) {
-            return new Integer(127);
+            return FAIL_EXIT_CODE;
         }
     }
 
@@ -162,10 +163,10 @@ public class DockerTaskExecutor implements TaskExecutor {
         try {
             LOGGER.info("Stopping DockerTaskExecutor " + this.getContainerName());
             this.workerDockerRequestHelper.stop();
-            return new Integer(0);
+            return SUCCESS_EXIT_CODE;
         } catch (Exception e) {
             e.printStackTrace();
-            return new Integer(127);
+            return FAIL_EXIT_CODE;
         }
     }
 
