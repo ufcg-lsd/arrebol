@@ -1,4 +1,4 @@
-package org.fogbowcloud.arrebol.execution.exceptions;
+package org.fogbowcloud.arrebol.execution.docker.exceptions;
 
 public class DockerStartException extends RuntimeException {
 

@@ -3,14 +3,18 @@ package org.fogbowcloud.arrebol;
 import com.google.gson.Gson;
 import org.apache.log4j.Logger;
 import org.fogbowcloud.arrebol.execution.*;
+import org.fogbowcloud.arrebol.execution.creator.DockerWorkerCreator;
+import org.fogbowcloud.arrebol.execution.creator.RawWorkerCreator;
+import org.fogbowcloud.arrebol.execution.creator.WorkerCreator;
+import org.fogbowcloud.arrebol.execution.docker.DockerVariable;
+import org.fogbowcloud.arrebol.execution.docker.constans.DockerConstants;
+import org.fogbowcloud.arrebol.execution.raw.RawConstants;
 import org.fogbowcloud.arrebol.models.job.Job;
 import org.fogbowcloud.arrebol.models.job.JobState;
-import org.fogbowcloud.arrebol.models.specification.Specification;
 import org.fogbowcloud.arrebol.models.task.Task;
 import org.fogbowcloud.arrebol.models.task.TaskState;
 import org.fogbowcloud.arrebol.queue.TaskQueue;
 import org.fogbowcloud.arrebol.repositories.JobRepository;
-import org.fogbowcloud.arrebol.resource.MatchAnyWorker;
 import org.fogbowcloud.arrebol.resource.StaticPool;
 import org.fogbowcloud.arrebol.resource.WorkerPool;
 import org.fogbowcloud.arrebol.scheduler.DefaultScheduler;
@@ -30,6 +34,7 @@ public class ArrebolController {
     private final DefaultScheduler scheduler;
     private final Map<String, Job> jobPool;
     private final TaskQueue queue;
+    private WorkerCreator workerCreator;
 
     private final Timer jobDatabaseCommitter;
 
@@ -41,12 +46,12 @@ public class ArrebolController {
     public ArrebolController() {
 
         String path = Thread.currentThread().getContextClassLoader().getResource("").getPath();
-        //Configuration arrebolConfiguration
         try {
             Gson gson = new Gson();
             BufferedReader bufferedReader = new BufferedReader(new FileReader(path + File.separator + "arrebol.json"));
             this.configuration = gson.fromJson(bufferedReader, Configuration.class);
             DockerVariable.DEFAULT_IMAGE = this.configuration.getImageId();
+            setWorkerCreator(this.configuration.getPoolType());
         } catch (FileNotFoundException e) {
             LOGGER.error("Error on loading properties file path=" + path, e);
             System.exit(1);
@@ -68,68 +73,17 @@ public class ArrebolController {
         this.jobDatabaseCommitter = new Timer(true);
     }
 
-    private static final String RAW_TYPE = "raw";
-    private static final String DOCKER_TYPE = "docker";
-
     private WorkerPool createPool(Configuration configuration, int poolId) {
 
         //we need to deal with missing/wrong properties
 
         Collection<Worker> workers = new LinkedList<>();
-        populatePool(workers, poolId, configuration);
+        workers.addAll(workerCreator.createWorkers(poolId, configuration));
 
         WorkerPool pool = new StaticPool(poolId, workers);
         LOGGER.info("pool={" + pool + "} created with workers={" + workers + "}");
 
         return pool;
-    }
-
-    private void populatePool(Collection<Worker> workers, int poolId, Configuration configuration){
-        String poolType = configuration.getPoolType();
-        if(poolType.equals(DOCKER_TYPE)){
-            workers.addAll(createDockerWorkers(poolId, configuration));
-        } else if(poolType.equals(RAW_TYPE)){
-            workers.addAll(createRawWorkers(poolId, configuration));
-        }
-    }
-
-    private Collection<Worker> createDockerWorkers(Integer poolId, Configuration configuration){
-        Collection<Worker> workers = new LinkedList<>();
-        int poolSize = new Integer(configuration.getPoolSize());
-        String imageId = configuration.getImageId();
-        for(String address : configuration.getWorkers()){
-            for (int i = 0; i < poolSize; i++) {
-                LOGGER.info("Creating docker worker with address=" + address);
-                Worker worker = createDockerWorker(poolId, i, imageId, address);
-                workers.add(worker);
-            }
-        }
-        return workers;
-    }
-
-    private Worker createDockerWorker(Integer poolId, int resourceId, String imageId, String address){
-        TaskExecutor executor = new DockerTaskExecutor(imageId, "docker-executor-" + UUID.randomUUID().toString(), address);
-        Specification resourceSpec = null;
-        Worker worker = new MatchAnyWorker(resourceSpec, "resourceId-"+resourceId, poolId, executor);
-        return worker;
-    }
-
-    private Collection<Worker> createRawWorkers(Integer poolId, Configuration configuration){
-        Collection<Worker> workers = new LinkedList<>();
-        int poolSize = new Integer(configuration.getPoolSize());
-        for (int i = 0; i < poolSize; i++) {
-            LOGGER.info("Creating raw worker[" + i + "]");
-            Worker worker = createRawWorker(poolId, i);
-            workers.add(worker);
-        }
-        return workers;
-    }
-
-    private Worker createRawWorker(Integer poolId, int resourceId){
-        TaskExecutor executor = new RawTaskExecutor();
-        Specification resourceSpec = null;
-        Worker worker = new MatchAnyWorker(resourceSpec, "resourceId-"+resourceId, poolId, executor);
-        return worker;
     }
 
     public void start() {
@@ -179,6 +133,17 @@ public class ArrebolController {
     public TaskState getTaskState(String taskId) {
         //FIXME:
         return null;
+    }
+
+    private void setWorkerCreator(String type){
+        switch (type){
+            case DockerConstants.DOCKER_TYPE:
+                this.workerCreator = new DockerWorkerCreator();
+                break;
+            case RawConstants.RAW_TYPE:
+                this.workerCreator = new RawWorkerCreator();
+                break;
+        }
     }
 
 

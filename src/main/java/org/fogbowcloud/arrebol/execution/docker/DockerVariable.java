@@ -1,4 +1,4 @@
-package org.fogbowcloud.arrebol.execution;
+package org.fogbowcloud.arrebol.execution.docker;
 
 public class DockerVariable {
 
