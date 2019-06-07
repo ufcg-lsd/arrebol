@@ -52,7 +52,7 @@ public class DockerTaskExecutor implements TaskExecutor {
             throw new DockerStartException("Could not start container " + getContainerName());
         }
 
-        LOGGER.info("Successful started container " + getContainerName());
+        LOGGER.info("Container " + getContainerName() + " started successfully for task " + task.getId());
         Command[] commands = getCommands(task);
         LOGGER.info("Starting to execute commands [len=" + commands.length + "] of task " + task.getId());
         int[] commandsResults = executeCommands(commands);
