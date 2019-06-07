@@ -1,4 +1,4 @@
 {
   "poolType":"raw",
-  "poolSize":"5"
+  "workerPoolSize":"5"
 }

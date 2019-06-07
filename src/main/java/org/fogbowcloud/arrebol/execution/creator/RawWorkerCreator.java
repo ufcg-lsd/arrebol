@@ -19,7 +19,7 @@ public class RawWorkerCreator implements WorkerCreator {
     @Override
     public Collection<Worker> createWorkers(Integer poolId, Configuration configuration) {
         Collection<Worker> workers = new LinkedList<>();
-        int poolSize = new Integer(configuration.getPoolSize());
+        int poolSize = new Integer(configuration.getWorkerPoolSize());
         for (int i = 0; i < poolSize; i++) {
             LOGGER.info("Creating raw worker[" + i + "]");
             Worker worker = createRawWorker(poolId, i);

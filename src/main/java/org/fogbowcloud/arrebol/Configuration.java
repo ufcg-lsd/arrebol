@@ -5,30 +5,30 @@ import java.util.List;
 public class Configuration {
 
     private String poolType;
-    private Integer poolSize;
+    private Integer workerPoolSize;
     private String imageId;
-    private List<String> workers;
+    private List<String> resourceAddresses;
 
-    public Configuration(String poolType, Integer poolSize, String imageId, List<String> workers) {
+    public Configuration(String poolType, Integer workerPoolSize, String imageId, List<String> resourceAddresses) {
         this.poolType = poolType;
-        this.poolSize = poolSize;
+        this.workerPoolSize = workerPoolSize;
         this.imageId = imageId;
-        this.workers = workers;
+        this.resourceAddresses = resourceAddresses;
     }
 
     public String getPoolType() {
         return poolType;
     }
 
-    public Integer getPoolSize() {
-        return poolSize;
+    public Integer getWorkerPoolSize() {
+        return workerPoolSize;
     }
 
     public String getImageId() {
         return imageId;
     }
 
-    public List<String> getWorkers() {
-        return workers;
+    public List<String> getResourceAddresses() {
+        return resourceAddresses;
     }
 }
