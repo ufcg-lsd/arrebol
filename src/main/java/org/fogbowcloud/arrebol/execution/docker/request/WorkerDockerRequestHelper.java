@@ -1,4 +1,4 @@
-package org.fogbowcloud.arrebol.execution.dockerworker;
+package org.fogbowcloud.arrebol.execution.docker.request;
 
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;

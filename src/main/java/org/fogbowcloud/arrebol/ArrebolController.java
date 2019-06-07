@@ -6,14 +6,15 @@ import org.fogbowcloud.arrebol.execution.*;
 import org.fogbowcloud.arrebol.execution.creator.DockerWorkerCreator;
 import org.fogbowcloud.arrebol.execution.creator.RawWorkerCreator;
 import org.fogbowcloud.arrebol.execution.creator.WorkerCreator;
+import org.fogbowcloud.arrebol.execution.docker.DockerVariable;
+import org.fogbowcloud.arrebol.execution.docker.constans.DockerConstants;
+import org.fogbowcloud.arrebol.execution.raw.RawConstants;
 import org.fogbowcloud.arrebol.models.job.Job;
 import org.fogbowcloud.arrebol.models.job.JobState;
-import org.fogbowcloud.arrebol.models.specification.Specification;
 import org.fogbowcloud.arrebol.models.task.Task;
 import org.fogbowcloud.arrebol.models.task.TaskState;
 import org.fogbowcloud.arrebol.queue.TaskQueue;
 import org.fogbowcloud.arrebol.repositories.JobRepository;
-import org.fogbowcloud.arrebol.resource.MatchAnyWorker;
 import org.fogbowcloud.arrebol.resource.StaticPool;
 import org.fogbowcloud.arrebol.resource.WorkerPool;
 import org.fogbowcloud.arrebol.scheduler.DefaultScheduler;
@@ -134,15 +135,12 @@ public class ArrebolController {
         return null;
     }
 
-    private static final String RAW_TYPE = "raw";
-    private static final String DOCKER_TYPE = "docker";
-
     private void setWorkerCreator(String type){
         switch (type){
-            case DOCKER_TYPE:
+            case DockerConstants.DOCKER_TYPE:
                 this.workerCreator = new DockerWorkerCreator();
                 break;
-            case RAW_TYPE:
+            case RawConstants.RAW_TYPE:
                 this.workerCreator = new RawWorkerCreator();
                 break;
         }

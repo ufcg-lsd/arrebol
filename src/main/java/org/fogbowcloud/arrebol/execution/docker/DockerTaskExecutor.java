@@ -1,10 +1,12 @@
-package org.fogbowcloud.arrebol.execution;
+package org.fogbowcloud.arrebol.execution.docker;
 
 import org.apache.log4j.Logger;
-import org.fogbowcloud.arrebol.execution.constans.DockerConstants;
-import org.fogbowcloud.arrebol.execution.exceptions.DockerStartException;
-import org.fogbowcloud.arrebol.execution.dockerworker.ExecInstanceResult;
-import org.fogbowcloud.arrebol.execution.dockerworker.WorkerDockerRequestHelper;
+import org.fogbowcloud.arrebol.execution.TaskExecutionResult;
+import org.fogbowcloud.arrebol.execution.TaskExecutor;
+import org.fogbowcloud.arrebol.execution.docker.constans.DockerConstants;
+import org.fogbowcloud.arrebol.execution.docker.exceptions.DockerStartException;
+import org.fogbowcloud.arrebol.execution.docker.request.ExecInstanceResult;
+import org.fogbowcloud.arrebol.execution.docker.request.WorkerDockerRequestHelper;
 import org.fogbowcloud.arrebol.models.command.Command;
 import org.fogbowcloud.arrebol.models.command.CommandState;
 import org.fogbowcloud.arrebol.models.task.Task;

@@ -3,7 +3,7 @@ package org.fogbowcloud.arrebol.execution.creator;
 import org.apache.log4j.Logger;
 import org.fogbowcloud.arrebol.ArrebolController;
 import org.fogbowcloud.arrebol.Configuration;
-import org.fogbowcloud.arrebol.execution.RawTaskExecutor;
+import org.fogbowcloud.arrebol.execution.raw.RawTaskExecutor;
 import org.fogbowcloud.arrebol.execution.TaskExecutor;
 import org.fogbowcloud.arrebol.execution.Worker;
 import org.fogbowcloud.arrebol.models.specification.Specification;

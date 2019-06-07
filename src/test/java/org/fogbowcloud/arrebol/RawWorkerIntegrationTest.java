@@ -1,7 +1,7 @@
 package org.fogbowcloud.arrebol;
 
 import org.apache.log4j.Logger;
-import org.fogbowcloud.arrebol.execution.RawTaskExecutor;
+import org.fogbowcloud.arrebol.execution.raw.RawTaskExecutor;
 import org.fogbowcloud.arrebol.execution.TaskExecutor;
 import org.fogbowcloud.arrebol.execution.Worker;
 import org.fogbowcloud.arrebol.models.command.Command;

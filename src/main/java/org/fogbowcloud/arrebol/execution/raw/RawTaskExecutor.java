@@ -1,6 +1,8 @@
-package org.fogbowcloud.arrebol.execution;
+package org.fogbowcloud.arrebol.execution.raw;
 
 import org.apache.log4j.Logger;
+import org.fogbowcloud.arrebol.execution.TaskExecutionResult;
+import org.fogbowcloud.arrebol.execution.TaskExecutor;
 import org.fogbowcloud.arrebol.models.command.Command;
 import org.fogbowcloud.arrebol.models.command.CommandState;
 import org.fogbowcloud.arrebol.models.task.Task;

@@ -1,4 +1,4 @@
-package org.fogbowcloud.arrebol.execution.dockerworker;
+package org.fogbowcloud.arrebol.execution.docker.request;
 
 import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpPost;
@@ -6,7 +6,7 @@ import org.apache.http.entity.StringEntity;
 import org.apache.log4j.Logger;
 import org.fogbowcloud.arrebol.utils.AppUtil;
 import org.json.JSONObject;
-import org.fogbowcloud.arrebol.execution.constans.DockerConstants;
+import org.fogbowcloud.arrebol.execution.docker.constans.DockerConstants;
 
 import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
