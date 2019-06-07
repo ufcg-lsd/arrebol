@@ -50,7 +50,7 @@ public class DockerTaskExecutor implements TaskExecutor {
 
         LOGGER.info("Successful started container " + getContainerName());
         Command[] commands = getCommands(task);
-        LOGGER.info("Starting to execute commands [" + commands.length + "] of task " + task.getId());
+        LOGGER.info("Starting to execute commands [len=" + commands.length + "] of task " + task.getId());
         int[] commandsResults = executeCommands(commands);
 
         Integer stopStatus = this.stop();
