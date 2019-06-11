@@ -21,10 +21,11 @@ public class WorkerDockerRequestHelper {
 
     private final Logger LOGGER = Logger.getLogger(WorkerDockerRequestHelper.class);
 
-    public WorkerDockerRequestHelper(String address, String containerName, String image) {
+    public WorkerDockerRequestHelper(String address, String containerName, String image) throws Exception {
         this.httpWrapper = new HttpWrapper();
         this.address = address;
         this.containerName = containerName;
+        this.pullImage(image);
         this.containerRequestHelper = new ContainerRequestHelper(address, containerName, image);
     }
 
@@ -40,18 +41,16 @@ public class WorkerDockerRequestHelper {
         this.containerRequestHelper.removeContainer();
     }
 
-    public String pullImage(String imageId) throws Exception {
+    public void pullImage(String imageId) throws Exception {
         final String endpoint = String.format("%s/images/create?fromImage=%s:latest", this.address, imageId);
-        String response = this.httpWrapper.doRequest(HttpPost.METHOD_NAME, endpoint);
-        return response;
+        this.httpWrapper.doRequest(HttpPost.METHOD_NAME, endpoint);
     }
 
     public String createExecInstance(String command) throws Exception {
         final String endpoint = String.format("%s/containers/%s/exec", this.address, this.containerName);
         StringEntity body = jsonCreateExecInstance(command);
         String response = this.httpWrapper.doRequest(HttpPost.METHOD_NAME, endpoint, body);
-        String execId = AppUtil.getValueFromJsonStr("Id", response);
-        return execId;
+        return AppUtil.getValueFromJsonStr("Id", response);
     }
 
     public void startExecInstance(String execId) throws Exception {
@@ -63,8 +62,7 @@ public class WorkerDockerRequestHelper {
     public ExecInstanceResult inspectExecInstance(String execId) throws Exception {
         final String endpoint = String.format("%s/exec/%s/json", this.address, execId);
         String response = this.httpWrapper.doRequest(HttpGet.METHOD_NAME, endpoint);
-        ExecInstanceResult execInstanceResult = instanceExecResult(response);
-        return execInstanceResult;
+        return instanceExecResult(response);
     }
 
     public void setRequirements(Map<String, String> requirements){
@@ -100,8 +98,7 @@ public class WorkerDockerRequestHelper {
             exitCode = jsonObject.getInt("ExitCode");
         }
         boolean running = jsonObject.getBoolean("Running");
-        ExecInstanceResult execInstanceResult = new ExecInstanceResult(execId, exitCode, running);
-        return execInstanceResult;
+        return new ExecInstanceResult(execId, exitCode, running);
     }
 
 }

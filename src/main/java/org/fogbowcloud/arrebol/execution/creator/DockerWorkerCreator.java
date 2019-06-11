@@ -20,7 +20,7 @@ public class DockerWorkerCreator implements WorkerCreator{
     @Override
     public Collection<Worker> createWorkers(Integer poolId, Configuration configuration) {
         Collection<Worker> workers = new LinkedList<>();
-        int poolSize = new Integer(configuration.getWorkerPoolSize());
+        int poolSize = configuration.getWorkerPoolSize();
         String imageId = configuration.getImageId();
         for(String address : configuration.getResourceAddresses()){
             for (int i = 0; i < poolSize; i++) {
@@ -33,9 +33,9 @@ public class DockerWorkerCreator implements WorkerCreator{
     }
 
     private Worker createDockerWorker(Integer poolId, int resourceId, String imageId, String address) {
-        TaskExecutor executor = new DockerTaskExecutor(imageId, "docker-executor-" + UUID.randomUUID().toString(), address);
+        TaskExecutor executor = new DockerTaskExecutor(imageId, "docker-executor-" +
+                UUID.randomUUID().toString(), address);
         Specification resourceSpec = null;
-        Worker worker = new MatchAnyWorker(resourceSpec, "resourceId-"+resourceId, poolId, executor);
-        return worker;
+        return new MatchAnyWorker(resourceSpec, "resourceId-"+resourceId, poolId, executor);
     }
 }

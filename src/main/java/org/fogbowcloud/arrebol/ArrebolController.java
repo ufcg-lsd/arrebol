@@ -38,23 +38,30 @@ public class ArrebolController {
 
     private final Timer jobDatabaseCommitter;
 
-    private static final int COMMIT_PERIOD_MILLIS = 1000 * 20;//20 seconds
+    private static final int COMMIT_PERIOD_MILLIS = 1000 * 20;
+    private static final int FAIL_EXIT_CODE = 1;
 
     @Autowired
     private JobRepository jobRepository;
 
     public ArrebolController() {
 
-        String path = Thread.currentThread().getContextClassLoader().getResource("").getPath();
+        String path = Objects.requireNonNull(Thread.currentThread().getContextClassLoader()
+                .getResource("")).getPath();
         try {
             Gson gson = new Gson();
             BufferedReader bufferedReader = new BufferedReader(new FileReader(path + File.separator + "arrebol.json"));
             this.configuration = gson.fromJson(bufferedReader, Configuration.class);
+
+            certifyConfigurationProperties();
+
             DockerVariable.DEFAULT_IMAGE = this.configuration.getImageId();
             setWorkerCreator(this.configuration.getPoolType());
         } catch (FileNotFoundException e) {
             LOGGER.error("Error on loading properties file path=" + path, e);
-            System.exit(1);
+            System.exit(FAIL_EXIT_CODE);
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage(), e);
         }
 
         String queueId = UUID.randomUUID().toString();
@@ -73,12 +80,33 @@ public class ArrebolController {
         this.jobDatabaseCommitter = new Timer(true);
     }
 
+    private void certifyConfigurationProperties() throws Exception {
+        final String verifyMsg = " Please, verify your configuration file.";
+        final String imageIdMsg = "Docker Image ID configuration property wrong or missing." + verifyMsg;
+        final String poolTypeMsg = "Worker Pool Type configuration property wrong or missing." + verifyMsg;
+        final String resourceAddressesMsg = "Docker Image ID configuration property wrong or missing." + verifyMsg;
+        final String workerPoolSize = "Docker Image ID configuration property wrong or missing." + verifyMsg;
+
+        if (this.configuration.getImageId().trim().isEmpty()) {
+          LOGGER.error(imageIdMsg);
+          throw new Exception(imageIdMsg);
+        } else if (this.configuration.getPoolType().trim().isEmpty()) {
+          LOGGER.error(poolTypeMsg);
+          throw new Exception(poolTypeMsg);
+        } else if (this.configuration.getResourceAddresses().isEmpty()) {
+          LOGGER.error(resourceAddressesMsg);
+          throw new Exception(resourceAddressesMsg);
+        } else if (this.configuration.getWorkerPoolSize() == 0) {
+          LOGGER.error(workerPoolSize);
+          throw new Exception(workerPoolSize);
+        }
+    }
+
     private WorkerPool createPool(Configuration configuration, int poolId) {
 
         //we need to deal with missing/wrong properties
 
-        Collection<Worker> workers = new LinkedList<>();
-        workers.addAll(workerCreator.createWorkers(poolId, configuration));
+        Collection<Worker> workers = new LinkedList<>(workerCreator.createWorkers(poolId, configuration));
 
         WorkerPool pool = new StaticPool(poolId, workers);
         LOGGER.info("pool={" + pool + "} created with workers={" + workers + "}");
@@ -96,9 +124,7 @@ public class ArrebolController {
         this.jobDatabaseCommitter.schedule(new TimerTask() {
                     public void run() {
                         LOGGER.info("Commit job pool to the database");
-                        for(Job job : jobPool.values()) {
-                            jobRepository.save(job);
-                        }
+                        jobRepository.save(jobPool.values());
                     }
                 }, COMMIT_PERIOD_MILLIS, COMMIT_PERIOD_MILLIS
         );

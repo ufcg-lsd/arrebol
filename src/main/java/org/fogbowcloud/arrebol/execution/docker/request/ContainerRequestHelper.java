@@ -32,6 +32,8 @@ public class ContainerRequestHelper {
     public String createContainer() throws Exception {
         final String endPoint = String.format("%s/containers/create?name=%s", address, containerName);
         StringEntity body = jsonCreateContainer();
+
+        //Todo catch and throw or threat possible exceptions
         String response = this.httpWrapper.doRequest(HttpPost.METHOD_NAME, endPoint, body);
         LOGGER.debug("Create container ["+ containerName +"] request response: ["+ response +"]");
         String containerId = AppUtil.getValueFromJsonStr("Id", response);
@@ -40,18 +42,24 @@ public class ContainerRequestHelper {
 
     public void startContainer() throws Exception {
         final String endpoint = String.format("%s/containers/%s/start", address, containerName);
+
+        //Todo catch and throw or threat possible exceptions
         String response = post(endpoint);
         LOGGER.debug("Start container ["+ containerName +"] request response: ["+ response +"]");
     }
 
     public void killContainer() throws Exception {
         final String endpoint = String.format("%s/containers/%s/kill", address, containerName);
+
+        //Todo catch and throw or threat possible exceptions
         String response = post(endpoint);
         LOGGER.debug("Kill container ["+ containerName +"] request response: ["+ response +"]");
     }
 
     public void removeContainer() throws Exception {
         final String endpoint = String.format("%s/containers/%s", address, containerName);
+
+        //Todo catch and throw or threat possible exceptions
         String response = this.httpWrapper.doRequest(HttpDelete.METHOD_NAME, endpoint);
         LOGGER.debug("Remove container ["+ containerName +"] request response: ["+ response +"]");
     }

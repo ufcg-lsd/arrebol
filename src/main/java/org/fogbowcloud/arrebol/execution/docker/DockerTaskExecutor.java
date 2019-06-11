@@ -12,7 +12,6 @@ import org.fogbowcloud.arrebol.models.command.CommandState;
 import org.fogbowcloud.arrebol.models.task.Task;
 import org.fogbowcloud.arrebol.models.task.TaskSpec;
 
-
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -31,8 +30,7 @@ public class DockerTaskExecutor implements TaskExecutor {
     private WorkerDockerRequestHelper workerDockerRequestHelper;
     private final Logger LOGGER = Logger.getLogger(DockerTaskExecutor.class);
 
-    public DockerTaskExecutor(String imageId, String containerName, String address) {
-        this.imageId = imageId;
+    public DockerTaskExecutor(String imageId, String containerName, String address) throws Exception {
         this.containerName = containerName;
         this.workerDockerRequestHelper = new WorkerDockerRequestHelper(address, containerName, imageId);
     }
@@ -43,7 +41,7 @@ public class DockerTaskExecutor implements TaskExecutor {
         //FIXME: also, follow the SAME log format we used in the RawTaskExecutor
         TaskExecutionResult taskExecutionResult;
 
-        updateRequirements(task.getTaskSpec());
+        setUpContainerRequirements(task.getTaskSpec());
 
         Integer startStatus = this.start();
 
@@ -55,7 +53,7 @@ public class DockerTaskExecutor implements TaskExecutor {
         LOGGER.info("Container " + getContainerName() + " started successfully for task " + task.getId());
         Command[] commands = getCommands(task);
         LOGGER.info("Starting to execute commands [len=" + commands.length + "] of task " + task.getId());
-        int[] commandsResults = executeCommands(commands);
+        int[] commandsResults = executeCommands(commands, task.getId());
 
         Integer stopStatus = this.stop();
         if (stopStatus != SUCCESS_EXIT_CODE) {
@@ -69,8 +67,8 @@ public class DockerTaskExecutor implements TaskExecutor {
         return taskExecutionResult;
     }
 
-    private void updateRequirements(TaskSpec taskSpec) {
-        verifyImage(taskSpec);
+    private void setUpContainerRequirements(TaskSpec taskSpec) {
+        setUpImage(taskSpec);
         Map<String, String> mapRequirements = new HashMap<>();
         String dockerRequirements = taskSpec.getSpec().getRequirements().get(DockerConstants.METADATA_DOCKER_REQUIREMENTS);
         if (dockerRequirements != null) {
@@ -82,11 +80,13 @@ public class DockerTaskExecutor implements TaskExecutor {
                 switch (key) {
                     case DockerConstants.DOCKER_MEMORY:
                         mapRequirements.put(DockerConstants.JSON_KEY_MEMORY, value);
-                        LOGGER.info("Added requirement [" + DockerConstants.JSON_KEY_MEMORY + "] with value [" + value + "]");
+                        LOGGER.info("Added requirement [" + DockerConstants.JSON_KEY_MEMORY +
+                                "] with value [" + value + "]");
                         break;
                     case DockerConstants.DOCKER_CPU_WEIGHT:
                         mapRequirements.put(DockerConstants.JSON_KEY_CPU_SHARES, value);
-                        LOGGER.info("Added requirement [" + DockerConstants.JSON_KEY_CPU_SHARES + "] with value [" + value + "]");
+                        LOGGER.info("Added requirement [" + DockerConstants.JSON_KEY_CPU_SHARES +
+                                "] with value [" + value + "]");
                         break;
                 }
             }
@@ -94,7 +94,7 @@ public class DockerTaskExecutor implements TaskExecutor {
         }
     }
 
-    private void verifyImage(TaskSpec taskSpec) {
+    private void setUpImage(TaskSpec taskSpec) {
         String image = taskSpec.getImage();
         if (image != null && !image.trim().isEmpty()) {
             LOGGER.info("Using image [" + image + "] to start " + containerName);
@@ -106,8 +106,8 @@ public class DockerTaskExecutor implements TaskExecutor {
         try {
             this.workerDockerRequestHelper.pullImage(image);
         } catch (Exception e) {
-            e.printStackTrace();
-            LOGGER.info("Error to pull docker image");
+            LOGGER.info("Error to pull docker image: " + image + " for the task spec " + taskSpec.getSpec() +
+                    "with error " + e.getMessage());
         }
     }
 
@@ -119,14 +119,14 @@ public class DockerTaskExecutor implements TaskExecutor {
         return commandsList.toArray(new Command[commandsSize]);
     }
 
-    protected int[] executeCommands(Command[] commands) {
+    protected int[] executeCommands(Command[] commands, String taskId) {
         int[] commandsResults = new int[commands.length];
         Arrays.fill(commandsResults, TaskExecutionResult.UNDETERMINED_RESULT);
         for (int i = 0; i < commands.length; i++) {
             Command c = commands[i];
             c.setState(CommandState.RUNNING);
             try {
-                Integer exitCode = executeCommand(c);
+                Integer exitCode = executeCommand(c, taskId);
                 commandsResults[i] = exitCode;
                 c.setExitcode(exitCode);
                 c.setState(CommandState.FINISHED);
@@ -166,25 +166,31 @@ public class DockerTaskExecutor implements TaskExecutor {
             this.workerDockerRequestHelper.stop();
             return SUCCESS_EXIT_CODE;
         } catch (Exception e) {
-            e.printStackTrace();
+            LOGGER.error("Failed to stop container with name " + this.getContainerName() +
+                    " with exit code " + FAIL_EXIT_CODE);
+
             return FAIL_EXIT_CODE;
         }
     }
 
-    protected Integer executeCommand(Command command) throws Exception {
-        LOGGER.info("Executing command [" + command.getCommand() + "] in worker [" + this.getContainerName() + "].");
+    protected Integer executeCommand(Command command, String taskId) throws Exception {
+        LOGGER.info("Executing command of the [" + command.getCommand() + "for the task [" + taskId + "]" +
+                this.getContainerName() + "].");
         String execId = this.workerDockerRequestHelper.createExecInstance(command.getCommand());
         this.workerDockerRequestHelper.startExecInstance(execId);
         ExecInstanceResult execInstanceResult = this.workerDockerRequestHelper.inspectExecInstance(execId);
         while (execInstanceResult.getExitCode() == null) {
             execInstanceResult = this.workerDockerRequestHelper.inspectExecInstance(execId);
+            final long poolingPeriodTime = 300;
+
             try {
-                sleep(300);
+                sleep(poolingPeriodTime);
             } catch (InterruptedException e) {
-                e.printStackTrace();
+               LOGGER.error(e.getMessage(), e);
             }
         }
-        LOGGER.info("Executed command [" + command.getCommand() + "] with exitcode=[" + execInstanceResult.getExitCode() + "] in worker [" + this.getContainerName() + "].");
+        LOGGER.info("Executed command [" + command.getCommand() + "] for the task [" + taskId + "] with exitcode=[" +
+                execInstanceResult.getExitCode() + "] in worker [" + this.getContainerName() + "].");
         return execInstanceResult.getExitCode();
     }
 
@@ -198,13 +204,12 @@ public class DockerTaskExecutor implements TaskExecutor {
         return "DockerTaskExecutor imageId={" + getImageId() + "} containerName={" + getContainerName() + "}";
     }
 
-    public String getContainerName() {
+    private String getContainerName() {
         return this.containerName;
     }
 
-    public String getImageId() {
+    private String getImageId() {
         return this.imageId;
     }
-
 
 }
