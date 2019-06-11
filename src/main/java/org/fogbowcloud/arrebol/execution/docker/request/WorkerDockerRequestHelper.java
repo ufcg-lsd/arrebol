@@ -21,11 +21,10 @@ public class WorkerDockerRequestHelper {
 
     private final Logger LOGGER = Logger.getLogger(WorkerDockerRequestHelper.class);
 
-    public WorkerDockerRequestHelper(String address, String containerName, String image) throws Exception {
+    public WorkerDockerRequestHelper(String address, String containerName, String image) {
         this.httpWrapper = new HttpWrapper();
         this.address = address;
         this.containerName = containerName;
-        this.pullImage(image);
         this.containerRequestHelper = new ContainerRequestHelper(address, containerName, image);
     }
 

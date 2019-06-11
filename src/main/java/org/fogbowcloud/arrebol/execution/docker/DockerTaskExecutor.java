@@ -30,7 +30,8 @@ public class DockerTaskExecutor implements TaskExecutor {
     private WorkerDockerRequestHelper workerDockerRequestHelper;
     private final Logger LOGGER = Logger.getLogger(DockerTaskExecutor.class);
 
-    public DockerTaskExecutor(String imageId, String containerName, String address) throws Exception {
+    public DockerTaskExecutor(String imageId, String containerName, String address) {
+        this.imageId = imageId;
         this.containerName = containerName;
         this.workerDockerRequestHelper = new WorkerDockerRequestHelper(address, containerName, imageId);
     }
