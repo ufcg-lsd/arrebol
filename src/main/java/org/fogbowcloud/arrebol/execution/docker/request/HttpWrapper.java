@@ -16,6 +16,7 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.message.BasicHeader;
 import org.apache.http.util.EntityUtils;
+import org.apache.log4j.Logger;
 
 public class HttpWrapper {
 
@@ -27,6 +28,8 @@ public class HttpWrapper {
     public static final String HTTP_METHOD_POST = HttpPost.METHOD_NAME;
     public static final String HTTP_METHOD_GET = HttpGet.METHOD_NAME;
     public static final String HTTP_METHOD_DELETE = HttpDelete.METHOD_NAME;
+
+    private final Logger LOGGER = Logger.getLogger(ContainerRequestHelper.class);
 
     private static HttpClient createHttpClient() {
         return HttpClients.createMinimal();
@@ -76,9 +79,11 @@ public class HttpWrapper {
                 return EntityUtils.toString(response.getEntity());
 
             } else if(statusCode >= CLIENT_SIDE_CODE_ERRO_INIT && statusCode <= SERVER_SIDE_ERRO_MAX) {
-                throw new Exception("Erro on request - Method ["+method+"] " +
-                        "Endpoint: ["+endpoint+"] - Status: "+statusCode+" -  " +
-                        "Msg: "+response.getStatusLine().toString());
+                String msg = "Erro on request - Method ["+method+"] " +
+                "Endpoint: ["+endpoint+"] - Status: "+statusCode+" -  " +
+                        "Msg: "+response.getStatusLine().toString();
+                LOGGER.info(msg);
+                throw new Exception(msg);
             } else {
                 return response.getStatusLine().toString();
             }

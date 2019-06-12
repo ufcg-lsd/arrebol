@@ -21,20 +21,18 @@ public class DockerWorkerCreator implements WorkerCreator{
     public Collection<Worker> createWorkers(Integer poolId, Configuration configuration) {
         Collection<Worker> workers = new LinkedList<>();
         int poolSize = configuration.getWorkerPoolSize();
-        String imageId = configuration.getImageId();
         for(String address : configuration.getResourceAddresses()){
             for (int i = 0; i < poolSize; i++) {
                 LOGGER.info("Creating docker worker with address=" + address);
-                Worker worker = createDockerWorker(poolId, i, imageId, address);
+                Worker worker = createDockerWorker(poolId, i, address);
                 workers.add(worker);
             }
         }
         return workers;
     }
 
-    private Worker createDockerWorker(Integer poolId, int resourceId, String imageId, String address) {
-        TaskExecutor executor = new DockerTaskExecutor(imageId, "docker-executor-" +
-                UUID.randomUUID().toString(), address);
+    private Worker createDockerWorker(Integer poolId, int resourceId, String address) {
+        TaskExecutor executor = new DockerTaskExecutor("docker-executor-" + UUID.randomUUID().toString(), address);
         Specification resourceSpec = null;
         return new MatchAnyWorker(resourceSpec, "resourceId-"+resourceId, poolId, executor);
     }
