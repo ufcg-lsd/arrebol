@@ -79,10 +79,10 @@ public class HttpWrapper {
                 return EntityUtils.toString(response.getEntity());
 
             } else if(statusCode >= CLIENT_SIDE_CODE_ERRO_INIT && statusCode <= SERVER_SIDE_ERRO_MAX) {
-                String msg = "Erro on request - Method ["+method+"] " +
-                "Endpoint: ["+endpoint+"] - Status: "+statusCode+" -  " +
+                String msg = "Error on request - Method ["+method+"] " +
+                "Endpoint: ["+endpoint+"] - Body: ["+ EntityUtils.toString(body) +"] Status: "+statusCode+" -  " +
                         "Msg: "+response.getStatusLine().toString();
-                LOGGER.info(msg);
+                LOGGER.error(msg);
                 throw new Exception(msg);
             } else {
                 return response.getStatusLine().toString();
