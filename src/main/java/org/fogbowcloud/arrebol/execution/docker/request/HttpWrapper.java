@@ -79,7 +79,7 @@ public class HttpWrapper {
                 return EntityUtils.toString(response.getEntity());
 
             } else if(statusCode >= CLIENT_SIDE_CODE_ERRO_INIT && statusCode <= SERVER_SIDE_ERRO_MAX) {
-                String msg = "Error on request - Method ["+method+"] " +
+                String msg = "Request error - Method ["+method+"] " +
                 "Endpoint: ["+endpoint+"] - Body: ["+ EntityUtils.toString(body) +"] Status: "+statusCode+" -  " +
                         "Msg: "+response.getStatusLine().toString();
                 LOGGER.error(msg);
