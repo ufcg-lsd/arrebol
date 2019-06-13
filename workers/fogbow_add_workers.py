@@ -19,6 +19,11 @@ def create_token():
     token = response.json()['token']
     return token
 
+def getImages(token):
+    response = requests.get(ras_images,
+                headers={'Fogbow-User-Token':token, 'Content-Type':'application/json'})
+    return response.json()
+
 def create_compute(token, specification):
     response = requests.post(ras_compute_endpoint,
                 json=specification, 
@@ -88,8 +93,7 @@ def add_resource(token, specification):
         public_ip_id = create_public_ip(token, compute_id)
         result, message = wait_public_ip(token, public_ip_id, constants.INTERVAL_CHECK_PUBLIC_IP_STATE_SEC, 20)
         if result:
-            resource_id = str(uuid.uuid4())
-            resource = {'resource_id':resource_id, 'compute_id':compute_id, 'public_ip':public_ip_id}
+            resource = {'compute_id':compute_id, 'public_ip':public_ip_id}
             return resource
         else:
             delete_public_ip(token, public_ip_id)
@@ -104,19 +108,20 @@ def add_resource(token, specification):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("-i", "--imageId", default="",
+    ap.add_argument("-i", "--imageId",
                     help="Id of the compute image")
-    ap.add_argument("-m", "--memory", default="",
+    ap.add_argument("-m", "--memory",
                     help="Compute memory size")
-    ap.add_argument("-c", "--vCPU", default="",
+    ap.add_argument("-c", "--vCPU",
                     help="Amount of compute cpu")
-    ap.add_argument("-d", "--disk", default="",
+    ap.add_argument("-d", "--disk",
                     help="Compute disk size")
+    ap.add_argument("-n", "--name",
+                    help="Compute name")
     args = vars(ap.parse_args())
 
     #TODO Add information about using args.
-    args['public_key'] = public_key
-    args['name'] = compute_name
+    #args['public_key'] = public_key
     my_token = create_token()
 
     response = add_resource(my_token, args)
@@ -125,6 +130,10 @@ def main():
         sys.exit(1)
     else:
         print(response)
+        my_file = open("workers.txt", "a")
+        my_file.write(str(response))
+        my_file.write('\n')
+        my_file.close()
         sys.exit(0)
 
 if __name__== "__main__":
