@@ -3,12 +3,14 @@ package org.fogbowcloud.arrebol.execution.docker.request;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
+import org.apache.http.util.EntityUtils;
 import org.apache.log4j.Logger;
 import org.fogbowcloud.arrebol.execution.docker.DockerVariable;
 import org.fogbowcloud.arrebol.execution.docker.constans.DockerConstants;
 import org.fogbowcloud.arrebol.execution.docker.exceptions.DockerCreateContainerException;
 import org.fogbowcloud.arrebol.execution.docker.exceptions.DockerRemoveContainerException;
 import org.fogbowcloud.arrebol.execution.docker.exceptions.DockerStartException;
+import org.fogbowcloud.arrebol.execution.docker.exceptions.NotFoundDockerImage;
 import org.fogbowcloud.arrebol.models.task.TaskSpec;
 import org.fogbowcloud.arrebol.utils.AppUtil;
 import org.json.JSONObject;
@@ -35,7 +37,7 @@ public class WorkerDockerRequestHelper {
         this.containerRequestHelper = new ContainerRequestHelper(address, containerName);
     }
 
-    public String start(TaskSpec taskSpec) throws DockerCreateContainerException, DockerStartException, UnsupportedEncodingException {
+    public String start(TaskSpec taskSpec) throws DockerCreateContainerException, DockerStartException, NotFoundDockerImage, UnsupportedEncodingException {
         setUpContainerRequirements(taskSpec);
         String containerId = this.containerRequestHelper.createContainer();
         this.containerRequestHelper.startContainer();
@@ -50,6 +52,7 @@ public class WorkerDockerRequestHelper {
     public String createExecInstance(String command) throws Exception {
         final String endpoint = String.format("%s/containers/%s/exec", this.address, this.containerName);
         StringEntity body = jsonCreateExecInstance(command);
+        LOGGER.debug("body of the request to create an exec=[" + EntityUtils.toString(body) + "]");
         String response = this.httpWrapper.doRequest(HttpPost.METHOD_NAME, endpoint, body);
         return AppUtil.getValueFromJsonStr("Id", response);
     }
@@ -105,7 +108,7 @@ public class WorkerDockerRequestHelper {
         try {
             this.pullImage(image);
         } catch (Exception e) {
-            LOGGER.info("Error to pull docker image: " + image + " for the task spec " + taskSpec.getSpec() +
+            throw new NotFoundDockerImage("Error to pull docker image: " + image + " for the task spec " + taskSpec.getSpec() +
                     "with error " + e.getMessage());
         }
     }
@@ -125,7 +128,7 @@ public class WorkerDockerRequestHelper {
 
     private StringEntity jsonCreateExecInstance(String command) throws UnsupportedEncodingException {
         JSONObject jsonObject = new JSONObject();
-        AppUtil.makeBodyField(jsonObject, "Tty", true);
+        AppUtil.makeBodyField(jsonObject, "Tty", false);
 
         List<String> commandBash = Arrays.asList("/bin/bash", "-c", command);
         AppUtil.makeBodyField(jsonObject, "Cmd", commandBash);
@@ -136,7 +139,7 @@ public class WorkerDockerRequestHelper {
     private StringEntity jsonStartExecInstance() throws UnsupportedEncodingException {
         JSONObject jsonObject = new JSONObject();
         AppUtil.makeBodyField(jsonObject, "Detach", false);
-        AppUtil.makeBodyField(jsonObject, "Tty", false);
+        AppUtil.makeBodyField(jsonObject, "Tty", true);
         return new StringEntity(jsonObject.toString());
     }
 
