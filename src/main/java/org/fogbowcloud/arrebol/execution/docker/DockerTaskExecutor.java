@@ -47,7 +47,7 @@ public class DockerTaskExecutor implements TaskExecutor {
             LOGGER.info("Container " + getContainerName() + " started successfully for task " + task.getId());
             Command[] commands = getCommands(task);
             LOGGER.info("Starting to execute commands [len=" + commands.length + "] of task " + task.getId());
-            int[] commandsResults = executeCommands(commands, task.getId());
+            int[] commandsResults = sendCommands2Worker(commands, task.getId());
 
             Integer stopStatus = this.stop();
             if (stopStatus != SUCCESS_EXIT_CODE) {
@@ -70,6 +70,7 @@ public class DockerTaskExecutor implements TaskExecutor {
         return commandsList.toArray(new Command[commandsSize]);
     }
 
+    /*
     private int[] executeCommands(Command[] commands, String taskId) {
         int[] commandsResults = new int[commands.length];
         Arrays.fill(commandsResults, TaskExecutionResult.UNDETERMINED_RESULT);
@@ -86,6 +87,21 @@ public class DockerTaskExecutor implements TaskExecutor {
             }
         }
         return commandsResults;
+    }
+    */
+    
+    private int[] sendCommands2Worker(Command[] commands, String taskId) {
+        for (int i = 0; i < commands.length; i++) {
+            Command c = commands[i];
+            try {
+                Integer exitCode = sendCommand2Worker(c, taskId);
+                c.setExitcode(exitCode);
+                c.setState(CommandState.FINISHED);
+            } catch (Throwable t) {
+                c.setState(CommandState.FAILED);
+            }
+        }
+        return new int[1];
     }
 
     private TaskExecutionResult getTaskResult(Command[] commands, int[] commandsResults) {
@@ -130,10 +146,35 @@ public class DockerTaskExecutor implements TaskExecutor {
         }
     }
 
+    /*
     private Integer executeCommand(Command command, String taskId) throws Exception {
         LOGGER.info("Executing command of the [" + command.getCommand() + "] for the task [" + taskId + "]" +
                 this.getContainerName() + "].");
         String execId = this.workerDockerRequestHelper.createExecInstance(command.getCommand());
+        this.workerDockerRequestHelper.startExecInstance(execId);
+
+        ExecInstanceResult execInstanceResult = this.workerDockerRequestHelper.inspectExecInstance(execId);
+        while (execInstanceResult.getExitCode() == null) {
+            execInstanceResult = this.workerDockerRequestHelper.inspectExecInstance(execId);
+            final long poolingPeriodTime = 300;
+
+            try {
+                sleep(poolingPeriodTime);
+            } catch (InterruptedException e) {
+               LOGGER.error(e.getMessage(), e);
+            }
+        }
+        LOGGER.info("Executed command [" + command.getCommand() + "] for the task [" + taskId + "] with exitcode=[" +
+                execInstanceResult.getExitCode() + "] in worker [" + this.getContainerName() + "].");
+        return execInstanceResult.getExitCode();
+    }
+    */
+    
+    private Integer sendCommand2Worker(Command command, String taskId) throws Exception {
+        LOGGER.info("Sending command to the [" + command.getCommand() + "] for the task [" + taskId
+                + "]" + this.getContainerName() + "].");
+        String execId = this.workerDockerRequestHelper
+                .createExecInstance("echo " + command.getCommand() + " >> /tmp/" + taskId + ".ts");
         this.workerDockerRequestHelper.startExecInstance(execId);
 
         ExecInstanceResult execInstanceResult = this.workerDockerRequestHelper.inspectExecInstance(execId);
