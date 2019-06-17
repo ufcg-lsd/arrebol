@@ -85,20 +85,25 @@ public class ArrebolController {
         final String imageIdMsg = "Docker Image ID configuration property wrong or missing." + verifyMsg;
         final String poolTypeMsg = "Worker Pool Type configuration property wrong or missing." + verifyMsg;
         final String resourceAddressesMsg = "Docker Image ID configuration property wrong or missing." + verifyMsg;
-        final String workerPoolSize = "Docker Image ID configuration property wrong or missing." + verifyMsg;
+        final String workerPoolSizeMsg = "Docker Image ID configuration property wrong or missing." + verifyMsg;
 
-        if (this.configuration.getImageId().trim().isEmpty()) {
+        String imageId = this.configuration.getImageId();
+        String poolType = this.configuration.getPoolType();
+        List<String> resourceAddresses = this.configuration.getResourceAddresses();
+        Integer workerPoolSize = this.configuration.getWorkerPoolSize();
+
+        if (imageId != null && imageId.trim().isEmpty() && imageId.contains(":") ) {
           LOGGER.error(imageIdMsg);
           throw new Exception(imageIdMsg);
-        } else if (this.configuration.getPoolType().trim().isEmpty()) {
+        } else if (poolType != null && poolType.trim().isEmpty()) {
           LOGGER.error(poolTypeMsg);
           throw new Exception(poolTypeMsg);
-        } else if (this.configuration.getResourceAddresses().isEmpty()) {
+        } else if (resourceAddresses != null && resourceAddresses.isEmpty()) {
           LOGGER.error(resourceAddressesMsg);
           throw new Exception(resourceAddressesMsg);
-        } else if (this.configuration.getWorkerPoolSize() == 0) {
-          LOGGER.error(workerPoolSize);
-          throw new Exception(workerPoolSize);
+        } else if (workerPoolSize != null && workerPoolSize == 0) {
+          LOGGER.error(workerPoolSizeMsg);
+          throw new Exception(workerPoolSizeMsg);
         }
     }
 
