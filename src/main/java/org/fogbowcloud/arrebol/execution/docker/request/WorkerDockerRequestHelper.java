@@ -36,8 +36,9 @@ public class WorkerDockerRequestHelper {
     }
 
     public String start(TaskSpec taskSpec) throws DockerCreateContainerException, DockerStartException, UnsupportedEncodingException {
-        setUpContainerRequirements(taskSpec);
-        String containerId = this.containerRequestHelper.createContainer();
+        setUpImage(taskSpec);
+        Map<String, String> requirements  = setUpContainerRequirements(taskSpec);
+        String containerId = this.containerRequestHelper.createContainer(taskSpec.getImage(), requirements);
         this.containerRequestHelper.startContainer();
         LOGGER.info("Started the container " + this.containerName);
         return containerId;
@@ -66,8 +67,7 @@ public class WorkerDockerRequestHelper {
         return instanceExecResult(response);
     }
 
-    private void setUpContainerRequirements(TaskSpec taskSpec) {
-        setUpImage(taskSpec);
+    private Map<String, String> setUpContainerRequirements(TaskSpec taskSpec) {
         Map<String, String> mapRequirements = new HashMap<>();
         String dockerRequirements = taskSpec.getSpec().getRequirements().get(DockerConstants.METADATA_DOCKER_REQUIREMENTS);
         if (dockerRequirements != null) {
@@ -89,20 +89,19 @@ public class WorkerDockerRequestHelper {
                         break;
                 }
             }
-            this.setRequirements(mapRequirements);
         }
+        return mapRequirements;
     }
 
     private void setUpImage(TaskSpec taskSpec) {
         String image = taskSpec.getImage();
-        if (image != null && !image.trim().isEmpty()) {
-            LOGGER.info("Using image [" + image + "] to start " + containerName);
-            this.setImage(image);
-        } else {
-            LOGGER.info("Using default image [" + DockerVariable.DEFAULT_IMAGE + "] to start " + containerName);
-            this.setImage(DockerVariable.DEFAULT_IMAGE);
-        }
         try {
+            if (image != null && !image.trim().isEmpty()) {
+                LOGGER.info("Using image [" + image + "] to start " + containerName);
+            } else {
+                LOGGER.info("Using default image [" + DockerVariable.DEFAULT_IMAGE + "] to start " + containerName);
+                image = DockerVariable.DEFAULT_IMAGE;
+            }
             this.pullImage(image);
         } catch (Exception e) {
             LOGGER.info("Error to pull docker image: " + image + " for the task spec " + taskSpec.getSpec() +
@@ -113,14 +112,6 @@ public class WorkerDockerRequestHelper {
     public void pullImage(String imageId) throws Exception {
         final String endpoint = String.format("%s/images/create?fromImage=%s:latest", this.address, imageId);
         this.httpWrapper.doRequest(HttpPost.METHOD_NAME, endpoint);
-    }
-
-    public void setRequirements(Map<String, String> requirements){
-        this.containerRequestHelper.setRequirements(requirements);
-    }
-
-    public void setImage(String image){
-        this.containerRequestHelper.setImage(image);
     }
 
     private StringEntity jsonCreateExecInstance(String command) throws UnsupportedEncodingException {
