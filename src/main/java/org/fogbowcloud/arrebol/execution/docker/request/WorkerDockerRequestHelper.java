@@ -36,9 +36,9 @@ public class WorkerDockerRequestHelper {
     }
 
     public String start(TaskSpec taskSpec) throws DockerCreateContainerException, DockerStartException, UnsupportedEncodingException {
-        setUpImage(taskSpec);
+        String image = setUpImage(taskSpec);
         Map<String, String> requirements  = setUpContainerRequirements(taskSpec);
-        String containerId = this.containerRequestHelper.createContainer(taskSpec.getImage(), requirements);
+        String containerId = this.containerRequestHelper.createContainer(image, requirements);
         this.containerRequestHelper.startContainer();
         LOGGER.info("Started the container " + this.containerName);
         return containerId;
@@ -93,7 +93,7 @@ public class WorkerDockerRequestHelper {
         return mapRequirements;
     }
 
-    private void setUpImage(TaskSpec taskSpec) {
+    private String setUpImage(TaskSpec taskSpec) {
         String image = taskSpec.getImage();
         try {
             if (image != null && !image.trim().isEmpty()) {
@@ -107,6 +107,7 @@ public class WorkerDockerRequestHelper {
             LOGGER.info("Error to pull docker image: " + image + " for the task spec " + taskSpec.getSpec() +
                     "with error " + e.getMessage());
         }
+        return image;
     }
 
     public void pullImage(String imageId) throws Exception {
