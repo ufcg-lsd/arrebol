@@ -8,11 +8,7 @@ import org.fogbowcloud.arrebol.models.command.CommandState;
 import org.fogbowcloud.arrebol.models.task.Task;
 import org.fogbowcloud.arrebol.models.task.TaskSpec;
 import org.fogbowcloud.arrebol.scheduler.SchedulerPolicy;
-
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.util.Arrays;
 import java.util.List;
 
 public class RawTaskExecutor implements TaskExecutor {
@@ -26,37 +22,33 @@ public class RawTaskExecutor implements TaskExecutor {
 
         TaskExecutionResult.RESULT result = TaskExecutionResult.RESULT.SUCCESS;
 
-        //converting to array to make bellow code simple?
+        // converting to array to make bellow code simple?
         TaskSpec taskSpec = task.getTaskSpec();
         List<Command> commandsList = taskSpec.getCommands();
 
-        Command[] cmds = new Command[commandsList.size()];
-        commandsList.toArray(cmds);
-
-        int [] exitValues = new int[cmds.length];
-        Arrays.fill(exitValues, TaskExecutionResult.UNDETERMINED_RESULT);
-
-        for(int i = 0; i < cmds.length; i++) {
-            Command commandToExec = cmds[i];
+        for (Command cmd : commandsList) {
             try {
-                commandToExec.setState(CommandState.RUNNING);
-                exitValues[i] = executeCommand(commandToExec);
-                commandToExec.setState(CommandState.FINISHED);
-                logger.debug("taskId={" + task.getId() + "} cmd_index={" + i + "}" +
-                        " cmd={" + cmds[i] + "} result={" + exitValues[i] + "}");
+                cmd.setState(CommandState.RUNNING);
+                int exitCode = executeCommand(cmd);
+                cmd.setState(CommandState.FINISHED);
+                cmd.setExitcode(exitCode);
+                logger.debug("taskId={" + task.getId() + "} cmd={" + cmd + "} result={" + exitCode
+                        + "}");
             } catch (Throwable t) {
-                logger.error("taskId={" + task.getId() + "} cmd_index={" + i + "}" +
-                        " cmd={" + cmds[i], t);
-                commandToExec.setState(CommandState.FAILED);
+                logger.error("taskId={" + task.getId() + "} cmd={" + cmd, t);
+                cmd.setState(CommandState.FAILED);
+                cmd.setExitcode(TaskExecutionResult.UNDETERMINED_RESULT);
                 result = TaskExecutionResult.RESULT.FAILURE;
             }
         }
 
-        return new TaskExecutionResult(result, exitValues, cmds);
+        return new TaskExecutionResult(result,
+                commandsList.toArray(new Command[commandsList.size()]));
     }
 
     private int executeCommand(Command command) throws IOException, InterruptedException {
-        //TODO: there are plenty of room to improve this code: working directories, stdout/stderr gathering, env vars
+        // TODO: there are plenty of room to improve this code: working directories, stdout/stderr
+        // gathering, env vars
         String cmdStr = command.getCommand();
         ProcessBuilder builder = new ProcessBuilder("/bin/bash", "-c", cmdStr);
         Process process = builder.start();
