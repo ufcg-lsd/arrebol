@@ -57,7 +57,7 @@ public class ArrebolController {
 
             DockerVariable.DEFAULT_IMAGE = this.configuration.getImageId();
             setWorkerCreator(this.configuration.getPoolType());
-        } catch (FileNotFoundException e) {
+        } catch (IOException e) {
             LOGGER.error("Error on loading properties file path=" + path, e);
             System.exit(FAIL_EXIT_CODE);
         } catch (Exception e) {
@@ -161,7 +161,7 @@ public class ArrebolController {
         return null;
     }
 
-    private void setWorkerCreator(String type){
+    private void setWorkerCreator(String type) throws IOException{
         switch (type){
             case DockerConstants.DOCKER_TYPE:
                 this.workerCreator = new DockerWorkerCreator();

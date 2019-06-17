@@ -1,5 +1,6 @@
 package org.fogbowcloud.arrebol.execution.creator;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
 import org.fogbowcloud.arrebol.ArrebolController;
 import org.fogbowcloud.arrebol.Configuration;
@@ -8,7 +9,10 @@ import org.fogbowcloud.arrebol.execution.TaskExecutor;
 import org.fogbowcloud.arrebol.execution.Worker;
 import org.fogbowcloud.arrebol.models.specification.Specification;
 import org.fogbowcloud.arrebol.resource.MatchAnyWorker;
-
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.UUID;
@@ -16,6 +20,16 @@ import java.util.UUID;
 public class DockerWorkerCreator implements WorkerCreator{
 
     private final Logger LOGGER = Logger.getLogger(ArrebolController.class);
+    private static final String TS_NAME = "in-namespace-task-script-executor.sh"; 
+    private final String tsFileContent;
+    
+    public DockerWorkerCreator() throws IOException {
+        Resource resource = new ClassPathResource(TS_NAME);
+        try(InputStream is = resource.getInputStream()) {
+            this.tsFileContent = IOUtils.toString(is, "UTF-8");
+            LOGGER.debug("Task script executor content [" + this.tsFileContent + "]");
+        }
+    }
 
     @Override
     public Collection<Worker> createWorkers(Integer poolId, Configuration configuration) {
@@ -32,7 +46,7 @@ public class DockerWorkerCreator implements WorkerCreator{
     }
 
     private Worker createDockerWorker(Integer poolId, int resourceId, String address) {
-        TaskExecutor executor = new DockerTaskExecutor("docker-executor-" + UUID.randomUUID().toString(), address);
+        TaskExecutor executor = new DockerTaskExecutor("docker-executor-" + UUID.randomUUID().toString(), address, this.tsFileContent);
         Specification resourceSpec = null;
         return new MatchAnyWorker(resourceSpec, "resourceId-"+resourceId, poolId, executor);
     }
