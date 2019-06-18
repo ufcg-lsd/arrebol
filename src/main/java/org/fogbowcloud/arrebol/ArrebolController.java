@@ -62,6 +62,7 @@ public class ArrebolController {
             System.exit(FAIL_EXIT_CODE);
         } catch (Exception e) {
             LOGGER.error(e.getMessage(), e);
+            System.exit(FAIL_EXIT_CODE);
         }
 
         String queueId = UUID.randomUUID().toString();
