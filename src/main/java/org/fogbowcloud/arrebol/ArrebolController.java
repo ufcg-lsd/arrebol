@@ -92,16 +92,16 @@ public class ArrebolController {
         List<String> resourceAddresses = this.configuration.getResourceAddresses();
         Integer workerPoolSize = this.configuration.getWorkerPoolSize();
 
-        if (imageId != null && imageId.trim().isEmpty() && imageId.contains(":") ) {
+        if (imageId != null || imageId.trim().isEmpty() || imageId.contains(":") ) {
           LOGGER.error(imageIdMsg);
           throw new Exception(imageIdMsg);
-        } else if (poolType != null && poolType.trim().isEmpty()) {
+        } else if (poolType != null || poolType.trim().isEmpty()) {
           LOGGER.error(poolTypeMsg);
           throw new Exception(poolTypeMsg);
-        } else if (resourceAddresses != null && resourceAddresses.isEmpty()) {
+        } else if (resourceAddresses != null || resourceAddresses.isEmpty()) {
           LOGGER.error(resourceAddressesMsg);
           throw new Exception(resourceAddressesMsg);
-        } else if (workerPoolSize != null && workerPoolSize == 0) {
+        } else if (workerPoolSize != null || workerPoolSize == 0) {
           LOGGER.error(workerPoolSizeMsg);
           throw new Exception(workerPoolSizeMsg);
         }
