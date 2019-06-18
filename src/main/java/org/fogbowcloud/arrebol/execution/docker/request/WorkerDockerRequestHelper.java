@@ -43,21 +43,29 @@ public class WorkerDockerRequestHelper {
         return containerId;
     }
 
-    public void stop() throws DockerRemoveContainerException {
+    public void stopContainer() throws DockerRemoveContainerException {
         this.containerRequestHelper.removeContainer();
     }
 
-    public String createExecInstance(String command) throws Exception {
+    public String createAttachExecInstance(String command)throws Exception {
         final String endpoint = String.format("%s/containers/%s/exec", this.address, this.containerName);
-        StringEntity body = jsonCreateExecInstance(command);
+        StringEntity body = jsonCreateExecInstance(command, true);
         String response = this.httpWrapper.doRequest(HttpPost.METHOD_NAME, endpoint, body);
         return AppUtil.getValueFromJsonStr("Id", response);
     }
 
-    public void startExecInstance(String execId) throws Exception {
+    public String createExecInstance(String command) throws Exception {
+        final String endpoint = String.format("%s/containers/%s/exec", this.address, this.containerName);
+        StringEntity body = jsonCreateExecInstance(command, false);
+        String response = this.httpWrapper.doRequest(HttpPost.METHOD_NAME, endpoint, body);
+        return AppUtil.getValueFromJsonStr("Id", response);
+    }
+
+    public String startExecInstance(String execId) throws Exception {
         final String endpoint = String.format("%s/exec/%s/start", this.address, execId);
         StringEntity body = jsonStartExecInstance();
-        this.httpWrapper.doRequest(HttpPost.METHOD_NAME, endpoint, body);
+        String response = this.httpWrapper.doRequest(HttpPost.METHOD_NAME, endpoint, body);
+        return response;
     }
 
     public ExecInstanceResult inspectExecInstance(String execId) throws Exception {
@@ -123,7 +131,7 @@ public class WorkerDockerRequestHelper {
         this.containerRequestHelper.setImage(image);
     }
 
-    private StringEntity jsonCreateExecInstance(String command) throws UnsupportedEncodingException {
+    private StringEntity jsonCreateExecInstance(String command, Boolean attach) throws UnsupportedEncodingException {
         JSONObject jsonObject = new JSONObject();
         AppUtil.makeBodyField(jsonObject, "Tty", true);
 
