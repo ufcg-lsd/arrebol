@@ -12,10 +12,8 @@ import org.fogbowcloud.arrebol.models.command.Command;
 import org.fogbowcloud.arrebol.models.command.CommandState;
 import org.fogbowcloud.arrebol.models.task.Task;
 import org.fogbowcloud.arrebol.models.task.TaskState;
-
 import java.io.UnsupportedEncodingException;
 import java.util.List;
-
 import static java.lang.Thread.sleep;
 
 public class DockerTaskExecutor implements TaskExecutor {
@@ -26,7 +24,7 @@ public class DockerTaskExecutor implements TaskExecutor {
     private WorkerDockerRequestHelper workerDockerRequestHelper;
     private final Logger LOGGER = Logger.getLogger(DockerTaskExecutor.class);
     private final String tsContent;
-    private static final String WORKER_TS_FILEPATH = "/tmp/task-script-executor.sh"; 
+    private static final String WORKER_TS_FILEPATH = "/tmp/task-script-executor.sh";
 
     public DockerTaskExecutor(String containerName, String address, String tsContent) {
         this.tsContent = tsContent;
@@ -40,9 +38,7 @@ public class DockerTaskExecutor implements TaskExecutor {
         // FIXME: also, follow the SAME log format we used in the RawTaskExecutor
         TaskExecutionResult taskExecutionResult;
 
-        Integer startStatus = this.start(task);
-
-        // TODO: sync execution state by exit codes
+        Integer startStatus = this.startExecution(task);
 
         if (startStatus != SUCCESS_EXIT_CODE) {
             LOGGER.error("Exit code from container start: " + startStatus);
@@ -50,15 +46,15 @@ public class DockerTaskExecutor implements TaskExecutor {
         } else {
             LOGGER.debug("Container " + getContainerName() + " started successfully for task "
                     + task.getId());
-            
+
             List<Command> commands = task.getTaskSpec().getCommands();
             try {
                 sendTaskScriptExecutor(task.getId());
-                
+
                 String taskScriptFilepath = "/tmp/" + task.getId() + ".ts";
                 sendTaskScript(commands, taskScriptFilepath, task.getId());
-                
                 runScriptExecutor(task.getId(), taskScriptFilepath);
+
             } catch (Throwable e) {
                 LOGGER.error(e);
                 for (Command cmd : commands) {
@@ -67,7 +63,15 @@ public class DockerTaskExecutor implements TaskExecutor {
                 }
             }
 
-            Integer stopStatus = this.stop();
+            try {
+                setAllToRunning(commands);
+                final String EC_FILEPATH = "/tmp/" + task.getId() + ".ec";
+                updateCommandsState(commands, EC_FILEPATH);
+            } catch (Exception e) {
+                LOGGER.error(e);
+            }
+
+            Integer stopStatus = this.stopExecution();
             if (stopStatus != SUCCESS_EXIT_CODE) {
                 LOGGER.error("Exit code from container " + getContainerName()
                         + " stopped for the task " + task.getId() + " : " + stopStatus);
@@ -80,16 +84,80 @@ public class DockerTaskExecutor implements TaskExecutor {
             return taskExecutionResult;
         }
     }
-    
+
+    private void updateCommandsState(List<Command> cmds, String ecFilepath) throws Exception {
+        final long poolingPeriodTime = 2000;
+        int nextRunningIndex = 0;
+        while (nextRunningIndex < cmds.size()) {
+            String ecContent = getEcFile(ecFilepath);
+            int[] exitcodes = parseEcContentToArray(ecContent, cmds.size());
+            nextRunningIndex = syncCommandsWithEC(cmds, exitcodes, nextRunningIndex);
+
+            try {
+                sleep(poolingPeriodTime);
+            } catch (InterruptedException e) {
+                LOGGER.error(e);
+            }
+        }
+    }
+
+    private Integer syncCommandsWithEC(List<Command> cmds, int exitcodes[], int nextRunningIndex) {
+        while (nextRunningIndex < cmds.size()) {
+            int exitCode = exitcodes[nextRunningIndex];
+            if (exitCode != TaskExecutionResult.UNDETERMINED_RESULT) {
+                Command cmd = cmds.get(nextRunningIndex);
+                if (evaluateCommand(cmd, exitCode)) {
+                    nextRunningIndex++;
+                } else {
+                    break;
+                }
+            }
+        }
+        return nextRunningIndex;
+    }
+
+    private boolean evaluateCommand(Command command, int exitcode) {
+        boolean isRunning = true;
+        if (exitcode != TaskExecutionResult.UNDETERMINED_RESULT) {
+            if (exitcode == 0) {
+                command.setState(CommandState.FINISHED);
+            } else {
+                command.setState(CommandState.FAILED);
+            }
+            command.setExitcode(exitcode);
+            isRunning = false;
+        }
+        return !isRunning;
+    }
+
+    private int[] parseEcContentToArray(String ecContent, int cmdsSize) {
+        String strExitcodes[] = ecContent.split("\n");
+        int exitcodes[] = new int[cmdsSize];
+        for (int i = 0; i < strExitcodes.length; i++) {
+            exitcodes[i] = Integer.valueOf(strExitcodes[i]);
+        }
+        for (int i = strExitcodes.length; i < cmdsSize; i++) {
+            exitcodes[i] = TaskExecutionResult.UNDETERMINED_RESULT;
+        }
+        return exitcodes;
+    }
+
+    private String getEcFile(String ecFilePath) throws Exception {
+        String commandToGetFile = String.format("cat %s", ecFilePath);
+        String execId = this.workerDockerRequestHelper.createAttachExecInstance(commandToGetFile);
+        String response = this.workerDockerRequestHelper.startExecInstance(execId).trim();
+        return response;
+    }
+
     private void runScriptExecutor(String taskId, String tsFilepath) throws Exception {
         asyncExecuteCommand("/bin/bash " + WORKER_TS_FILEPATH + " -d -tsf=" + tsFilepath, taskId);
     }
-    
+
     private void sendTaskScriptExecutor(String taskId) throws Exception {
         LOGGER.debug("Sending Task Script Executor to Docker Worker");
+        String writeCommand = "echo '" + this.tsContent + "' > " + WORKER_TS_FILEPATH;
         try {
-            int exitCode = executeCommand(
-                    "echo '" + this.tsContent + "' > " + WORKER_TS_FILEPATH, taskId);
+            int exitCode = executeCommand(writeCommand, taskId);
             if (exitCode != 0) {
                 throw new Exception(
                         "Error while trying to execute send task script executor, exit code ["
@@ -107,7 +175,7 @@ public class DockerTaskExecutor implements TaskExecutor {
         LOGGER.debug(
                 "Starting to execute commands [len=" + commands.size() + "] of task " + taskId);
 
-        int[] deliveryResults = executeCommands(commands, "echo '", "' >> " + tsFilepath, taskId);
+        int[] deliveryResults = writeCommandsToTsFile(commands, tsFilepath, taskId);
 
         for (int i = 0; i < commands.size(); i++) {
             if (deliveryResults[i] != 0) {
@@ -117,13 +185,13 @@ public class DockerTaskExecutor implements TaskExecutor {
         }
     }
 
-    private int[] executeCommands(List<Command> commands, String cmdPrefix, String cmdSuffix, String taskId) {
+    private int[] writeCommandsToTsFile(List<Command> commands, String tsFilepath, String taskId) {
         int[] exitCodes = new int[commands.size()];
         int i = 0;
-        for(Command cmd : commands) {
+        for (Command cmd : commands) {
             Integer exitCode;
             try {
-                exitCode = executeCommand(cmdPrefix + cmd.getCommand() + cmdSuffix, taskId);
+                exitCode = writeToFile(cmd.getCommand(), tsFilepath, taskId);
             } catch (Throwable t) {
                 exitCode = TaskExecutionResult.UNDETERMINED_RESULT;
             }
@@ -131,7 +199,7 @@ public class DockerTaskExecutor implements TaskExecutor {
         }
         return exitCodes;
     }
-    
+
     private TaskExecutionResult getTaskResult(List<Command> commands) {
         TaskExecutionResult.RESULT result = TaskExecutionResult.RESULT.SUCCESS;
         for (Command cmd : commands) {
@@ -143,13 +211,21 @@ public class DockerTaskExecutor implements TaskExecutor {
         return new TaskExecutionResult(result, new Command[commands.size()]);
     }
 
-    private Integer start(Task task) {
+    private void setAllToRunning(List<Command> commands) {
+        for (Command c : commands) {
+            c.setState(CommandState.RUNNING);
+        }
+    }
+
+
+    private Integer startExecution(Task task) {
         try {
             LOGGER.info("Starting DockerTaskExecutor " + this.getContainerName());
             this.workerDockerRequestHelper.start(task.getTaskSpec());
             return SUCCESS_EXIT_CODE;
         } catch (DockerStartException | DockerCreateContainerException de) {
-            LOGGER.info("Set task [" + task.getId() + "] to FAILED because a container error [" + de.getMessage() + "]");
+            LOGGER.info("Set task [" + task.getId() + "] to FAILED because a container error ["
+                    + de.getMessage() + "]");
             task.setState(TaskState.FAILED);
             return FAIL_EXIT_CODE;
         } catch (UnsupportedEncodingException e) {
@@ -159,23 +235,36 @@ public class DockerTaskExecutor implements TaskExecutor {
         }
     }
 
-    private Integer stop() {
+    private Integer stopExecution() {
         try {
             LOGGER.info("Stopping DockerTaskExecutor " + this.getContainerName());
-            this.workerDockerRequestHelper.stop();
+            this.workerDockerRequestHelper.stopContainer();
             return SUCCESS_EXIT_CODE;
-        } catch (DockerRemoveContainerException de){
-            LOGGER.error("Failed to stop container with name " + this.getContainerName() +
-                    " with exit code " + FAIL_EXIT_CODE);
+        } catch (DockerRemoveContainerException de) {
+            LOGGER.error("Failed to stop container with name " + this.getContainerName()
+                    + " with exit code " + FAIL_EXIT_CODE);
 
             return FAIL_EXIT_CODE;
         }
+    }
+
+    private Integer writeToFile(String command, String file, String taskId) throws Exception {
+        return executeCommand("echo '" + command + "' >> " + file, taskId);
     }
 
     private Integer executeCommand(String command, String taskId) throws Exception {
         LOGGER.info("Sending command to the [" + command + "] for the task [" + taskId + "]"
                 + this.getContainerName() + "].");
 
+        ExecInstanceResult execInstanceResult = executeCommand(command);
+
+        LOGGER.info("Executed command [" + command + "] for the task [" + taskId
+                + "] with exitcode=[" + execInstanceResult.getExitCode() + "] in worker ["
+                + this.getContainerName() + "].");
+        return execInstanceResult.getExitCode();
+    }
+
+    private ExecInstanceResult executeCommand(String command) throws Exception {
         String execId = this.workerDockerRequestHelper.createExecInstance(command);
         this.workerDockerRequestHelper.startExecInstance(execId);
 
@@ -191,12 +280,9 @@ public class DockerTaskExecutor implements TaskExecutor {
                 LOGGER.error(e.getMessage(), e);
             }
         }
-        LOGGER.info("Executed command [" + command + "] for the task [" + taskId
-                + "] with exitcode=[" + execInstanceResult.getExitCode() + "] in worker ["
-                + this.getContainerName() + "].");
-        return execInstanceResult.getExitCode();
+        return execInstanceResult;
     }
-    
+
     private void asyncExecuteCommand(String command, String taskId) throws Exception {
         LOGGER.info("Sending command to the [" + command + "] for the task [" + taskId + "]"
                 + this.getContainerName() + "].");
