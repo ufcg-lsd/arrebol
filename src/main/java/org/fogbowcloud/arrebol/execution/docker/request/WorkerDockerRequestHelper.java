@@ -134,6 +134,7 @@ public class WorkerDockerRequestHelper {
     private StringEntity jsonCreateExecInstance(String command, Boolean attach) throws UnsupportedEncodingException {
         JSONObject jsonObject = new JSONObject();
         AppUtil.makeBodyField(jsonObject, "Tty", true);
+        AppUtil.makeBodyField(jsonObject, "AttachStdout", attach);
 
         List<String> commandBash = Arrays.asList("/bin/bash", "-c", command);
         AppUtil.makeBodyField(jsonObject, "Cmd", commandBash);
