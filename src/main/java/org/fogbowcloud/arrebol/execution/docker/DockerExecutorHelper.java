@@ -14,13 +14,12 @@ public class DockerExecutorHelper {
 
     private final String taskScriptContent;
     private DockerCommandExecutor dockerCommandExecutor;
-    private final String containerName;
+    private final WorkerDockerRequestHelper workerDockerRequestHelper;
 
-    public DockerExecutorHelper(String taskScriptContent, WorkerDockerRequestHelper workerDockerRequestHelper,
-                                String containerName) {
+    public DockerExecutorHelper(String taskScriptContent, WorkerDockerRequestHelper workerDockerRequestHelper) {
         this.taskScriptContent = taskScriptContent;
-        this.containerName = containerName;
-        this.dockerCommandExecutor = new DockerCommandExecutor(workerDockerRequestHelper, containerName);
+        this.workerDockerRequestHelper = workerDockerRequestHelper;
+        this.dockerCommandExecutor = new DockerCommandExecutor(workerDockerRequestHelper);
     }
 
     public void runScriptExecutor(String taskId, String tsFilepath) throws Exception {
@@ -40,7 +39,7 @@ public class DockerExecutorHelper {
         } catch (Throwable e) {
             LOGGER.error(e);
             throw new Exception("Cannot send task script executor of ID=" + taskId + " to worker="
-                    + this.containerName);
+                    + this.workerDockerRequestHelper.getContainerName());
         }
     }
 
@@ -57,6 +56,24 @@ public class DockerExecutorHelper {
                         + "] exit code=" + deliveryResults[i]);
             }
         }
+    }
+
+    public String getEcFile(String ecFilePath) throws Exception {
+        String commandToGetFile = String.format("cat %s", ecFilePath);
+        String execId = this.workerDockerRequestHelper.createAttachExecInstance(commandToGetFile);
+        return this.workerDockerRequestHelper.startExecInstance(execId).trim();
+    }
+
+    public int[] parseEcContentToArray(String ecContent, int cmdsSize) {
+        String[] strExitcodes = ecContent.split("\r\n");
+        int[] exitcodes = new int[cmdsSize];
+        for (int i = 0; i < strExitcodes.length; i++) {
+            exitcodes[i] = Integer.valueOf(strExitcodes[i]);
+        }
+        for (int i = strExitcodes.length; i < cmdsSize; i++) {
+            exitcodes[i] = TaskExecutionResult.UNDETERMINED_RESULT;
+        }
+        return exitcodes;
     }
 
     private int[] writeCommandsToTsFile(List<Command> commands, String tsFilepath, String taskId) {
@@ -77,6 +94,4 @@ public class DockerExecutorHelper {
     private Integer writeToFile(String command, String file, String taskId) throws Exception {
         return this.dockerCommandExecutor.executeCommand("echo '" + command + "' >> " + file, taskId);
     }
-
-
 }

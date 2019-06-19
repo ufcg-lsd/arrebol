@@ -11,6 +11,7 @@ import org.fogbowcloud.arrebol.models.command.Command;
 import org.fogbowcloud.arrebol.models.command.CommandState;
 import org.fogbowcloud.arrebol.models.task.Task;
 import org.fogbowcloud.arrebol.models.task.TaskState;
+
 import java.io.UnsupportedEncodingException;
 import java.util.List;
 import static java.lang.Thread.sleep;
@@ -27,8 +28,7 @@ public class DockerTaskExecutor implements TaskExecutor {
 
     public DockerTaskExecutor(String containerName, String address, String taskScriptContent) {
         this.workerDockerRequestHelper = new WorkerDockerRequestHelper(address, containerName);
-        this.dockerExecutorHelper = new DockerExecutorHelper(taskScriptContent, this.workerDockerRequestHelper,
-                containerName);
+        this.dockerExecutorHelper = new DockerExecutorHelper(taskScriptContent, this.workerDockerRequestHelper);
     }
 
     @Override
@@ -38,7 +38,7 @@ public class DockerTaskExecutor implements TaskExecutor {
         // FIXME: also, follow the SAME log format we used in the RawTaskExecutor
         TaskExecutionResult taskExecutionResult;
 
-        Integer startStatus = this.startExecution(task);
+        Integer startStatus = startExecution(task);
 
         if (startStatus != SUCCESS_EXIT_CODE) {
             LOGGER.error("Exit code from container start: " + startStatus);
@@ -65,13 +65,13 @@ public class DockerTaskExecutor implements TaskExecutor {
 
             try {
                 setAllToRunning(commands);
-                final String EC_FILEPATH = "/tmp/" + task.getId() + ".tc.ec";
+                final String EC_FILEPATH = "/tmp/" + task.getId() + ".ts.ec";
                 updateCommandsState(commands, EC_FILEPATH);
             } catch (Exception e) {
                 LOGGER.error(e);
             }
 
-            Integer stopStatus = this.stopExecution();
+            Integer stopStatus = stopExecution();
             if (stopStatus != SUCCESS_EXIT_CODE) {
                 LOGGER.error("Exit code from container " + getContainerName()
                         + " stopped for the task " + task.getId() + " : " + stopStatus);
@@ -85,12 +85,42 @@ public class DockerTaskExecutor implements TaskExecutor {
         }
     }
 
+    private Integer startExecution(Task task) {
+        try {
+            LOGGER.info("Starting DockerTaskExecutor " + this.workerDockerRequestHelper.getContainerName());
+            this.workerDockerRequestHelper.start(task.getTaskSpec());
+            return SUCCESS_EXIT_CODE;
+        } catch (DockerStartException | DockerCreateContainerException de) {
+            LOGGER.info("Set task [" + task.getId() + "] to FAILED because a container error ["
+                    + de.getMessage() + "]");
+            task.setState(TaskState.FAILED);
+            return FAIL_EXIT_CODE;
+        } catch (UnsupportedEncodingException e) {
+            LOGGER.info("Set task [" + task.getId() + "] to FAILED [" + e.getMessage() + "]");
+            task.setState(TaskState.FAILED);
+            return FAIL_EXIT_CODE;
+        }
+    }
+
+    private Integer stopExecution() {
+        try {
+            LOGGER.info("Stopping DockerTaskExecutor " + this.workerDockerRequestHelper.getContainerName());
+            this.workerDockerRequestHelper.stopContainer();
+            return SUCCESS_EXIT_CODE;
+        } catch (DockerRemoveContainerException de) {
+            LOGGER.error("Failed to stop container with name " + this.workerDockerRequestHelper.getContainerName()
+                    + " with exit code " + FAIL_EXIT_CODE);
+
+            return FAIL_EXIT_CODE;
+        }
+    }
+
     private void updateCommandsState(List<Command> cmds, String ecFilepath) throws Exception {
         final long poolingPeriodTime = 2000;
         int nextRunningIndex = 0;
         while (nextRunningIndex < cmds.size()) {
-            String ecContent = getEcFile(ecFilepath);
-            int[] exitcodes = parseEcContentToArray(ecContent, cmds.size());
+            String ecContent = this.dockerExecutorHelper.getEcFile(ecFilepath);
+            int[] exitcodes = this.dockerExecutorHelper.parseEcContentToArray(ecContent, cmds.size());
             nextRunningIndex = syncCommandsWithEC(cmds, exitcodes, nextRunningIndex);
 
             try {
@@ -101,7 +131,7 @@ public class DockerTaskExecutor implements TaskExecutor {
         }
     }
 
-    private Integer syncCommandsWithEC(List<Command> cmds, int exitcodes[], int nextRunningIndex) {
+    private Integer syncCommandsWithEC(List<Command> cmds, int[] exitcodes, int nextRunningIndex) {
         while (nextRunningIndex < cmds.size()) {
             int exitCode = exitcodes[nextRunningIndex];
             if (exitCode != TaskExecutionResult.UNDETERMINED_RESULT) {
@@ -130,25 +160,6 @@ public class DockerTaskExecutor implements TaskExecutor {
         return !isRunning;
     }
 
-    private int[] parseEcContentToArray(String ecContent, int cmdsSize) {
-        String strExitcodes[] = ecContent.split("\r\n");
-        int exitcodes[] = new int[cmdsSize];
-        for (int i = 0; i < strExitcodes.length; i++) {
-            exitcodes[i] = Integer.valueOf(strExitcodes[i]);
-        }
-        for (int i = strExitcodes.length; i < cmdsSize; i++) {
-            exitcodes[i] = TaskExecutionResult.UNDETERMINED_RESULT;
-        }
-        return exitcodes;
-    }
-
-    private String getEcFile(String ecFilePath) throws Exception {
-        String commandToGetFile = String.format("cat %s", ecFilePath);
-        String execId = this.workerDockerRequestHelper.createAttachExecInstance(commandToGetFile);
-        String response = this.workerDockerRequestHelper.startExecInstance(execId).trim();
-        return response;
-    }
-
     private TaskExecutionResult getTaskResult(List<Command> commands) {
         TaskExecutionResult.RESULT result = TaskExecutionResult.RESULT.SUCCESS;
         for (Command cmd : commands) {
@@ -166,39 +177,7 @@ public class DockerTaskExecutor implements TaskExecutor {
         }
     }
 
-
-    private Integer startExecution(Task task) {
-        try {
-            LOGGER.info("Starting DockerTaskExecutor " + this.getContainerName());
-            this.workerDockerRequestHelper.start(task.getTaskSpec());
-            return SUCCESS_EXIT_CODE;
-        } catch (DockerStartException | DockerCreateContainerException de) {
-            LOGGER.info("Set task [" + task.getId() + "] to FAILED because a container error ["
-                    + de.getMessage() + "]");
-            task.setState(TaskState.FAILED);
-            return FAIL_EXIT_CODE;
-        } catch (UnsupportedEncodingException e) {
-            LOGGER.info("Set task [" + task.getId() + "] to FAILED [" + e.getMessage() + "]");
-            task.setState(TaskState.FAILED);
-            return FAIL_EXIT_CODE;
-        }
-    }
-
-    private Integer stopExecution() {
-        try {
-            LOGGER.info("Stopping DockerTaskExecutor " + this.getContainerName());
-            this.workerDockerRequestHelper.stopContainer();
-            return SUCCESS_EXIT_CODE;
-        } catch (DockerRemoveContainerException de) {
-            LOGGER.error("Failed to stop container with name " + this.getContainerName()
-                    + " with exit code " + FAIL_EXIT_CODE);
-
-            return FAIL_EXIT_CODE;
-        }
-    }
-
     private String getContainerName() {
         return this.workerDockerRequestHelper.getContainerName();
     }
-
 }

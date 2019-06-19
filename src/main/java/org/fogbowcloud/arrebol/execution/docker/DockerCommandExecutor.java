@@ -10,22 +10,20 @@ public class DockerCommandExecutor {
 
     private static final Logger LOGGER = Logger.getLogger(DockerCommandExecutor.class);
     private final WorkerDockerRequestHelper workerDockerRequestHelper;
-    private final String containerName;
 
-    public DockerCommandExecutor(WorkerDockerRequestHelper workerDockerRequestHelper, String containerName) {
+    public DockerCommandExecutor(WorkerDockerRequestHelper workerDockerRequestHelper) {
         this.workerDockerRequestHelper = workerDockerRequestHelper;
-        this.containerName = containerName;
     }
 
     public Integer executeCommand(String command, String taskId) throws Exception {
         LOGGER.info("Sending command to the [" + command + "] for the task [" + taskId + "]"
-                + this.containerName + "].");
+                + this.workerDockerRequestHelper.getContainerName() + "].");
 
         ExecInstanceResult execInstanceResult = executeCommand(command);
 
         LOGGER.info("Executed command [" + command + "] for the task [" + taskId
                 + "] with exitcode=[" + execInstanceResult.getExitCode() + "] in worker ["
-                + this.containerName + "].");
+                + this.workerDockerRequestHelper.getContainerName() + "].");
         return execInstanceResult.getExitCode();
     }
 
@@ -50,7 +48,7 @@ public class DockerCommandExecutor {
 
     public void asyncExecuteCommand(String command, String taskId) throws Exception {
         LOGGER.info("Sending command to the [" + command + "] for the task [" + taskId + "]"
-                + this.containerName + "].");
+                + this.workerDockerRequestHelper.getContainerName() + "].");
 
         String execId = this.workerDockerRequestHelper.createExecInstance(command);
         this.workerDockerRequestHelper.startExecInstance(execId);
