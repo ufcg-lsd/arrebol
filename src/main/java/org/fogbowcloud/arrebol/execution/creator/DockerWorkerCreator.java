@@ -20,11 +20,11 @@ import java.util.UUID;
 public class DockerWorkerCreator implements WorkerCreator{
 
     private final Logger LOGGER = Logger.getLogger(ArrebolController.class);
-    private static final String TS_NAME = "in-namespace-task-script-executor.sh"; 
+    private static final String TASK_SCRIPT_NAME = "in-namespace-task-script-executor.sh";
     private final String tsFileContent;
     
     public DockerWorkerCreator() throws IOException {
-        Resource resource = new ClassPathResource(TS_NAME);
+        Resource resource = new ClassPathResource(TASK_SCRIPT_NAME);
         try(InputStream is = resource.getInputStream()) {
             this.tsFileContent = IOUtils.toString(is, "UTF-8");
             LOGGER.debug("Task script executor content [" + this.tsFileContent + "]");
