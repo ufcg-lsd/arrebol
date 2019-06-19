@@ -52,7 +52,8 @@ public class DockerTaskExecutor implements TaskExecutor {
                 this.dockerExecutorHelper.sendTaskScriptExecutor(task.getId());
 
                 String taskScriptFilepath = "/tmp/" + task.getId() + ".ts";
-                this.dockerExecutorHelper.sendTaskScript(commands, taskScriptFilepath, task.getId());
+                this.dockerExecutorHelper.sendTaskScript(commands, taskScriptFilepath,
+                        task.getId());
                 this.dockerExecutorHelper.runScriptExecutor(task.getId(), taskScriptFilepath);
 
             } catch (Throwable e) {
@@ -116,19 +117,26 @@ public class DockerTaskExecutor implements TaskExecutor {
     }
 
     private void updateCommandsState(List<Command> cmds, String ecFilepath) throws Exception {
-        final long poolingPeriodTime = 2000;
-        int nextRunningIndex = 0;
-        while (nextRunningIndex < cmds.size()) {
-            String ecContent = this.dockerExecutorHelper.getEcFile(ecFilepath);
-            int[] exitcodes = this.dockerExecutorHelper.parseEcContentToArray(ecContent, cmds.size());
-            nextRunningIndex = syncCommandsWithEC(cmds, exitcodes, nextRunningIndex);
+        try {
+            final long poolingPeriodTime = 2000;
+            int nextRunningIndex = 0;
+            while (nextRunningIndex < cmds.size()) {
+                String ecContent = this.dockerExecutorHelper.getEcFile(ecFilepath);
+                int[] exitcodes = this.dockerExecutorHelper.parseEcContentToArray(ecContent, cmds.size());
+                nextRunningIndex = syncCommandsWithEC(cmds, exitcodes, nextRunningIndex);
 
-            try {
-                sleep(poolingPeriodTime);
-            } catch (InterruptedException e) {
-                LOGGER.error(e);
+                try {
+                    sleep(poolingPeriodTime);
+                } catch (InterruptedException e) {
+                    LOGGER.error(e);
+                }
             }
+        } catch (Throwable e){
+            LOGGER.error("Could not fetch information about running commands.");
+            LOGGER.error(e);
+            setNotFinishedToFailed(cmds);
         }
+
     }
 
     private Integer syncCommandsWithEC(List<Command> cmds, int[] exitcodes, int nextRunningIndex) {
@@ -174,6 +182,16 @@ public class DockerTaskExecutor implements TaskExecutor {
     private void setAllToRunning(List<Command> commands) {
         for (Command c : commands) {
             c.setState(CommandState.RUNNING);
+        }
+    }
+
+    private void setNotFinishedToFailed(List<Command> commands) {
+        for (Command c : commands) {
+            if (!(c.getState().equals(CommandState.FINISHED))
+                    || c.getState().equals(CommandState.FAILED)) {
+                c.setState(CommandState.FAILED);
+                c.setExitcode(TaskExecutionResult.UNDETERMINED_RESULT);
+            }
         }
     }
 

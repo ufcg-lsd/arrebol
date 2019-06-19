@@ -2,6 +2,7 @@ package org.fogbowcloud.arrebol.execution.docker;
 
 import org.apache.log4j.Logger;
 import org.fogbowcloud.arrebol.execution.TaskExecutionResult;
+import org.fogbowcloud.arrebol.execution.docker.request.ExecInstanceResult;
 import org.fogbowcloud.arrebol.execution.docker.request.WorkerDockerRequestHelper;
 import org.fogbowcloud.arrebol.models.command.Command;
 
@@ -60,8 +61,13 @@ public class DockerExecutorHelper {
 
     public String getEcFile(String ecFilePath) throws Exception {
         String commandToGetFile = String.format("cat %s", ecFilePath);
-        String execId = this.workerDockerRequestHelper.createAttachExecInstance(commandToGetFile);
-        return this.workerDockerRequestHelper.startExecInstance(execId).trim();
+        String execId = this.workerDockerRequestHelper.createExecInstance(commandToGetFile, true, true);
+        String response = this.workerDockerRequestHelper.startExecInstance(execId).trim();
+        ExecInstanceResult result = this.workerDockerRequestHelper.inspectExecInstance(execId);
+        if(result.getExitCode() != 0){
+            throw new RuntimeException("No zero exitcode [" + result.getExitCode() + "] to get ec file: " + response);
+        }
+        return response;
     }
 
     public int[] parseEcContentToArray(String ecContent, int cmdsSize) {

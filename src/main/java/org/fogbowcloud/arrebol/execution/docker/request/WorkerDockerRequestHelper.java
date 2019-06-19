@@ -47,16 +47,9 @@ public class WorkerDockerRequestHelper {
         this.containerRequestHelper.removeContainer();
     }
 
-    public String createAttachExecInstance(String command)throws Exception {
+    public String createExecInstance(String command, boolean attachStdout, boolean attachStderr) throws Exception {
         final String endpoint = String.format("%s/containers/%s/exec", this.address, this.containerName);
-        StringEntity body = jsonCreateExecInstance(command, true);
-        String response = this.httpWrapper.doRequest(HttpPost.METHOD_NAME, endpoint, body);
-        return AppUtil.getValueFromJsonStr("Id", response);
-    }
-
-    public String createExecInstance(String command) throws Exception {
-        final String endpoint = String.format("%s/containers/%s/exec", this.address, this.containerName);
-        StringEntity body = jsonCreateExecInstance(command, false);
+        StringEntity body = jsonCreateExecInstance(command, attachStdout, attachStderr);
         String response = this.httpWrapper.doRequest(HttpPost.METHOD_NAME, endpoint, body);
         return AppUtil.getValueFromJsonStr("Id", response);
     }
@@ -131,10 +124,11 @@ public class WorkerDockerRequestHelper {
         this.containerRequestHelper.setImage(image);
     }
 
-    private StringEntity jsonCreateExecInstance(String command, Boolean attach) throws UnsupportedEncodingException {
+    private StringEntity jsonCreateExecInstance(String command, boolean attachStdout, boolean attachStderr) throws UnsupportedEncodingException {
         JSONObject jsonObject = new JSONObject();
         AppUtil.makeBodyField(jsonObject, "Tty", true);
-        AppUtil.makeBodyField(jsonObject, "AttachStdout", attach);
+        AppUtil.makeBodyField(jsonObject, "AttachStdout", attachStdout);
+        AppUtil.makeBodyField(jsonObject, "AttachStdout", attachStderr);
 
         List<String> commandBash = Arrays.asList("/bin/bash", "-c", command);
         AppUtil.makeBodyField(jsonObject, "Cmd", commandBash);
