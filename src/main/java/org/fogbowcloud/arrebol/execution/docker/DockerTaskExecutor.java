@@ -116,19 +116,26 @@ public class DockerTaskExecutor implements TaskExecutor {
     }
 
     private void updateCommandsState(List<Command> cmds, String ecFilepath) throws Exception {
-        final long poolingPeriodTime = 2000;
-        int nextRunningIndex = 0;
-        while (nextRunningIndex < cmds.size()) {
-            String ecContent = this.dockerExecutorHelper.getEcFile(ecFilepath);
-            int[] exitcodes = this.dockerExecutorHelper.parseEcContentToArray(ecContent, cmds.size());
-            nextRunningIndex = syncCommandsWithEC(cmds, exitcodes, nextRunningIndex);
+        try {
+            final long poolingPeriodTime = 2000;
+            int nextRunningIndex = 0;
+            while (nextRunningIndex < cmds.size()) {
+                String ecContent = this.dockerExecutorHelper.getEcFile(ecFilepath);
+                int[] exitcodes = this.dockerExecutorHelper.parseEcContentToArray(ecContent, cmds.size());
+                nextRunningIndex = syncCommandsWithEC(cmds, exitcodes, nextRunningIndex);
 
-            try {
-                sleep(poolingPeriodTime);
-            } catch (InterruptedException e) {
-                LOGGER.error(e);
+                try {
+                    sleep(poolingPeriodTime);
+                } catch (InterruptedException e) {
+                    LOGGER.error(e);
+                }
             }
+        } catch (Throwable e){
+            LOGGER.error("Could not fetch information about running commands.");
+            LOGGER.error(e);
+            setAllToFailed(cmds);
         }
+
     }
 
     private Integer syncCommandsWithEC(List<Command> cmds, int[] exitcodes, int nextRunningIndex) {
@@ -174,6 +181,12 @@ public class DockerTaskExecutor implements TaskExecutor {
     private void setAllToRunning(List<Command> commands) {
         for (Command c : commands) {
             c.setState(CommandState.RUNNING);
+        }
+    }
+
+    private void setAllToFailed(List<Command> commands) {
+        for (Command c : commands) {
+            c.setState(CommandState.FAILED);
         }
     }
 

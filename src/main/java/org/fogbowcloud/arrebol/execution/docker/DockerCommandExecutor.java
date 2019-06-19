@@ -28,7 +28,7 @@ public class DockerCommandExecutor {
     }
 
     private ExecInstanceResult executeCommand(String command) throws Exception {
-        String execId = this.workerDockerRequestHelper.createExecInstance(command);
+        String execId = this.workerDockerRequestHelper.createExecInstance(command, false, false);
         this.workerDockerRequestHelper.startExecInstance(execId);
 
         ExecInstanceResult execInstanceResult =
@@ -50,7 +50,7 @@ public class DockerCommandExecutor {
         LOGGER.info("Sending command to the [" + command + "] for the task [" + taskId + "]"
                 + this.workerDockerRequestHelper.getContainerName() + "].");
 
-        String execId = this.workerDockerRequestHelper.createExecInstance(command);
+        String execId = this.workerDockerRequestHelper.createExecInstance(command, false, false);
         this.workerDockerRequestHelper.startExecInstance(execId);
     }
 
