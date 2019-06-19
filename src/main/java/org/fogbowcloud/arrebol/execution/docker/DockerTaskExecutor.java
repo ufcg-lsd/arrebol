@@ -65,7 +65,7 @@ public class DockerTaskExecutor implements TaskExecutor {
 
             try {
                 setAllToRunning(commands);
-                final String EC_FILEPATH = "/tmp/" + task.getId() + ".ec";
+                final String EC_FILEPATH = "/tmp/" + task.getId() + ".tc.ec";
                 updateCommandsState(commands, EC_FILEPATH);
             } catch (Exception e) {
                 LOGGER.error(e);
@@ -131,7 +131,7 @@ public class DockerTaskExecutor implements TaskExecutor {
     }
 
     private int[] parseEcContentToArray(String ecContent, int cmdsSize) {
-        String strExitcodes[] = ecContent.split("\n");
+        String strExitcodes[] = ecContent.split("\r\n");
         int exitcodes[] = new int[cmdsSize];
         for (int i = 0; i < strExitcodes.length; i++) {
             exitcodes[i] = Integer.valueOf(strExitcodes[i]);

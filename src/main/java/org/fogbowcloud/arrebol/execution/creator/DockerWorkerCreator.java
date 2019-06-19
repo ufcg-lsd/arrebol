@@ -20,14 +20,14 @@ import java.util.UUID;
 public class DockerWorkerCreator implements WorkerCreator{
 
     private final Logger LOGGER = Logger.getLogger(ArrebolController.class);
-    private static final String TASK_SCRIPT_NAME = "in-namespace-task-script-executor.sh";
-    private final String tsFileContent;
+    private static final String TASK_SCRIPT_EXECUTOR_NAME = "task-script-executor.sh";
+    private final String tsExecutorFileContent;
     
     public DockerWorkerCreator() throws IOException {
-        Resource resource = new ClassPathResource(TASK_SCRIPT_NAME);
+        Resource resource = new ClassPathResource(TASK_SCRIPT_EXECUTOR_NAME);
         try(InputStream is = resource.getInputStream()) {
-            this.tsFileContent = IOUtils.toString(is, "UTF-8");
-            LOGGER.debug("Task script executor content [" + this.tsFileContent + "]");
+            this.tsExecutorFileContent = IOUtils.toString(is, "UTF-8");
+            LOGGER.debug("Task script executor content [" + this.tsExecutorFileContent + "]");
         }
     }
 
@@ -46,7 +46,7 @@ public class DockerWorkerCreator implements WorkerCreator{
     }
 
     private Worker createDockerWorker(Integer poolId, int resourceId, String address) {
-        TaskExecutor executor = new DockerTaskExecutor("docker-executor-" + UUID.randomUUID().toString(), address, this.tsFileContent);
+        TaskExecutor executor = new DockerTaskExecutor("docker-executor-" + UUID.randomUUID().toString(), address, this.tsExecutorFileContent);
         Specification resourceSpec = null;
         return new MatchAnyWorker(resourceSpec, "resourceId-"+resourceId, poolId, executor);
     }
