@@ -132,7 +132,7 @@ public class DockerTaskExecutor implements TaskExecutor {
 
     private int[] parseEcContentToArray(String ecContent, int cmdsSize) {
         String strExitcodes[] = ecContent.split("\n");
-        int exitcodes[] = new int[strExitcodes.length];
+        int exitcodes[] = new int[cmdsSize];
         for (int i = 0; i < strExitcodes.length; i++) {
             exitcodes[i] = Integer.valueOf(strExitcodes[i]);
         }
