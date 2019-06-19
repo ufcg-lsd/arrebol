@@ -64,8 +64,8 @@ public class DockerTaskExecutor implements TaskExecutor {
                 for (Command cmd : commands) {
                     cmd.setState(CommandState.FAILED);
                     cmd.setExitcode(TaskExecutionResult.UNDETERMINED_RESULT);
-                    task.setState(TaskState.FAILED);
                 }
+                task.setState(TaskState.FAILED);
             }
 
             try {
