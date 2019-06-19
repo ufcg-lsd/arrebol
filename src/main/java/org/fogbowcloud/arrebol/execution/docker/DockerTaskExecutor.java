@@ -52,7 +52,8 @@ public class DockerTaskExecutor implements TaskExecutor {
                 this.dockerExecutorHelper.sendTaskScriptExecutor(task.getId());
 
                 String taskScriptFilepath = "/tmp/" + task.getId() + ".ts";
-                this.dockerExecutorHelper.sendTaskScript(commands, taskScriptFilepath, task.getId());
+                this.dockerExecutorHelper.sendTaskScript(commands, taskScriptFilepath,
+                        task.getId());
                 this.dockerExecutorHelper.runScriptExecutor(task.getId(), taskScriptFilepath);
 
             } catch (Throwable e) {
@@ -133,7 +134,7 @@ public class DockerTaskExecutor implements TaskExecutor {
         } catch (Throwable e){
             LOGGER.error("Could not fetch information about running commands.");
             LOGGER.error(e);
-            setAllToFailed(cmds);
+            setNotFinishedToFailed(cmds);
         }
 
     }
@@ -184,9 +185,13 @@ public class DockerTaskExecutor implements TaskExecutor {
         }
     }
 
-    private void setAllToFailed(List<Command> commands) {
+    private void setNotFinishedToFailed(List<Command> commands) {
         for (Command c : commands) {
-            c.setState(CommandState.FAILED);
+            if (!(c.getState().equals(CommandState.FINISHED))
+                    || c.getState().equals(CommandState.FAILED)) {
+                c.setState(CommandState.FAILED);
+                c.setExitcode(TaskExecutionResult.UNDETERMINED_RESULT);
+            }
         }
     }
 
