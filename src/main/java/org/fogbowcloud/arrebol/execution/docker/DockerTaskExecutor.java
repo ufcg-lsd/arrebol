@@ -259,9 +259,6 @@ public class DockerTaskExecutor implements TaskExecutor {
         LOGGER.info("Sending command to the [" + command + "] for the task [" + taskId + "]"
                 + this.getContainerName() + "].");
 
-        String execId = this.workerDockerRequestHelper.createExecInstance(command);
-        this.workerDockerRequestHelper.startExecInstance(execId);
-
         ExecInstanceResult execInstanceResult = executeCommand(command);
 
         LOGGER.info("Executed command [" + command + "] for the task [" + taskId
