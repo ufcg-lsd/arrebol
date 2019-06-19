@@ -144,7 +144,7 @@ public class WorkerDockerRequestHelper {
     private StringEntity jsonStartExecInstance() throws UnsupportedEncodingException {
         JSONObject jsonObject = new JSONObject();
         AppUtil.makeBodyField(jsonObject, "Detach", false);
-        AppUtil.makeBodyField(jsonObject, "Tty", false);
+        AppUtil.makeBodyField(jsonObject, "Tty", true);
         return new StringEntity(jsonObject.toString());
     }
 

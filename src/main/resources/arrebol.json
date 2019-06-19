@@ -3,6 +3,6 @@
   "workerPoolSize":"5",
   "imageId":"wesleymonte/simple-worker",
   "resourceAddresses":[
-    "http://10.11.4.66:5555"
+    "http://localhost:5555"
   ]
 }

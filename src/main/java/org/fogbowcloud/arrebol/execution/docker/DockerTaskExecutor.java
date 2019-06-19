@@ -57,7 +57,6 @@ public class DockerTaskExecutor implements TaskExecutor {
                 
                 String taskScriptFilepath = "/tmp/" + task.getId() + ".ts";
                 sendTaskScript(commands, taskScriptFilepath, task.getId());
-                
                 runScriptExecutor(task.getId(), taskScriptFilepath);
 
             } catch (Throwable e) {
@@ -65,7 +64,17 @@ public class DockerTaskExecutor implements TaskExecutor {
                 for (Command cmd : commands) {
                     cmd.setState(CommandState.FAILED);
                     cmd.setExitcode(TaskExecutionResult.UNDETERMINED_RESULT);
+                    task.setState(TaskState.FAILED);
                 }
+            }
+
+            try {
+                setAllToRunning(commands);
+                final String EC_FILEPATH = "/tmp/" + task.getId() + ".ec";
+                syncCommands(commands, EC_FILEPATH);
+            } catch (Exception e) {
+                LOGGER.error(e);
+                task.setState(TaskState.FAILED);
             }
 
             Integer stopStatus = this.stopExecution();
@@ -82,25 +91,66 @@ public class DockerTaskExecutor implements TaskExecutor {
         }
     }
 
-    private void checkTaskResults(List<Command> commands, String taskScriptFilepath) throws Exception {
-        for(int i = 0; i < commands.size(); i++){
-            String checkCommand = String.format("awk 'NR==%d' %s", i + 1, taskScriptFilepath);
-            String execId = this.workerDockerRequestHelper.createAttachExecInstance(checkCommand);
-            String response = this.workerDockerRequestHelper.startExecInstance(execId);
-            while(response.isEmpty()){
-                final long poolingPeriodTime = 300;
-                try {
-                    sleep(poolingPeriodTime);
-                } catch (InterruptedException e) {
-                    LOGGER.error(e.getMessage(), e);
-                }
-                execId = this.workerDockerRequestHelper.createAttachExecInstance(checkCommand);
-                response = this.workerDockerRequestHelper.startExecInstance(execId);
+    private void syncCommands(List<Command> commands, String ecFilepath) throws Exception {
+        Integer indexOfLastRunning;
+        do {
+            indexOfLastRunning = Integer.MAX_VALUE;
+            String ecContent = getEcFile(ecFilepath);
+            int[] exitcodes = parseEcContentToArray(ecContent);
+            indexOfLastRunning = syncCommandsWithEC(commands, exitcodes, indexOfLastRunning);
+
+            final long poolingPeriodTime = 300;
+
+            try {
+                sleep(poolingPeriodTime);
+            } catch (InterruptedException e) {
+                LOGGER.error(e.getMessage(), e);
             }
-            //TODO Change command state
-            Integer exitcode = Integer.valueOf(response);
-            commands.get(i).setExitcode(exitcode);
+        } while(indexOfLastRunning != Integer.MAX_VALUE);
+    }
+
+    private Integer syncCommandsWithEC(List<Command> commands, int exitcodes[], int indexOfLastRunning){
+        Integer newLastIndex = Integer.MAX_VALUE;
+        for(int i = indexOfLastRunning; i < commands.size(); i++){
+            CommandState currentState = updateCommand(commands.get(i), exitcodes[i]);
+            if(currentState == CommandState.RUNNING && i < newLastIndex){
+                newLastIndex = i;
             }
+        }
+        return newLastIndex;
+    }
+
+    private CommandState updateCommand(Command command, Integer exitcode){
+        CommandState newState = CommandState.RUNNING;
+        if(exitcode.equals(Integer.MAX_VALUE)){
+            command.setState(newState);
+        } else {
+            if(exitcode == 0){
+                newState = CommandState.FINISHED;
+                command.setState(newState);
+            } else {
+                newState = CommandState.FAILED;
+                command.setState(newState);
+            }
+            command.setExitcode(exitcode);
+        }
+        return newState;
+    }
+
+    private int[] parseEcContentToArray(String ecContent){
+        String strExitcodes[] = ecContent.split("\n");
+        int exitcodes[] = new int[strExitcodes.length];
+        for(int i = 0; i < strExitcodes.length; i++){
+            exitcodes[i] = Integer.valueOf(strExitcodes[i]);
+        }
+        return exitcodes;
+    }
+
+    private String getEcFile(String ecFilePath) throws Exception {
+        String commandToGetFile = String.format("cat %s", ecFilePath);
+        String execId = this.workerDockerRequestHelper.createAttachExecInstance(commandToGetFile);
+        String response = this.workerDockerRequestHelper.startExecInstance(execId).trim();
+        return response;
     }
     
     private void runScriptExecutor(String taskId, String tsFilepath) throws Exception {
@@ -165,6 +215,12 @@ public class DockerTaskExecutor implements TaskExecutor {
         return new TaskExecutionResult(result, new Command[commands.size()]);
     }
 
+    private void setAllToRunning(List<Command> commands){
+        for(Command c : commands){
+            c.setState(CommandState.RUNNING);
+        }
+    }
+
 
     private Integer startExecution(Task task) {
         try {
@@ -206,7 +262,7 @@ public class DockerTaskExecutor implements TaskExecutor {
         String execId = this.workerDockerRequestHelper.createExecInstance(command);
         this.workerDockerRequestHelper.startExecInstance(execId);
 
-        ExecInstanceResult execInstanceResult = syncExecuteCommand(command, taskId);
+        ExecInstanceResult execInstanceResult = executeCommand(command);
 
         LOGGER.info("Executed command [" + command + "] for the task [" + taskId
                 + "] with exitcode=[" + execInstanceResult.getExitCode() + "] in worker ["
@@ -214,7 +270,7 @@ public class DockerTaskExecutor implements TaskExecutor {
         return execInstanceResult.getExitCode();
     }
 
-    private ExecInstanceResult syncExecuteCommand(String command, String taskId) throws Exception{
+    private ExecInstanceResult executeCommand(String command) throws Exception{
         String execId = this.workerDockerRequestHelper.createExecInstance(command);
         this.workerDockerRequestHelper.startExecInstance(execId);
 
