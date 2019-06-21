@@ -1,5 +1,5 @@
 package org.fogbowcloud.arrebol.models.job;
 
 public enum JobState {
-    SUBMITTED, READY, RUNNING, FINISHED, FAILED
+    SUBMITTED, QUEUED, RUNNING, FINISHED, FAILED
 }

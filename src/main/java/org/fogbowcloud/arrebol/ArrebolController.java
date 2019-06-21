@@ -157,7 +157,7 @@ public class ArrebolController {
 
     public String addJob(Job job) {
 
-        job.setJobState(JobState.READY);
+        job.setJobState(JobState.QUEUED);
         this.jobPool.put(job.getId(), job);
 
         for(Task task : job.getTasks()){
@@ -193,34 +193,28 @@ public class ArrebolController {
 
     private void updateJobState(Job job){
         JobState jobState = job.getJobState();
-        if(!jobState.equals(JobState.FINISHED) || !jobState.equals(JobState.FAILED)){
-            if(isAllFailed(job)){
-                jobState = JobState.FAILED;
-            } else {
-                for(Task task : job.getTasks()){
-                    if(task.getState().equals(TaskState.RUNNING) || task.getState().equals(TaskState.PENDING)){
-                        jobState = JobState.RUNNING;
-                        break;
-                    }
-                    if(task.getState().equals(TaskState.FINISHED) || task.getState().equals(TaskState.FAILED)){
-                        jobState = JobState.FINISHED;
-                    }
-                }
-            }
-            job.setJobState(jobState);
+        if(!jobState.equals(JobState.FAILED) || !jobState.equals(JobState.FINISHED)){
+          if(all(job.getTasks(), TaskState.FAILED.getId())){
+            job.setJobState(JobState.FAILED);
+          }
+          else if(all(job.getTasks(), TaskState.FINISHED.getId())){
+            job.setJobState(JobState.FINISHED);
+          }
+          else if(all(job.getTasks(), TaskState.PENDING.getId())){
+            job.setJobState(JobState.QUEUED);
+          } else {
+            job.setJobState(JobState.RUNNING);
+          }
         }
-
     }
 
-    private boolean isAllFailed(Job job){
-        boolean answer = true;
-        for(Task task : job.getTasks()){
-            if(!task.getState().equals(TaskState.FAILED)){
-                answer = false;
-                break;
-            }
+    public boolean all(Collection<Task> tasks, int mask){
+      for(Task t : tasks){
+        if((t.getState().getId() & mask) == 0){
+          return false;
         }
-        return answer;
+      }
+      return true;
     }
 
 }
