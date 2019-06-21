@@ -44,7 +44,8 @@ public class DockerTaskExecutor implements TaskExecutor {
 
         if (startStatus != SUCCESS_EXIT_CODE) {
             LOGGER.error("Exit code from container start: " + startStatus);
-            throw new DockerStartException("Could not start container " + getContainerName());
+            setAllFailed(task.getTaskSpec().getCommands());
+            return getTaskResult(task.getTaskSpec().getCommands());
         } else {
             LOGGER.debug("Container " + getContainerName() + " started successfully for task "
                     + task.getId());
@@ -93,11 +94,9 @@ public class DockerTaskExecutor implements TaskExecutor {
             return SUCCESS_EXIT_CODE;
         } catch (DockerStartException | DockerCreateContainerException | NotFoundDockerImage de) {
             LOGGER.error("Set task [" + task.getId() + "] to FAILED because a container error [" + de.getMessage() + "]");
-            task.setState(TaskState.FAILED);
             return FAIL_EXIT_CODE;
         } catch (UnsupportedEncodingException e) {
             LOGGER.error("Set task [" + task.getId() + "] to FAILED [" + e.getMessage() + "]");
-            task.setState(TaskState.FAILED);
             return FAIL_EXIT_CODE;
         }
     }
