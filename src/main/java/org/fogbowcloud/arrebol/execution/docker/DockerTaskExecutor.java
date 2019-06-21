@@ -16,6 +16,7 @@ import org.fogbowcloud.arrebol.models.task.TaskState;
 
 import java.io.UnsupportedEncodingException;
 import java.util.List;
+
 import static java.lang.Thread.sleep;
 
 public class DockerTaskExecutor implements TaskExecutor {
@@ -30,7 +31,8 @@ public class DockerTaskExecutor implements TaskExecutor {
 
     public DockerTaskExecutor(String containerName, String address, String taskScriptContent) {
         this.workerDockerRequestHelper = new WorkerDockerRequestHelper(address, containerName);
-        this.dockerExecutorHelper = new DockerExecutorHelper(taskScriptContent, this.workerDockerRequestHelper);
+        this.dockerExecutorHelper = new DockerExecutorHelper(taskScriptContent,
+            this.workerDockerRequestHelper);
     }
 
     @Override
@@ -39,79 +41,72 @@ public class DockerTaskExecutor implements TaskExecutor {
         // to its FAILURE state
         // FIXME: also, follow the SAME log format we used in the RawTaskExecutor
         TaskExecutionResult taskExecutionResult;
+        Integer startStatus = FAIL_EXIT_CODE;
 
-        Integer startStatus = startExecution(task);
+        try {
+            startExecution(task);
 
-        if (startStatus != SUCCESS_EXIT_CODE) {
-            LOGGER.error("Exit code from container start: " + startStatus);
-            setAllFailed(task.getTaskSpec().getCommands());
-            return getTaskResult(task.getTaskSpec().getCommands());
-        } else {
             LOGGER.debug("Container " + getContainerName() + " started successfully for task "
-                    + task.getId());
+                + task.getId());
 
-            List<Command> commands = task.getTaskSpec().getCommands();
-            try {
-                this.dockerExecutorHelper.sendTaskScriptExecutor(task.getId());
+            setupAndRun(task);
+            checkTask(task);
+            
+            stopExecution();
 
-                String taskScriptFilepath = "/tmp/" + task.getId() + ".ts";
-                this.dockerExecutorHelper.sendTaskScript(commands, taskScriptFilepath,
-                        task.getId());
-                this.dockerExecutorHelper.runScriptExecutor(task.getId(), taskScriptFilepath);
-
-            } catch (Throwable e) {
-                LOGGER.error(e);
-                setAllFailed(commands);
-            }
-
-            try {
-                final String EC_FILEPATH = "/tmp/" + task.getId() + ".ts.ec";
-                updateCommandsState(commands, EC_FILEPATH);
-            } catch (Throwable e) {
-                LOGGER.error("Could not update all commands state.");
-                LOGGER.error(e);
-                setNotFinishedToFailed(commands);
-            }
-
-            Integer stopStatus = stopExecution();
-            if (stopStatus != SUCCESS_EXIT_CODE) {
-                LOGGER.error("Exit code from container " + getContainerName()
-                        + " stopped for the task " + task.getId() + " : " + stopStatus);
-            }
-
-            taskExecutionResult = getTaskResult(commands);
-
+        } catch (DockerRemoveContainerException de) {
+            LOGGER.error(de);
+            LOGGER.error("Failed to stop container with name " + this.workerDockerRequestHelper.getContainerName() + " with exit code " + FAIL_EXIT_CODE);
+        } catch (Throwable t) {
+            LOGGER.error(t);
+            LOGGER.error("Set task [" + task.getId() + "] to FAILED [" + t.getMessage() + "]");
+            LOGGER.error("Exit code from container start: " + startStatus);
+            setNotFinishedToFailed(task.getTaskSpec().getCommands());
+        } finally {
+            taskExecutionResult = getTaskResult(task.getTaskSpec().getCommands());
             LOGGER.debug("Result of task [" + task.getId() + "]: "
-                    + taskExecutionResult.getResult().toString());
+                + taskExecutionResult.getResult().toString());
             return taskExecutionResult;
         }
+
     }
 
-    private Integer startExecution(Task task) {
+    private void setupAndRun(Task task) {
+        List<Command> commands = task.getTaskSpec().getCommands();
         try {
-            LOGGER.info("Starting DockerTaskExecutor " + this.workerDockerRequestHelper.getContainerName());
-            this.workerDockerRequestHelper.start(task.getTaskSpec());
-            return SUCCESS_EXIT_CODE;
-        } catch (DockerStartException | DockerCreateContainerException | NotFoundDockerImage de) {
-            LOGGER.error("Set task [" + task.getId() + "] to FAILED because a container error [" + de.getMessage() + "]");
-            return FAIL_EXIT_CODE;
-        } catch (UnsupportedEncodingException e) {
-            LOGGER.error("Set task [" + task.getId() + "] to FAILED [" + e.getMessage() + "]");
-            return FAIL_EXIT_CODE;
+            this.dockerExecutorHelper.sendTaskScriptExecutor(task.getId());
+            String taskScriptFilepath = "/tmp/" + task.getId() + ".ts";
+            this.dockerExecutorHelper.sendTaskScript(commands, taskScriptFilepath,
+                task.getId());
+            this.dockerExecutorHelper.runScriptExecutor(task.getId(), taskScriptFilepath);
+        } catch (Throwable e) {
+            LOGGER.error(e);
+            setAllFailed(commands);
         }
     }
 
-    private Integer stopExecution() {
+    private void checkTask(Task task) {
+        List<Command> commands = task.getTaskSpec().getCommands();
         try {
-            LOGGER.info("Stopping DockerTaskExecutor " + this.workerDockerRequestHelper.getContainerName());
-            this.workerDockerRequestHelper.stopContainer();
-            return SUCCESS_EXIT_CODE;
-        } catch (DockerRemoveContainerException de) {
-            LOGGER.error("Failed to stop container with name " + this.workerDockerRequestHelper.getContainerName()
-                    + " with exit code " + FAIL_EXIT_CODE);
-
-            return FAIL_EXIT_CODE;
+            final String EC_FILEPATH = "/tmp/" + task.getId() + ".ts.ec";
+            updateCommandsState(commands, EC_FILEPATH);
+        } catch (Throwable e) {
+            LOGGER.error("Could not update all commands state.");
+            LOGGER.error(e);
+            setNotFinishedToFailed(commands);
         }
+    }
+
+    private void startExecution(Task task) throws UnsupportedEncodingException {
+        LOGGER.info(
+            "Starting DockerTaskExecutor " + this.workerDockerRequestHelper.getContainerName());
+        this.workerDockerRequestHelper.start(task.getTaskSpec());
+    }
+
+    private void stopExecution() {
+        LOGGER.info(
+            "Stopping DockerTaskExecutor " + this.workerDockerRequestHelper.getContainerName());
+        this.workerDockerRequestHelper.stopContainer();
     }
 
     private void updateCommandsState(List<Command> cmds, String ecFilepath) throws Exception {
@@ -120,17 +115,17 @@ public class DockerTaskExecutor implements TaskExecutor {
         while (nextRunningIndex < cmds.size()) {
             Command cmd = cmds.get(nextRunningIndex);
             cmd.setState(CommandState.RUNNING);
-            
+
             String ecContent = this.dockerExecutorHelper.getEcFile(ecFilepath);
             LOGGER.debug("Exit code file content [" + ecContent + "]");
 
             int[] exitcodes =
-                    this.dockerExecutorHelper.parseEcContentToArray(ecContent, cmds.size());
+                this.dockerExecutorHelper.parseEcContentToArray(ecContent, cmds.size());
             LOGGER.debug("Exits codes array [" + Arrays.toString(exitcodes) + "]");
 
             nextRunningIndex = syncCommandsWithEC(cmds, exitcodes, nextRunningIndex);
             LOGGER.debug("After sync waiting for index [" + nextRunningIndex + "]");
-            
+
             try {
                 sleep(poolingPeriodTime);
             } catch (InterruptedException e) {
@@ -172,7 +167,7 @@ public class DockerTaskExecutor implements TaskExecutor {
         }
         return new TaskExecutionResult(result, new Command[commands.size()]);
     }
-    
+
     private void setAllFailed(List<Command> commands) {
         for (Command cmd : commands) {
             cmd.setState(CommandState.FAILED);
