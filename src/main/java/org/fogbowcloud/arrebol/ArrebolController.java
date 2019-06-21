@@ -1,8 +1,22 @@
 package org.fogbowcloud.arrebol;
 
 import com.google.gson.Gson;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Timer;
+import java.util.TimerTask;
+import java.util.UUID;
 import org.apache.log4j.Logger;
-import org.fogbowcloud.arrebol.execution.*;
+import org.fogbowcloud.arrebol.execution.Worker;
 import org.fogbowcloud.arrebol.execution.creator.DockerWorkerCreator;
 import org.fogbowcloud.arrebol.execution.creator.RawWorkerCreator;
 import org.fogbowcloud.arrebol.execution.creator.WorkerCreator;
@@ -22,27 +36,20 @@ import org.fogbowcloud.arrebol.scheduler.FifoSchedulerPolicy;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.io.*;
-import java.util.*;
-
 @Component
 public class ArrebolController {
-
-    private final Logger LOGGER = Logger.getLogger(ArrebolController.class);
-
-    private Configuration configuration;
-    private final DefaultScheduler scheduler;
-    private final Map<String, Job> jobPool;
-    private final TaskQueue queue;
-    private WorkerCreator workerCreator;
-
-    private final Timer jobDatabaseCommitter;
-    private final Timer jobStateMonitor;
 
     private static final int COMMIT_PERIOD_MILLIS = 1000 * 20;
     private static final int UPDATE_PERIOD_MILLIS = 1000 * 10;
     private static final int FAIL_EXIT_CODE = 1;
-
+    private final Logger LOGGER = Logger.getLogger(ArrebolController.class);
+    private final DefaultScheduler scheduler;
+    private final Map<String, Job> jobPool;
+    private final TaskQueue queue;
+    private final Timer jobDatabaseCommitter;
+    private final Timer jobStateMonitor;
+    private Configuration configuration;
+    private WorkerCreator workerCreator;
     @Autowired
     private JobRepository jobRepository;
 
@@ -137,11 +144,11 @@ public class ArrebolController {
         //commit the job pool to DB using a COMMIT_PERIOD_MILLIS PERIOD between successive commits
         //(I also specified the delay to the start the fist commit to be COMMIT_PERIOD_MILLIS)
         this.jobDatabaseCommitter.schedule(new TimerTask() {
-                                           public void run() {
-                                               LOGGER.info("Commit job pool to the database");
-                                               jobRepository.save(jobPool.values());
-                                           }
-                                       }, COMMIT_PERIOD_MILLIS, COMMIT_PERIOD_MILLIS
+                                               public void run() {
+                                                   LOGGER.info("Commit job pool to the database");
+                                                   jobRepository.save(jobPool.values());
+                                               }
+                                           }, COMMIT_PERIOD_MILLIS, COMMIT_PERIOD_MILLIS
         );
 
         this.jobStateMonitor.schedule(new TimerTask() {
@@ -199,7 +206,7 @@ public class ArrebolController {
 
     private void updateJobState(Job job) {
         JobState jobState = job.getJobState();
-        if (!jobState.equals(JobState.FAILED) || !jobState.equals(JobState.FINISHED)) {
+        if (!(jobState.equals(JobState.FAILED) || jobState.equals(JobState.FINISHED))) {
             if (all(job.getTasks(), TaskState.FAILED.getValue())) {
                 job.setJobState(JobState.FAILED);
             } else if (all(job.getTasks(),
