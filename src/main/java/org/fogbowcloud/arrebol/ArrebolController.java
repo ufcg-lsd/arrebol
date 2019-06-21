@@ -37,8 +37,10 @@ public class ArrebolController {
     private WorkerCreator workerCreator;
 
     private final Timer jobDatabaseCommitter;
+    private final Timer jobStateMonitor;
 
     private static final int COMMIT_PERIOD_MILLIS = 1000 * 20;
+    private static final int UPDATE_PERIOD_MILLIS = 1000 * 10;
     private static final int FAIL_EXIT_CODE = 1;
 
     @Autowired
@@ -79,6 +81,7 @@ public class ArrebolController {
 
         this.jobPool = Collections.synchronizedMap(new HashMap<String,  Job>());
         this.jobDatabaseCommitter = new Timer(true);
+        this.jobStateMonitor = new Timer(true);
     }
 
     private void certifyConfigurationProperties() throws Exception {
@@ -135,6 +138,16 @@ public class ArrebolController {
                 }, COMMIT_PERIOD_MILLIS, COMMIT_PERIOD_MILLIS
         );
 
+        this.jobStateMonitor.schedule(new TimerTask() {
+                  public void run() {
+                      LOGGER.info("Updating job states");
+                      for(Job job : jobPool.values()){
+                          updateJobState(job);
+                      }
+                  }
+              }, UPDATE_PERIOD_MILLIS, UPDATE_PERIOD_MILLIS
+        );
+
         // TODO: read from bd
     }
 
@@ -178,5 +191,36 @@ public class ArrebolController {
         }
     }
 
+    private void updateJobState(Job job){
+        JobState jobState = job.getJobState();
+        if(!jobState.equals(JobState.FINISHED) || !jobState.equals(JobState.FAILED)){
+            if(isAllFailed(job)){
+                jobState = JobState.FAILED;
+            } else {
+                for(Task task : job.getTasks()){
+                    if(task.getState().equals(TaskState.RUNNING) || task.getState().equals(TaskState.PENDING)){
+                        jobState = JobState.RUNNING;
+                        break;
+                    }
+                    if(task.getState().equals(TaskState.FINISHED) || task.getState().equals(TaskState.FAILED)){
+                        jobState = JobState.FINISHED;
+                    }
+                }
+            }
+            job.setJobState(jobState);
+        }
+
+    }
+
+    private boolean isAllFailed(Job job){
+        boolean answer = true;
+        for(Task task : job.getTasks()){
+            if(!task.getState().equals(TaskState.FAILED)){
+                answer = false;
+                break;
+            }
+        }
+        return answer;
+    }
 
 }
