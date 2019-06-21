@@ -1,5 +1,6 @@
 package org.fogbowcloud.arrebol.execution.docker;
 
+import java.util.Arrays;
 import org.apache.log4j.Logger;
 import org.fogbowcloud.arrebol.execution.TaskExecutionResult;
 import org.fogbowcloud.arrebol.execution.TaskExecutor;
@@ -122,9 +123,12 @@ public class DockerTaskExecutor implements TaskExecutor {
             int nextRunningIndex = 0;
             while (nextRunningIndex < cmds.size()) {
                 String ecContent = this.dockerExecutorHelper.getEcFile(ecFilepath);
-                int[] exitcodes = this.dockerExecutorHelper.parseEcContentToArray(ecContent, cmds.size());
-                nextRunningIndex = syncCommandsWithEC(cmds, exitcodes, nextRunningIndex);
+                LOGGER.debug("Exit code file content [" + ecContent + "]");
 
+                int[] exitcodes = this.dockerExecutorHelper.parseEcContentToArray(ecContent, cmds.size());
+                LOGGER.debug("Exits codes array [" + Arrays.toString(exitcodes) + "]");
+                nextRunningIndex = syncCommandsWithEC(cmds, exitcodes, nextRunningIndex);
+                LOGGER.debug("After sync waiting for index [" + nextRunningIndex + "]");
                 try {
                     sleep(poolingPeriodTime);
                 } catch (InterruptedException e) {
@@ -142,13 +146,11 @@ public class DockerTaskExecutor implements TaskExecutor {
     private Integer syncCommandsWithEC(List<Command> cmds, int[] exitcodes, int nextRunningIndex) {
         while (nextRunningIndex < cmds.size()) {
             int exitCode = exitcodes[nextRunningIndex];
-            if (exitCode != TaskExecutionResult.UNDETERMINED_RESULT) {
-                Command cmd = cmds.get(nextRunningIndex);
-                if (evaluateCommand(cmd, exitCode)) {
-                    nextRunningIndex++;
-                } else {
-                    break;
-                }
+            Command cmd = cmds.get(nextRunningIndex);
+            if (evaluateCommand(cmd, exitCode)) {
+                nextRunningIndex++;
+            } else {
+                break;
             }
         }
         return nextRunningIndex;
