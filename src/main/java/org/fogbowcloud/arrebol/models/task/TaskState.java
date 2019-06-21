@@ -4,13 +4,13 @@ public enum TaskState {
 
     PENDING(1), RUNNING(2), FINISHED(4), FAILED(8);
 
-    private int id;
+    private int value;
 
     TaskState(int id) {
-        this.id = id;
+        this.value = id;
     }
 
-    public int getId(){
-        return this.id;
+    public int getValue(){
+        return this.value;
     }
 }

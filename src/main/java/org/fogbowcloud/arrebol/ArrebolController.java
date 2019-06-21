@@ -28,197 +28,198 @@ import java.util.*;
 @Component
 public class ArrebolController {
 
-  private final Logger LOGGER = Logger.getLogger(ArrebolController.class);
+    private final Logger LOGGER = Logger.getLogger(ArrebolController.class);
 
-  private Configuration configuration;
-  private final DefaultScheduler scheduler;
-  private final Map<String, Job> jobPool;
-  private final TaskQueue queue;
-  private WorkerCreator workerCreator;
+    private Configuration configuration;
+    private final DefaultScheduler scheduler;
+    private final Map<String, Job> jobPool;
+    private final TaskQueue queue;
+    private WorkerCreator workerCreator;
 
-  private final Timer jobDatabaseCommitter;
-  private final Timer jobStateMonitor;
+    private final Timer jobDatabaseCommitter;
+    private final Timer jobStateMonitor;
 
-  private static final int COMMIT_PERIOD_MILLIS = 1000 * 20;
-  private static final int UPDATE_PERIOD_MILLIS = 1000 * 10;
-  private static final int FAIL_EXIT_CODE = 1;
+    private static final int COMMIT_PERIOD_MILLIS = 1000 * 20;
+    private static final int UPDATE_PERIOD_MILLIS = 1000 * 10;
+    private static final int FAIL_EXIT_CODE = 1;
 
-  @Autowired
-  private JobRepository jobRepository;
+    @Autowired
+    private JobRepository jobRepository;
 
-  public ArrebolController() {
+    public ArrebolController() {
 
-    String path = Objects.requireNonNull(Thread.currentThread().getContextClassLoader()
-        .getResource("")).getPath();
-    try {
-      Gson gson = new Gson();
-      BufferedReader bufferedReader = new BufferedReader(
-          new FileReader(path + File.separator + "arrebol.json"));
-      this.configuration = gson.fromJson(bufferedReader, Configuration.class);
+        String path = Objects.requireNonNull(Thread.currentThread().getContextClassLoader()
+            .getResource("")).getPath();
+        try {
+            Gson gson = new Gson();
+            BufferedReader bufferedReader = new BufferedReader(
+                new FileReader(path + File.separator + "arrebol.json"));
+            this.configuration = gson.fromJson(bufferedReader, Configuration.class);
 
-      certifyConfigurationProperties();
+            certifyConfigurationProperties();
 
-      DockerVariable.DEFAULT_IMAGE = this.configuration.getImageId();
-      setWorkerCreator(this.configuration.getPoolType());
-    } catch (IOException e) {
-      LOGGER.error("Error on loading properties file path=" + path, e);
-      System.exit(FAIL_EXIT_CODE);
-    } catch (Exception e) {
-      LOGGER.error(e.getMessage(), e);
-      System.exit(FAIL_EXIT_CODE);
+            DockerVariable.DEFAULT_IMAGE = this.configuration.getImageId();
+            setWorkerCreator(this.configuration.getPoolType());
+        } catch (IOException e) {
+            LOGGER.error("Error on loading properties file path=" + path, e);
+            System.exit(FAIL_EXIT_CODE);
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage(), e);
+            System.exit(FAIL_EXIT_CODE);
+        }
+
+        String queueId = UUID.randomUUID().toString();
+        String queueName = "defaultQueue";
+
+        this.queue = new TaskQueue(queueId, queueName);
+
+        int poolId = 1;
+        WorkerPool pool = createPool(configuration, poolId);
+
+        //create the scheduler bind the pieces together
+        FifoSchedulerPolicy policy = new FifoSchedulerPolicy();
+        this.scheduler = new DefaultScheduler(queue, pool, policy);
+
+        this.jobPool = Collections.synchronizedMap(new HashMap<String, Job>());
+        this.jobDatabaseCommitter = new Timer(true);
+        this.jobStateMonitor = new Timer(true);
     }
 
-    String queueId = UUID.randomUUID().toString();
-    String queueName = "defaultQueue";
+    private void certifyConfigurationProperties() throws Exception {
+        final String verifyMsg = " Please, verify your configuration file.";
+        final String imageIdMsg =
+            "Docker Image ID configuration property wrong or missing." + verifyMsg;
+        final String poolTypeMsg =
+            "Worker Pool Type configuration property wrong or missing." + verifyMsg;
+        final String resourceAddressesMsg =
+            "Docker Image ID configuration property wrong or missing." + verifyMsg;
+        final String workerPoolSizeMsg =
+            "Docker Image ID configuration property wrong or missing." + verifyMsg;
 
-    this.queue = new TaskQueue(queueId, queueName);
+        String imageId = this.configuration.getImageId();
+        String poolType = this.configuration.getPoolType();
+        List<String> resourceAddresses = this.configuration.getResourceAddresses();
+        Integer workerPoolSize = this.configuration.getWorkerPoolSize();
 
-    int poolId = 1;
-    WorkerPool pool = createPool(configuration, poolId);
-
-    //create the scheduler bind the pieces together
-    FifoSchedulerPolicy policy = new FifoSchedulerPolicy();
-    this.scheduler = new DefaultScheduler(queue, pool, policy);
-
-    this.jobPool = Collections.synchronizedMap(new HashMap<String, Job>());
-    this.jobDatabaseCommitter = new Timer(true);
-    this.jobStateMonitor = new Timer(true);
-  }
-
-  private void certifyConfigurationProperties() throws Exception {
-    final String verifyMsg = " Please, verify your configuration file.";
-    final String imageIdMsg =
-        "Docker Image ID configuration property wrong or missing." + verifyMsg;
-    final String poolTypeMsg =
-        "Worker Pool Type configuration property wrong or missing." + verifyMsg;
-    final String resourceAddressesMsg =
-        "Docker Image ID configuration property wrong or missing." + verifyMsg;
-    final String workerPoolSizeMsg =
-        "Docker Image ID configuration property wrong or missing." + verifyMsg;
-
-    String imageId = this.configuration.getImageId();
-    String poolType = this.configuration.getPoolType();
-    List<String> resourceAddresses = this.configuration.getResourceAddresses();
-    Integer workerPoolSize = this.configuration.getWorkerPoolSize();
-
-    if (imageId == null || imageId.trim().isEmpty() || imageId.contains(":")) {
-      LOGGER.error(imageIdMsg);
-      throw new Exception(imageIdMsg);
-    } else if (poolType == null || poolType.trim().isEmpty()) {
-      LOGGER.error(poolTypeMsg);
-      throw new Exception(poolTypeMsg);
-    } else if (resourceAddresses == null || resourceAddresses.isEmpty()) {
-      LOGGER.error(resourceAddressesMsg);
-      throw new Exception(resourceAddressesMsg);
-    } else if (workerPoolSize == null || workerPoolSize == 0) {
-      LOGGER.error(workerPoolSizeMsg);
-      throw new Exception(workerPoolSizeMsg);
+        if (imageId == null || imageId.trim().isEmpty() || imageId.contains(":")) {
+            LOGGER.error(imageIdMsg);
+            throw new Exception(imageIdMsg);
+        } else if (poolType == null || poolType.trim().isEmpty()) {
+            LOGGER.error(poolTypeMsg);
+            throw new Exception(poolTypeMsg);
+        } else if (resourceAddresses == null || resourceAddresses.isEmpty()) {
+            LOGGER.error(resourceAddressesMsg);
+            throw new Exception(resourceAddressesMsg);
+        } else if (workerPoolSize == null || workerPoolSize == 0) {
+            LOGGER.error(workerPoolSizeMsg);
+            throw new Exception(workerPoolSizeMsg);
+        }
     }
-  }
 
-  private WorkerPool createPool(Configuration configuration, int poolId) {
+    private WorkerPool createPool(Configuration configuration, int poolId) {
 
-    //we need to deal with missing/wrong properties
+        //we need to deal with missing/wrong properties
 
-    Collection<Worker> workers = new LinkedList<>(
-        workerCreator.createWorkers(poolId, configuration));
+        Collection<Worker> workers = new LinkedList<>(
+            workerCreator.createWorkers(poolId, configuration));
 
-    WorkerPool pool = new StaticPool(poolId, workers);
-    LOGGER.info("pool={" + pool + "} created with workers={" + workers + "}");
+        WorkerPool pool = new StaticPool(poolId, workers);
+        LOGGER.info("pool={" + pool + "} created with workers={" + workers + "}");
 
-    return pool;
-  }
+        return pool;
+    }
 
-  public void start() {
+    public void start() {
 
-    Thread schedulerThread = new Thread(this.scheduler, "scheduler-thread");
-    schedulerThread.start();
+        Thread schedulerThread = new Thread(this.scheduler, "scheduler-thread");
+        schedulerThread.start();
 
-    //commit the job pool to DB using a COMMIT_PERIOD_MILLIS PERIOD between successive commits
-    //(I also specified the delay to the start the fist commit to be COMMIT_PERIOD_MILLIS)
-    this.jobDatabaseCommitter.schedule(new TimerTask() {
-                                         public void run() {
-                                           LOGGER.info("Commit job pool to the database");
-                                           jobRepository.save(jobPool.values());
-                                         }
+        //commit the job pool to DB using a COMMIT_PERIOD_MILLIS PERIOD between successive commits
+        //(I also specified the delay to the start the fist commit to be COMMIT_PERIOD_MILLIS)
+        this.jobDatabaseCommitter.schedule(new TimerTask() {
+                                           public void run() {
+                                               LOGGER.info("Commit job pool to the database");
+                                               jobRepository.save(jobPool.values());
+                                           }
                                        }, COMMIT_PERIOD_MILLIS, COMMIT_PERIOD_MILLIS
-    );
+        );
 
-    this.jobStateMonitor.schedule(new TimerTask() {
-                                    public void run() {
-                                      LOGGER.info("Updating job states");
-                                      for (Job job : jobPool.values()) {
-                                        updateJobState(job);
-                                      }
-                                    }
-                                  }, UPDATE_PERIOD_MILLIS, UPDATE_PERIOD_MILLIS
-    );
+        this.jobStateMonitor.schedule(new TimerTask() {
+                                          public void run() {
+                                              LOGGER.info("Updating job states");
+                                              for (Job job : jobPool.values()) {
+                                                  updateJobState(job);
+                                              }
+                                          }
+                                      }, UPDATE_PERIOD_MILLIS, UPDATE_PERIOD_MILLIS
+        );
 
-    // TODO: read from bd
-  }
-
-  public void stop() {
-    // TODO: delete all resources?
-  }
-
-  public String addJob(Job job) {
-
-    job.setJobState(JobState.QUEUED);
-    this.jobPool.put(job.getId(), job);
-
-    for (Task task : job.getTasks()) {
-      this.queue.addTask(task);
+        // TODO: read from bd
     }
 
-    return job.getId();
-  }
-
-  public String stopJob(Job job) {
-
-    for (Task task : job.getTasks()) {
-      //
+    public void stop() {
+        // TODO: delete all resources?
     }
-    return job.getId();
-  }
 
-  public TaskState getTaskState(String taskId) {
-    //FIXME:
-    return null;
-  }
+    public String addJob(Job job) {
 
-  private void setWorkerCreator(String type) throws IOException {
-    switch (type) {
-      case DockerConstants.DOCKER_TYPE:
-        this.workerCreator = new DockerWorkerCreator();
-        break;
-      case RawConstants.RAW_TYPE:
-        this.workerCreator = new RawWorkerCreator();
-        break;
-    }
-  }
-
-  private void updateJobState(Job job) {
-    JobState jobState = job.getJobState();
-    if (!jobState.equals(JobState.FAILED) || !jobState.equals(JobState.FINISHED)) {
-      if (all(job.getTasks(), TaskState.FAILED.getId())) {
-        job.setJobState(JobState.FAILED);
-      } else if (all(job.getTasks(), TaskState.FINISHED.getId() + TaskState.FAILED.getId())) {
-        job.setJobState(JobState.FINISHED);
-      } else if (all(job.getTasks(), TaskState.PENDING.getId())) {
         job.setJobState(JobState.QUEUED);
-      } else {
-        job.setJobState(JobState.RUNNING);
-      }
-    }
-  }
+        this.jobPool.put(job.getId(), job);
 
-  public boolean all(Collection<Task> tasks, int mask) {
-    for (Task t : tasks) {
-      if ((t.getState().getId() & mask) == 0) {
-        return false;
-      }
+        for (Task task : job.getTasks()) {
+            this.queue.addTask(task);
+        }
+
+        return job.getId();
     }
-    return true;
-  }
+
+    public String stopJob(Job job) {
+
+        for (Task task : job.getTasks()) {
+            //
+        }
+        return job.getId();
+    }
+
+    public TaskState getTaskState(String taskId) {
+        //FIXME:
+        return null;
+    }
+
+    private void setWorkerCreator(String type) throws IOException {
+        switch (type) {
+            case DockerConstants.DOCKER_TYPE:
+                this.workerCreator = new DockerWorkerCreator();
+                break;
+            case RawConstants.RAW_TYPE:
+                this.workerCreator = new RawWorkerCreator();
+                break;
+        }
+    }
+
+    private void updateJobState(Job job) {
+        JobState jobState = job.getJobState();
+        if (!jobState.equals(JobState.FAILED) || !jobState.equals(JobState.FINISHED)) {
+            if (all(job.getTasks(), TaskState.FAILED.getValue())) {
+                job.setJobState(JobState.FAILED);
+            } else if (all(job.getTasks(),
+                TaskState.FINISHED.getValue() + TaskState.FAILED.getValue())) {
+                job.setJobState(JobState.FINISHED);
+            } else if (all(job.getTasks(), TaskState.PENDING.getValue())) {
+                job.setJobState(JobState.QUEUED);
+            } else {
+                job.setJobState(JobState.RUNNING);
+            }
+        }
+    }
+
+    public boolean all(Collection<Task> tasks, int mask) {
+        for (Task t : tasks) {
+            if ((t.getState().getValue() & mask) == 0) {
+                return false;
+            }
+        }
+        return true;
+    }
 
 }
