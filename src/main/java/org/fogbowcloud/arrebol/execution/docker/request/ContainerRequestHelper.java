@@ -12,15 +12,12 @@ import org.json.JSONObject;
 import org.fogbowcloud.arrebol.execution.docker.constans.DockerConstants;
 
 import java.io.UnsupportedEncodingException;
-import java.util.HashMap;
 import java.util.Map;
 
 public class ContainerRequestHelper {
     private HttpWrapper httpWrapper;
     private String address;
-    private String image;
     private String containerName;
-    private Map<String, String> requirements;
 
     private final Logger LOGGER = Logger.getLogger(ContainerRequestHelper.class);
 
@@ -28,13 +25,11 @@ public class ContainerRequestHelper {
         this.httpWrapper = new HttpWrapper();
         this.address = address;
         this.containerName = containerName;
-        this.image = image;
-        this.requirements = new HashMap<>();
     }
 
-    public String createContainer() throws DockerCreateContainerException, UnsupportedEncodingException {
+    public String createContainer(String image, Map<String, String> requirements) throws DockerCreateContainerException, UnsupportedEncodingException {
         final String endPoint = String.format("%s/containers/create?name=%s", address, containerName);
-        StringEntity body = jsonCreateContainer();
+        StringEntity body = jsonCreateContainer(image, requirements);
         String response;
         try {
             response = this.httpWrapper.doRequest(HttpPost.METHOD_NAME, endPoint, body);
@@ -81,26 +76,18 @@ public class ContainerRequestHelper {
         return this.httpWrapper.doRequest(HttpPost.METHOD_NAME, endpoint);
     }
 
-    public void setRequirements(Map<String, String> requirements) {
-        this.requirements = requirements;
-    }
-
-    protected void setImage(String image){
-        this.image = image;
-    }
-
-    private StringEntity jsonCreateContainer() throws UnsupportedEncodingException {
+    private StringEntity jsonCreateContainer(String image, Map<String, String> requirements) throws UnsupportedEncodingException {
         JSONObject jsonObject = new JSONObject();
         AppUtil.makeBodyField(jsonObject, "Image", image);
         AppUtil.makeBodyField(jsonObject, "Tty", true);
         //AppUtil.makeBodyField(jsonObject, "HostConfig", requirements);
-        jsonAddRequirements(jsonObject);
+        jsonAddRequirements(jsonObject, requirements);
         return new StringEntity(jsonObject.toString());
     }
 
-    private void jsonAddRequirements(JSONObject jsonObject){
+    private void jsonAddRequirements(JSONObject jsonObject, Map<String, String> requirements){
         JSONObject jsonRequirements = new JSONObject();
-        for(Map.Entry<String, String> entry : this.requirements.entrySet()){
+        for(Map.Entry<String, String> entry : requirements.entrySet()){
             switch(entry.getKey()){
                 case DockerConstants.JSON_KEY_MEMORY:
                     Integer memory = Integer.valueOf(entry.getValue()) * 1048576;

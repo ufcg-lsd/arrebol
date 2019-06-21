@@ -6,6 +6,7 @@ import org.fogbowcloud.arrebol.execution.TaskExecutor;
 import org.fogbowcloud.arrebol.execution.docker.exceptions.DockerCreateContainerException;
 import org.fogbowcloud.arrebol.execution.docker.exceptions.DockerRemoveContainerException;
 import org.fogbowcloud.arrebol.execution.docker.exceptions.DockerStartException;
+import org.fogbowcloud.arrebol.execution.docker.exceptions.NotFoundDockerImage;
 import org.fogbowcloud.arrebol.execution.docker.request.WorkerDockerRequestHelper;
 import org.fogbowcloud.arrebol.models.command.Command;
 import org.fogbowcloud.arrebol.models.command.CommandState;
@@ -91,13 +92,12 @@ public class DockerTaskExecutor implements TaskExecutor {
             LOGGER.info("Starting DockerTaskExecutor " + this.workerDockerRequestHelper.getContainerName());
             this.workerDockerRequestHelper.start(task.getTaskSpec());
             return SUCCESS_EXIT_CODE;
-        } catch (DockerStartException | DockerCreateContainerException de) {
-            LOGGER.info("Set task [" + task.getId() + "] to FAILED because a container error ["
-                    + de.getMessage() + "]");
+        } catch (DockerStartException | DockerCreateContainerException | NotFoundDockerImage de) {
+            LOGGER.error("Set task [" + task.getId() + "] to FAILED because a container error [" + de.getMessage() + "]");
             task.setState(TaskState.FAILED);
             return FAIL_EXIT_CODE;
         } catch (UnsupportedEncodingException e) {
-            LOGGER.info("Set task [" + task.getId() + "] to FAILED [" + e.getMessage() + "]");
+            LOGGER.error("Set task [" + task.getId() + "] to FAILED [" + e.getMessage() + "]");
             task.setState(TaskState.FAILED);
             return FAIL_EXIT_CODE;
         }
