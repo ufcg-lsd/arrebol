@@ -1,16 +1,4 @@
 {
-	"Job": {
-     	"name": "simple_job",
-     	"spec": {
-         	"resourceId": "default-compute-image",
-			"requeriments": {
-            			 "glue2CloudComputeManagerID": "SomeCloud"
-        	}
-    	},
-    	"tasks": [
-        		"echo Hello World",
-        		"PUT /local/ubuntu/filetotransfer transferedfile",
-        		"GET transferedfile /local/ubuntu/filetotransfer"
-    	]
+	"label":  "simple_job"
 }
 
