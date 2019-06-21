@@ -60,18 +60,16 @@ public class DockerTaskExecutor implements TaskExecutor {
 
             } catch (Throwable e) {
                 LOGGER.error(e);
-                for (Command cmd : commands) {
-                    cmd.setState(CommandState.FAILED);
-                    cmd.setExitcode(TaskExecutionResult.UNDETERMINED_RESULT);
-                }
+                setAllFailed(commands);
             }
 
             try {
-                setAllToRunning(commands);
                 final String EC_FILEPATH = "/tmp/" + task.getId() + ".ts.ec";
                 updateCommandsState(commands, EC_FILEPATH);
-            } catch (Exception e) {
+            } catch (Throwable e) {
+                LOGGER.error("Could not update all commands state.");
                 LOGGER.error(e);
+                setNotFinishedToFailed(commands);
             }
 
             Integer stopStatus = stopExecution();
@@ -118,29 +116,28 @@ public class DockerTaskExecutor implements TaskExecutor {
     }
 
     private void updateCommandsState(List<Command> cmds, String ecFilepath) throws Exception {
-        try {
-            final long poolingPeriodTime = 2000;
-            int nextRunningIndex = 0;
-            while (nextRunningIndex < cmds.size()) {
-                String ecContent = this.dockerExecutorHelper.getEcFile(ecFilepath);
-                LOGGER.debug("Exit code file content [" + ecContent + "]");
+        final long poolingPeriodTime = 2000;
+        int nextRunningIndex = 0;
+        while (nextRunningIndex < cmds.size()) {
+            Command cmd = cmds.get(nextRunningIndex);
+            cmd.setState(CommandState.RUNNING);
+            
+            String ecContent = this.dockerExecutorHelper.getEcFile(ecFilepath);
+            LOGGER.debug("Exit code file content [" + ecContent + "]");
 
-                int[] exitcodes = this.dockerExecutorHelper.parseEcContentToArray(ecContent, cmds.size());
-                LOGGER.debug("Exits codes array [" + Arrays.toString(exitcodes) + "]");
-                nextRunningIndex = syncCommandsWithEC(cmds, exitcodes, nextRunningIndex);
-                LOGGER.debug("After sync waiting for index [" + nextRunningIndex + "]");
-                try {
-                    sleep(poolingPeriodTime);
-                } catch (InterruptedException e) {
-                    LOGGER.error(e);
-                }
+            int[] exitcodes =
+                    this.dockerExecutorHelper.parseEcContentToArray(ecContent, cmds.size());
+            LOGGER.debug("Exits codes array [" + Arrays.toString(exitcodes) + "]");
+
+            nextRunningIndex = syncCommandsWithEC(cmds, exitcodes, nextRunningIndex);
+            LOGGER.debug("After sync waiting for index [" + nextRunningIndex + "]");
+            
+            try {
+                sleep(poolingPeriodTime);
+            } catch (InterruptedException e) {
+                LOGGER.error(e);
             }
-        } catch (Throwable e){
-            LOGGER.error("Could not fetch information about running commands.");
-            LOGGER.error(e);
-            setNotFinishedToFailed(cmds);
         }
-
     }
 
     private Integer syncCommandsWithEC(List<Command> cmds, int[] exitcodes, int nextRunningIndex) {
@@ -159,11 +156,7 @@ public class DockerTaskExecutor implements TaskExecutor {
     private boolean evaluateCommand(Command command, int exitcode) {
         boolean isRunning = true;
         if (exitcode != TaskExecutionResult.UNDETERMINED_RESULT) {
-            if (exitcode == 0) {
-                command.setState(CommandState.FINISHED);
-            } else {
-                command.setState(CommandState.FAILED);
-            }
+            command.setState(CommandState.FINISHED);
             command.setExitcode(exitcode);
             isRunning = false;
         }
@@ -180,17 +173,17 @@ public class DockerTaskExecutor implements TaskExecutor {
         }
         return new TaskExecutionResult(result, new Command[commands.size()]);
     }
-
-    private void setAllToRunning(List<Command> commands) {
-        for (Command c : commands) {
-            c.setState(CommandState.RUNNING);
+    
+    private void setAllFailed(List<Command> commands) {
+        for (Command cmd : commands) {
+            cmd.setState(CommandState.FAILED);
+            cmd.setExitcode(TaskExecutionResult.UNDETERMINED_RESULT);
         }
     }
 
     private void setNotFinishedToFailed(List<Command> commands) {
         for (Command c : commands) {
-            if (!(c.getState().equals(CommandState.FINISHED))
-                    || c.getState().equals(CommandState.FAILED)) {
+            if (!c.getState().equals(CommandState.FINISHED)) {
                 c.setState(CommandState.FAILED);
                 c.setExitcode(TaskExecutionResult.UNDETERMINED_RESULT);
             }
