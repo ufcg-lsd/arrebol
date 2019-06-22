@@ -12,3 +12,7 @@ class Arrebol:
         self.createEndPoint = self.arrebolUrl + "/job"
         data = open(path_to_job)
         return requests.post(self.createEndPoint, data=data)
+
+    def get_job(self, job_id)
+        self.getEndPoint = self.arrebolUrl + "/job/"
+        return requests.post(self.getEndPoint + job_id)

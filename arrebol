@@ -1,0 +1,61 @@
+#!/bin/bash
+
+#FIXME to read from env or conf file
+SERVICE_URL="http://localhost:8080"
+
+CREATE_JOB_ENDPOINT=$SERVICE_URL/job
+JOB_STATUS_ENDPOINT=$SERVICE_URL/job
+
+create_job() {
+    job_path=$1
+    if test -f "$job_path"; then
+        curl -H "Content-Type: application/json" --request POST --data @$job_path $CREATE_JOB_ENDPOINT
+    else
+        echo "file: $job_path does not exist"
+        exit 1
+    fi
+}
+
+job_status() {
+    job_id=$1
+    curl -H "Content-Type: application/json" $JOB_STATUS_ENDPOINT/${job_id}
+}
+
+parse_job() {
+    case $1 in
+        create )			shift
+            create_job $@
+            ;;
+        status )			shift
+            job_status $@
+            ;;
+        * )                  usage
+            exit 1
+    esac
+}
+
+parse_queue() {
+    echo "queue commands are not supported yet"
+    exit 1
+}
+
+usage () {
+    echo "usage: job <job_cmd> | queue <queue_cmd | [-h]"
+}
+
+define_params() {
+    case $1 in
+        job) shift
+            parse_job $@
+            ;;
+        queue) shift
+            parse_queue
+            ;;
+        -h | --help | *)
+            usage;
+            exit 0;
+            ;;
+    esac
+}
+
+define_params $@

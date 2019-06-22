@@ -30,5 +30,11 @@ class AcceptTests(unittest.TestCase):
         self.assertStatusCode(response, 201)
         #TODO: assert job id and other stuff
 
+    def test_create_singletask_job(self):
+        self.facade = Arrebol(arrebolUrl)
+
+        response = self.facade.create("jobs/single_task_job.json")
+        self.assertStatusCode(response, 201)
+
 if __name__ == '__main__':
     unittest.main()
