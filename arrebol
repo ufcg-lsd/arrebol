@@ -9,7 +9,7 @@ JOB_STATUS_ENDPOINT=$SERVICE_URL/job
 create_job() {
     job_path=$1
     if test -f "$job_path"; then
-        curl -H "Content-Type: application/json" --request POST --data @$job_path $CREATE_JOB_ENDPOINT
+        curl -H "Content-Type: application/json" --request POST --data @"$job_path" $CREATE_JOB_ENDPOINT
     else
         echo "file: $job_path does not exist"
         exit 1
@@ -18,16 +18,16 @@ create_job() {
 
 job_status() {
     job_id=$1
-    curl -H "Content-Type: application/json" $JOB_STATUS_ENDPOINT/${job_id}
+    curl -H "Content-Type: application/json" $JOB_STATUS_ENDPOINT/"$job_id"
 }
 
 parse_job() {
     case $1 in
         create )			shift
-            create_job $@
+            create_job "$@"
             ;;
         status )			shift
-            job_status $@
+            job_status "$@"
             ;;
         * )                  usage
             exit 1
@@ -46,7 +46,7 @@ usage () {
 define_params() {
     case $1 in
         job) shift
-            parse_job $@
+            parse_job "$@"
             ;;
         queue) shift
             parse_queue
@@ -58,4 +58,4 @@ define_params() {
     esac
 }
 
-define_params $@
+define_params "$@"
