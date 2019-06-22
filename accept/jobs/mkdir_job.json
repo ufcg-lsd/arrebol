@@ -1,0 +1,23 @@
+{
+  "label": "mk-dir",
+  "tasksSpecs": [
+    {
+      "id": "TaskNumber-0-36b8d41a-8611-4468-93ee-40f4140c7555",
+      "spec": {
+      	"image":"ubuntu",
+        "requirements": {
+          "DockerRequirements": "DockerMemory == 1024 && DockerCPUWeight == 512"
+        }
+      },
+      "commands": [
+        "mkdir test-dir",
+        "cd test-dir",
+        "touch test.file"
+      ],
+      "metadata": {
+        "owner": "admin",
+        "group": "admin"
+      }
+    }
+  ]
+}

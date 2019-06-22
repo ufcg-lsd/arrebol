@@ -1,0 +1,11 @@
+{
+  "label": "single_task",
+  "tasksSpecs": [
+    {
+      "id": "TaskNumber-0-36b8d41a-8611-4468-93ee-40f4140c7555",
+      "commands": [
+        "mkdir test-dir"
+      ]
+    }
+  ]
+}
