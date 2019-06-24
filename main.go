@@ -10,14 +10,16 @@ import (
 )
 
 type JobSpec struct {
-	Label string `json:"label"`
+	Label      string `json:"label"`
+	TasksSpecs []struct {
+		Id       string   `json:"id"`
+		Commands []string `json:"commands"`
+	} `json:"tasksSpecs,omitempty"`
 }
 
 type Job struct {
-
-	//TODO: add a JobSpec directly
-	Id    string `json:"id"`
-	Label string `json:"label"`
+	Id      string  `json:"id"`
+	JobSpec JobSpec `json:"jobSpec"`
 }
 
 var Jobs []Job
@@ -34,7 +36,7 @@ func CreateJob(w http.ResponseWriter, r *http.Request) {
 	json.Unmarshal(reqBody, &newSpec)
 
 	newJobId := uuid.Must(uuid.NewV4()).String()
-	var newJob Job = Job{Id: newJobId, Label: newSpec.Label}
+	var newJob Job = Job{Id: newJobId, JobSpec: newSpec}
 
 	Jobs = append(Jobs, newJob)
 
@@ -46,7 +48,6 @@ func CreateJob(w http.ResponseWriter, r *http.Request) {
 func GetJob(w http.ResponseWriter, r *http.Request) {
 
 	//TODO: what if there is no job for job_id?
-
 	vars := mux.Vars(r)
 	job_id := vars["id"]
 
