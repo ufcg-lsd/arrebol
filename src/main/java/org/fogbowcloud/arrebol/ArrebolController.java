@@ -1,8 +1,22 @@
 package org.fogbowcloud.arrebol;
 
 import com.google.gson.Gson;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Timer;
+import java.util.TimerTask;
+import java.util.UUID;
 import org.apache.log4j.Logger;
-import org.fogbowcloud.arrebol.execution.*;
+import org.fogbowcloud.arrebol.execution.Worker;
 import org.fogbowcloud.arrebol.execution.creator.DockerWorkerCreator;
 import org.fogbowcloud.arrebol.execution.creator.RawWorkerCreator;
 import org.fogbowcloud.arrebol.execution.creator.WorkerCreator;
@@ -22,42 +36,38 @@ import org.fogbowcloud.arrebol.scheduler.FifoSchedulerPolicy;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.io.*;
-import java.util.*;
-
 @Component
 public class ArrebolController {
 
+    private static final int COMMIT_PERIOD_MILLIS = 1000 * 20;
+    private static final int UPDATE_PERIOD_MILLIS = 1000 * 10;
+    private static final int FAIL_EXIT_CODE = 1;
     private final Logger LOGGER = Logger.getLogger(ArrebolController.class);
-
-    private Configuration configuration;
     private final DefaultScheduler scheduler;
     private final Map<String, Job> jobPool;
     private final TaskQueue queue;
-    private WorkerCreator workerCreator;
-
     private final Timer jobDatabaseCommitter;
-
-    private static final int COMMIT_PERIOD_MILLIS = 1000 * 20;
-    private static final int FAIL_EXIT_CODE = 1;
-
+    private final Timer jobStateMonitor;
+    private Configuration configuration;
+    private WorkerCreator workerCreator;
     @Autowired
     private JobRepository jobRepository;
 
     public ArrebolController() {
 
         String path = Objects.requireNonNull(Thread.currentThread().getContextClassLoader()
-                .getResource("")).getPath();
+            .getResource("")).getPath();
         try {
             Gson gson = new Gson();
-            BufferedReader bufferedReader = new BufferedReader(new FileReader(path + File.separator + "arrebol.json"));
+            BufferedReader bufferedReader = new BufferedReader(
+                new FileReader(path + File.separator + "arrebol.json"));
             this.configuration = gson.fromJson(bufferedReader, Configuration.class);
 
             certifyConfigurationProperties();
 
             DockerVariable.DEFAULT_IMAGE = this.configuration.getImageId();
             setWorkerCreator(this.configuration.getPoolType());
-        } catch (FileNotFoundException e) {
+        } catch (IOException e) {
             LOGGER.error("Error on loading properties file path=" + path, e);
             System.exit(FAIL_EXIT_CODE);
         } catch (Exception e) {
@@ -77,34 +87,39 @@ public class ArrebolController {
         FifoSchedulerPolicy policy = new FifoSchedulerPolicy();
         this.scheduler = new DefaultScheduler(queue, pool, policy);
 
-        this.jobPool = Collections.synchronizedMap(new HashMap<String,  Job>());
+        this.jobPool = Collections.synchronizedMap(new HashMap<String, Job>());
         this.jobDatabaseCommitter = new Timer(true);
+        this.jobStateMonitor = new Timer(true);
     }
 
     private void certifyConfigurationProperties() throws Exception {
         final String verifyMsg = " Please, verify your configuration file.";
-        final String imageIdMsg = "Docker Image ID configuration property wrong or missing." + verifyMsg;
-        final String poolTypeMsg = "Worker Pool Type configuration property wrong or missing." + verifyMsg;
-        final String resourceAddressesMsg = "Docker Image ID configuration property wrong or missing." + verifyMsg;
-        final String workerPoolSizeMsg = "Docker Image ID configuration property wrong or missing." + verifyMsg;
+        final String imageIdMsg =
+            "Docker Image ID configuration property wrong or missing." + verifyMsg;
+        final String poolTypeMsg =
+            "Worker Pool Type configuration property wrong or missing." + verifyMsg;
+        final String resourceAddressesMsg =
+            "Docker Image ID configuration property wrong or missing." + verifyMsg;
+        final String workerPoolSizeMsg =
+            "Docker Image ID configuration property wrong or missing." + verifyMsg;
 
         String imageId = this.configuration.getImageId();
         String poolType = this.configuration.getPoolType();
         List<String> resourceAddresses = this.configuration.getResourceAddresses();
         Integer workerPoolSize = this.configuration.getWorkerPoolSize();
 
-        if (imageId == null || imageId.trim().isEmpty() || imageId.contains(":") ) {
-          LOGGER.error(imageIdMsg);
-          throw new Exception(imageIdMsg);
+        if (imageId == null || imageId.trim().isEmpty() || imageId.contains(":")) {
+            LOGGER.error(imageIdMsg);
+            throw new Exception(imageIdMsg);
         } else if (poolType == null || poolType.trim().isEmpty()) {
-          LOGGER.error(poolTypeMsg);
-          throw new Exception(poolTypeMsg);
+            LOGGER.error(poolTypeMsg);
+            throw new Exception(poolTypeMsg);
         } else if (resourceAddresses == null || resourceAddresses.isEmpty()) {
-          LOGGER.error(resourceAddressesMsg);
-          throw new Exception(resourceAddressesMsg);
+            LOGGER.error(resourceAddressesMsg);
+            throw new Exception(resourceAddressesMsg);
         } else if (workerPoolSize == null || workerPoolSize == 0) {
-          LOGGER.error(workerPoolSizeMsg);
-          throw new Exception(workerPoolSizeMsg);
+            LOGGER.error(workerPoolSizeMsg);
+            throw new Exception(workerPoolSizeMsg);
         }
     }
 
@@ -112,7 +127,8 @@ public class ArrebolController {
 
         //we need to deal with missing/wrong properties
 
-        Collection<Worker> workers = new LinkedList<>(workerCreator.createWorkers(poolId, configuration));
+        Collection<Worker> workers = new LinkedList<>(
+            workerCreator.createWorkers(poolId, configuration));
 
         WorkerPool pool = new StaticPool(poolId, workers);
         LOGGER.info("pool={" + pool + "} created with workers={" + workers + "}");
@@ -128,11 +144,21 @@ public class ArrebolController {
         //commit the job pool to DB using a COMMIT_PERIOD_MILLIS PERIOD between successive commits
         //(I also specified the delay to the start the fist commit to be COMMIT_PERIOD_MILLIS)
         this.jobDatabaseCommitter.schedule(new TimerTask() {
-                    public void run() {
-                        LOGGER.info("Commit job pool to the database");
-                        jobRepository.save(jobPool.values());
-                    }
-                }, COMMIT_PERIOD_MILLIS, COMMIT_PERIOD_MILLIS
+                                               public void run() {
+                                                   LOGGER.info("Commit job pool to the database");
+                                                   jobRepository.save(jobPool.values());
+                                               }
+                                           }, COMMIT_PERIOD_MILLIS, COMMIT_PERIOD_MILLIS
+        );
+
+        this.jobStateMonitor.schedule(new TimerTask() {
+                                          public void run() {
+                                              LOGGER.info("Updating job states");
+                                              for (Job job : jobPool.values()) {
+                                                  updateJobState(job);
+                                              }
+                                          }
+                                      }, UPDATE_PERIOD_MILLIS, UPDATE_PERIOD_MILLIS
         );
 
         // TODO: read from bd
@@ -144,10 +170,10 @@ public class ArrebolController {
 
     public String addJob(Job job) {
 
-        job.setJobState(JobState.READY);
+        job.setJobState(JobState.QUEUED);
         this.jobPool.put(job.getId(), job);
 
-        for(Task task : job.getTasks()){
+        for (Task task : job.getTasks()) {
             this.queue.addTask(task);
         }
 
@@ -156,8 +182,8 @@ public class ArrebolController {
 
     public String stopJob(Job job) {
 
-        for(Task task : job.getTasks()){
-         //
+        for (Task task : job.getTasks()) {
+            //
         }
         return job.getId();
     }
@@ -167,8 +193,8 @@ public class ArrebolController {
         return null;
     }
 
-    private void setWorkerCreator(String type){
-        switch (type){
+    private void setWorkerCreator(String type) throws IOException {
+        switch (type) {
             case DockerConstants.DOCKER_TYPE:
                 this.workerCreator = new DockerWorkerCreator();
                 break;
@@ -178,5 +204,29 @@ public class ArrebolController {
         }
     }
 
+    private void updateJobState(Job job) {
+        JobState jobState = job.getJobState();
+        if (!(jobState.equals(JobState.FAILED) || jobState.equals(JobState.FINISHED))) {
+            if (all(job.getTasks(), TaskState.FAILED.getValue())) {
+                job.setJobState(JobState.FAILED);
+            } else if (all(job.getTasks(),
+                TaskState.FINISHED.getValue() + TaskState.FAILED.getValue())) {
+                job.setJobState(JobState.FINISHED);
+            } else if (all(job.getTasks(), TaskState.PENDING.getValue())) {
+                job.setJobState(JobState.QUEUED);
+            } else {
+                job.setJobState(JobState.RUNNING);
+            }
+        }
+    }
+
+    public boolean all(Collection<Task> tasks, int mask) {
+        for (Task t : tasks) {
+            if ((t.getState().getValue() & mask) == 0) {
+                return false;
+            }
+        }
+        return true;
+    }
 
 }

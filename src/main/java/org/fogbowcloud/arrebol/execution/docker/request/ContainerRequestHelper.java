@@ -12,7 +12,6 @@ import org.json.JSONObject;
 import org.fogbowcloud.arrebol.execution.docker.constans.DockerConstants;
 
 import java.io.UnsupportedEncodingException;
-import java.util.HashMap;
 import java.util.Map;
 
 public class ContainerRequestHelper {
