@@ -45,18 +45,13 @@ public class DockerTaskExecutor implements TaskExecutor {
 
         try {
             startExecution(task);
-
-            LOGGER.debug("Container " + getContainerName() + " started successfully for task "
-                + task.getId());
-
             setupAndRun(task);
             checkTask(task);
-            
             stopExecution();
-
         } catch (DockerRemoveContainerException de) {
             LOGGER.error(de);
-            LOGGER.error("Failed to stop container with name " + this.workerDockerRequestHelper.getContainerName() + " with exit code " + FAIL_EXIT_CODE);
+            LOGGER.error("Failed to stop container with name " + this.workerDockerRequestHelper
+                .getContainerName() + " with exit code " + FAIL_EXIT_CODE);
         } catch (Throwable t) {
             LOGGER.error(t);
             LOGGER.error("Set task [" + task.getId() + "] to FAILED [" + t.getMessage() + "]");
@@ -71,39 +66,30 @@ public class DockerTaskExecutor implements TaskExecutor {
 
     }
 
-    private void setupAndRun(Task task) {
+    private void setupAndRun(Task task) throws Exception {
         List<Command> commands = task.getTaskSpec().getCommands();
-        try {
-            this.dockerExecutorHelper.sendTaskScriptExecutor(task.getId());
-            String taskScriptFilepath = "/tmp/" + task.getId() + ".ts";
-            this.dockerExecutorHelper.sendTaskScript(commands, taskScriptFilepath,
-                task.getId());
-            this.dockerExecutorHelper.runScriptExecutor(task.getId(), taskScriptFilepath);
-        } catch (Throwable e) {
-            LOGGER.error(e);
-            setAllFailed(commands);
-        }
+        this.dockerExecutorHelper.sendTaskScriptExecutor(task.getId());
+        String taskScriptFilepath = "/tmp/" + task.getId() + ".ts";
+        this.dockerExecutorHelper.sendTaskScript(commands, taskScriptFilepath,
+            task.getId());
+        this.dockerExecutorHelper.runScriptExecutor(task.getId(), taskScriptFilepath);
     }
 
-    private void checkTask(Task task) {
+    private void checkTask(Task task) throws Exception {
         List<Command> commands = task.getTaskSpec().getCommands();
-        try {
-            final String EC_FILEPATH = "/tmp/" + task.getId() + ".ts.ec";
-            updateCommandsState(commands, EC_FILEPATH);
-        } catch (Throwable e) {
-            LOGGER.error("Could not update all commands state.");
-            LOGGER.error(e);
-            setNotFinishedToFailed(commands);
-        }
+        final String EC_FILEPATH = "/tmp/" + task.getId() + ".ts.ec";
+        updateCommandsState(commands, EC_FILEPATH);
     }
 
     private void startExecution(Task task) throws UnsupportedEncodingException {
         LOGGER.info(
             "Starting DockerTaskExecutor " + this.workerDockerRequestHelper.getContainerName());
         this.workerDockerRequestHelper.start(task.getTaskSpec());
+        LOGGER.debug(
+            "Container " + getContainerName() + " started successfully for task " + task.getId());
     }
 
-    private void stopExecution() {
+    private void stopExecution() throws DockerRemoveContainerException {
         LOGGER.info(
             "Stopping DockerTaskExecutor " + this.workerDockerRequestHelper.getContainerName());
         this.workerDockerRequestHelper.stopContainer();
@@ -166,13 +152,6 @@ public class DockerTaskExecutor implements TaskExecutor {
             }
         }
         return new TaskExecutionResult(result, new Command[commands.size()]);
-    }
-
-    private void setAllFailed(List<Command> commands) {
-        for (Command cmd : commands) {
-            cmd.setState(CommandState.FAILED);
-            cmd.setExitcode(TaskExecutionResult.UNDETERMINED_RESULT);
-        }
     }
 
     private void setNotFinishedToFailed(List<Command> commands) {
