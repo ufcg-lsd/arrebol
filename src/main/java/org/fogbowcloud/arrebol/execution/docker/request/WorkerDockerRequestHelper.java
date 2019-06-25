@@ -109,7 +109,7 @@ public class WorkerDockerRequestHelper {
             this.pullImage(image);
         } catch (Exception e) {
             throw new NotFoundDockerImage("Error to pull docker image: " + image + " for the task spec " + taskSpec.getSpec() +
-                    "with error " + e.getMessage());
+                    " with error " + e.getMessage());
         }
         return image;
     }
