@@ -3,4 +3,6 @@ target/
 arrebol-service.iml
 nohup.out
 
+bin/shutdown.pid
+
 logs/*
