@@ -73,8 +73,10 @@ public class DockerExecutorHelper {
     public int[] parseEcContentToArray(String ecContent, int cmdsSize) {
         String[] strExitcodes = ecContent.split("\r\n");
         int[] exitcodes = new int[cmdsSize];
-        for (int i = 0; i < strExitcodes.length; i++) {
-            exitcodes[i] = Integer.valueOf(strExitcodes[i]);
+        if(!ecContent.trim().isEmpty()){
+            for (int i = 0; i < strExitcodes.length; i++) {
+                exitcodes[i] = Integer.valueOf(strExitcodes[i]);
+            }
         }
         for (int i = strExitcodes.length; i < cmdsSize; i++) {
             exitcodes[i] = TaskExecutionResult.UNDETERMINED_RESULT;
