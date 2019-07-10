@@ -4,10 +4,10 @@ import java.util.List;
 
 public class Configuration {
 
-    private String poolType;
-    private Integer workerPoolSize;
-    private String imageId;
-    private List<String> resourceAddresses;
+    private final String poolType;
+    private final Integer workerPoolSize;
+    private final String imageId;
+    private final List<String> resourceAddresses;
 
     public Configuration(String poolType, Integer workerPoolSize, String imageId, List<String> resourceAddresses) {
         this.poolType = poolType;

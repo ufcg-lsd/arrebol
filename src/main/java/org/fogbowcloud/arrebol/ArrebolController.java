@@ -3,6 +3,7 @@ package org.fogbowcloud.arrebol;
 import com.google.gson.Gson;
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.Collection;
@@ -58,17 +59,12 @@ public class ArrebolController {
         String path = Objects.requireNonNull(Thread.currentThread().getContextClassLoader()
             .getResource("")).getPath();
         try {
-            Gson gson = new Gson();
-            BufferedReader bufferedReader = new BufferedReader(
-                new FileReader(path + File.separator + "arrebol.json"));
-            this.configuration = gson.fromJson(bufferedReader, Configuration.class);
-
-            certifyConfigurationProperties();
-
-            DockerVariable.DEFAULT_IMAGE = this.configuration.getImageId();
-            setWorkerCreator(this.configuration.getPoolType());
-        } catch (IOException e) {
-            LOGGER.error("Error on loading properties file path=" + path, e);
+            loadConfigurationFile(path);
+            checkConfigurationProperties();
+            loadGlobalVariables();
+            loadWorkerCreator(this.configuration.getPoolType());
+        } catch (FileNotFoundException f) {
+            LOGGER.error("Error on loading properties file path=" + path, f);
             System.exit(FAIL_EXIT_CODE);
         } catch (Exception e) {
             LOGGER.error(e.getMessage(), e);
@@ -92,7 +88,7 @@ public class ArrebolController {
         this.jobStateMonitor = new Timer(true);
     }
 
-    private void certifyConfigurationProperties() throws Exception {
+    private void checkConfigurationProperties() throws Exception {
         final String verifyMsg = " Please, verify your configuration file.";
         final String imageIdMsg =
             "Docker Image ID configuration property wrong or missing." + verifyMsg;
@@ -109,17 +105,28 @@ public class ArrebolController {
         Integer workerPoolSize = this.configuration.getWorkerPoolSize();
 
         if (imageId == null || imageId.trim().isEmpty() || imageId.contains(":")) {
-            LOGGER.error(imageIdMsg);
             throw new Exception(imageIdMsg);
         } else if (poolType == null || poolType.trim().isEmpty()) {
-            LOGGER.error(poolTypeMsg);
             throw new Exception(poolTypeMsg);
         } else if (resourceAddresses == null || resourceAddresses.isEmpty()) {
-            LOGGER.error(resourceAddressesMsg);
             throw new Exception(resourceAddressesMsg);
         } else if (workerPoolSize == null || workerPoolSize == 0) {
-            LOGGER.error(workerPoolSizeMsg);
             throw new Exception(workerPoolSizeMsg);
+        }
+    }
+
+    private void loadConfigurationFile(String path) throws FileNotFoundException {
+        Gson gson = new Gson();
+        BufferedReader bufferedReader = new BufferedReader(
+            new FileReader(path + File.separator + "arrebol.json"));
+        this.configuration = gson.fromJson(bufferedReader, Configuration.class);
+    }
+
+    private void loadGlobalVariables(){
+        switch (configuration.getPoolType()) {
+            case DockerConstants.DOCKER_TYPE:
+                DockerVariable.DEFAULT_IMAGE = configuration.getImageId();
+                break;
         }
     }
 
@@ -183,7 +190,7 @@ public class ArrebolController {
     public String stopJob(Job job) {
 
         for (Task task : job.getTasks()) {
-            //
+            ////still unsuportted
         }
         return job.getId();
     }
@@ -193,7 +200,7 @@ public class ArrebolController {
         return null;
     }
 
-    private void setWorkerCreator(String type) throws IOException {
+    private void loadWorkerCreator(String type) throws IOException {
         switch (type) {
             case DockerConstants.DOCKER_TYPE:
                 this.workerCreator = new DockerWorkerCreator();
@@ -204,6 +211,7 @@ public class ArrebolController {
         }
     }
 
+    //The arrebol does not change job state internally, so we need this workaround
     private void updateJobState(Job job) {
         JobState jobState = job.getJobState();
         if (!(jobState.equals(JobState.FAILED) || jobState.equals(JobState.FINISHED))) {
@@ -220,7 +228,7 @@ public class ArrebolController {
         }
     }
 
-    public boolean all(Collection<Task> tasks, int mask) {
+    private boolean all(Collection<Task> tasks, int mask) {
         for (Task t : tasks) {
             if ((t.getState().getValue() & mask) == 0) {
                 return false;
