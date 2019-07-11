@@ -3,7 +3,8 @@ package org.fogbowcloud.arrebol.execution.creator;
 import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
 import org.fogbowcloud.arrebol.ArrebolController;
-import org.fogbowcloud.arrebol.Configuration;
+import org.fogbowcloud.arrebol.models.configuration.Configuration;
+import org.fogbowcloud.arrebol.execution.docker.DockerConfiguration;
 import org.fogbowcloud.arrebol.execution.docker.DockerTaskExecutor;
 import org.fogbowcloud.arrebol.execution.TaskExecutor;
 import org.fogbowcloud.arrebol.execution.Worker;
@@ -11,7 +12,6 @@ import org.fogbowcloud.arrebol.models.specification.Specification;
 import org.fogbowcloud.arrebol.resource.MatchAnyWorker;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collection;
 import java.util.LinkedList;
@@ -22,8 +22,10 @@ public class DockerWorkerCreator implements WorkerCreator{
     private final Logger LOGGER = Logger.getLogger(ArrebolController.class);
     private static final String TASK_SCRIPT_EXECUTOR_NAME = "task-script-executor.sh";
     private final String tsExecutorFileContent;
+    private final DockerConfiguration configuration;
     
-    public DockerWorkerCreator() throws IOException {
+    public DockerWorkerCreator(Configuration configuration) throws Exception {
+        this.configuration = new DockerConfiguration(configuration);
         Resource resource = new ClassPathResource(TASK_SCRIPT_EXECUTOR_NAME);
         try(InputStream is = resource.getInputStream()) {
             this.tsExecutorFileContent = IOUtils.toString(is, "UTF-8");
@@ -32,7 +34,7 @@ public class DockerWorkerCreator implements WorkerCreator{
     }
 
     @Override
-    public Collection<Worker> createWorkers(Integer poolId, Configuration configuration) {
+    public Collection<Worker> createWorkers(Integer poolId) {
         Collection<Worker> workers = new LinkedList<>();
         int poolSize = configuration.getWorkerPoolSize();
         for(String address : configuration.getResourceAddresses()){

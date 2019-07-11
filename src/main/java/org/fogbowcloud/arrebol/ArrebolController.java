@@ -5,12 +5,10 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
-import java.io.IOException;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Timer;
@@ -21,9 +19,9 @@ import org.fogbowcloud.arrebol.execution.Worker;
 import org.fogbowcloud.arrebol.execution.creator.DockerWorkerCreator;
 import org.fogbowcloud.arrebol.execution.creator.RawWorkerCreator;
 import org.fogbowcloud.arrebol.execution.creator.WorkerCreator;
-import org.fogbowcloud.arrebol.execution.docker.DockerVariable;
 import org.fogbowcloud.arrebol.execution.docker.constans.DockerConstants;
 import org.fogbowcloud.arrebol.execution.raw.RawConstants;
+import org.fogbowcloud.arrebol.models.configuration.Configuration;
 import org.fogbowcloud.arrebol.models.job.Job;
 import org.fogbowcloud.arrebol.models.job.JobState;
 import org.fogbowcloud.arrebol.models.task.Task;
@@ -59,10 +57,8 @@ public class ArrebolController {
         String path = Objects.requireNonNull(Thread.currentThread().getContextClassLoader()
             .getResource("")).getPath();
         try {
-            loadConfigurationFile(path);
-            checkConfigurationProperties();
-            loadGlobalVariables();
-            loadWorkerCreator(this.configuration.getPoolType());
+            this.configuration = loadConfigurationFile(path);
+            buildWorkerCreator(configuration);
         } catch (FileNotFoundException f) {
             LOGGER.error("Error on loading properties file path=" + path, f);
             System.exit(FAIL_EXIT_CODE);
@@ -77,7 +73,7 @@ public class ArrebolController {
         this.queue = new TaskQueue(queueId, queueName);
 
         int poolId = 1;
-        WorkerPool pool = createPool(configuration, poolId);
+        WorkerPool pool = createPool(poolId);
 
         //create the scheduler bind the pieces together
         FifoSchedulerPolicy policy = new FifoSchedulerPolicy();
@@ -88,54 +84,21 @@ public class ArrebolController {
         this.jobStateMonitor = new Timer(true);
     }
 
-    private void checkConfigurationProperties() throws Exception {
-        final String verifyMsg = " Please, verify your configuration file.";
-        final String imageIdMsg =
-            "Docker Image ID configuration property wrong or missing." + verifyMsg;
-        final String poolTypeMsg =
-            "Worker Pool Type configuration property wrong or missing." + verifyMsg;
-        final String resourceAddressesMsg =
-            "Docker Image ID configuration property wrong or missing." + verifyMsg;
-        final String workerPoolSizeMsg =
-            "Docker Image ID configuration property wrong or missing." + verifyMsg;
 
-        String imageId = this.configuration.getImageId();
-        String poolType = this.configuration.getPoolType();
-        List<String> resourceAddresses = this.configuration.getResourceAddresses();
-        Integer workerPoolSize = this.configuration.getWorkerPoolSize();
 
-        if (imageId == null || imageId.trim().isEmpty() || imageId.contains(":")) {
-            throw new Exception(imageIdMsg);
-        } else if (poolType == null || poolType.trim().isEmpty()) {
-            throw new Exception(poolTypeMsg);
-        } else if (resourceAddresses == null || resourceAddresses.isEmpty()) {
-            throw new Exception(resourceAddressesMsg);
-        } else if (workerPoolSize == null || workerPoolSize == 0) {
-            throw new Exception(workerPoolSizeMsg);
-        }
-    }
-
-    private void loadConfigurationFile(String path) throws FileNotFoundException {
+    private Configuration loadConfigurationFile(String path) throws FileNotFoundException {
+        Configuration configuration;
         Gson gson = new Gson();
-        BufferedReader bufferedReader = new BufferedReader(
-            new FileReader(path + File.separator + "arrebol.json"));
-        this.configuration = gson.fromJson(bufferedReader, Configuration.class);
+        BufferedReader bufferedReader = new BufferedReader(new FileReader(path + File.separator + "arrebol.json"));
+        configuration = gson.fromJson(bufferedReader, Configuration.class);
+        return configuration;
     }
 
-    private void loadGlobalVariables(){
-        switch (configuration.getPoolType()) {
-            case DockerConstants.DOCKER_TYPE:
-                DockerVariable.DEFAULT_IMAGE = configuration.getImageId();
-                break;
-        }
-    }
-
-    private WorkerPool createPool(Configuration configuration, int poolId) {
+    private WorkerPool createPool(int poolId) {
 
         //we need to deal with missing/wrong properties
 
-        Collection<Worker> workers = new LinkedList<>(
-            workerCreator.createWorkers(poolId, configuration));
+        Collection<Worker> workers = new LinkedList<>(workerCreator.createWorkers(poolId));
 
         WorkerPool pool = new StaticPool(poolId, workers);
         LOGGER.info("pool={" + pool + "} created with workers={" + workers + "}");
@@ -200,14 +163,16 @@ public class ArrebolController {
         return null;
     }
 
-    private void loadWorkerCreator(String type) throws IOException {
-        switch (type) {
+    private void buildWorkerCreator(Configuration configuration) throws Exception {
+        switch (configuration.getPoolType()) {
             case DockerConstants.DOCKER_TYPE:
-                this.workerCreator = new DockerWorkerCreator();
+                this.workerCreator = new DockerWorkerCreator(configuration);
                 break;
             case RawConstants.RAW_TYPE:
-                this.workerCreator = new RawWorkerCreator();
+                this.workerCreator = new RawWorkerCreator(configuration);
                 break;
+            default:
+                throw new IllegalArgumentException("The pool type is invalid.");
         }
     }
 
