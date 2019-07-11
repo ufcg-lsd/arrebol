@@ -5,7 +5,6 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.util.EntityUtils;
 import org.apache.log4j.Logger;
-import org.fogbowcloud.arrebol.execution.docker.DockerVariable;
 import org.fogbowcloud.arrebol.execution.docker.constans.DockerConstants;
 import org.fogbowcloud.arrebol.execution.docker.exceptions.DockerCreateContainerException;
 import org.fogbowcloud.arrebol.execution.docker.exceptions.DockerRemoveContainerException;
@@ -27,14 +26,16 @@ public class WorkerDockerRequestHelper {
     private final String address;
     private final String containerName;
     private ContainerRequestHelper containerRequestHelper;
+    private final String defaultImageId;
 
     private final Logger LOGGER = Logger.getLogger(WorkerDockerRequestHelper.class);
 
-    public WorkerDockerRequestHelper(String address, String containerName) {
+    public WorkerDockerRequestHelper(String address, String containerName, String defaultImageId) {
         this.httpWrapper = new HttpWrapper();
         this.address = address;
         this.containerName = containerName;
         this.containerRequestHelper = new ContainerRequestHelper(address, containerName);
+        this.defaultImageId = defaultImageId;
     }
 
     public String start(TaskSpec taskSpec) throws DockerCreateContainerException, DockerStartException, NotFoundDockerImage, UnsupportedEncodingException {
@@ -103,8 +104,8 @@ public class WorkerDockerRequestHelper {
             if (image != null && !image.trim().isEmpty()) {
                 LOGGER.info("Using image [" + image + "] to start " + containerName);
             } else {
-                LOGGER.info("Using default image [" + DockerVariable.DEFAULT_IMAGE + "] to start " + containerName);
-                image = DockerVariable.DEFAULT_IMAGE;
+                image = this.defaultImageId;
+                LOGGER.info("Using default image [" + image + "] to start " + containerName);
             }
             this.pullImage(image);
         } catch (Exception e) {

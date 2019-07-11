@@ -1,8 +1,18 @@
 {
   "poolType":"docker",
-  "workerPoolSize":"5",
-  "imageId":"wesleymonte/simple-worker:latest",
-  "resourceAddresses":[
-    "http://127.0.0.1:5555"
+  "properties": [
+    {
+      "key":"workerPoolSize",
+      "value": 5
+    },
+    {
+      "key": "imageId",
+      "value": "wesleymonte/simple-worker"
+    },
+    {
+      "key": "resourceAddresses",
+      "value": ["http://127.0.0.1:5555",
+                "http://10.5.3.10:5555"]
+    }
   ]
 }

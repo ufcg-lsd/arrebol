@@ -29,8 +29,8 @@ public class DockerTaskExecutor implements TaskExecutor {
     private WorkerDockerRequestHelper workerDockerRequestHelper;
     private final DockerExecutorHelper dockerExecutorHelper;
 
-    public DockerTaskExecutor(String containerName, String address, String taskScriptContent) {
-        this.workerDockerRequestHelper = new WorkerDockerRequestHelper(address, containerName);
+    public DockerTaskExecutor(String containerName, String address, String taskScriptContent, String defaultImageId) {
+        this.workerDockerRequestHelper = new WorkerDockerRequestHelper(address, containerName, defaultImageId);
         this.dockerExecutorHelper = new DockerExecutorHelper(taskScriptContent,
             this.workerDockerRequestHelper);
     }

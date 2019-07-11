@@ -2,7 +2,8 @@ package org.fogbowcloud.arrebol.execution.creator;
 
 import org.apache.log4j.Logger;
 import org.fogbowcloud.arrebol.ArrebolController;
-import org.fogbowcloud.arrebol.Configuration;
+import org.fogbowcloud.arrebol.models.configuration.Configuration;
+import org.fogbowcloud.arrebol.execution.raw.RawConfiguration;
 import org.fogbowcloud.arrebol.execution.raw.RawTaskExecutor;
 import org.fogbowcloud.arrebol.execution.TaskExecutor;
 import org.fogbowcloud.arrebol.execution.Worker;
@@ -15,9 +16,14 @@ import java.util.LinkedList;
 public class RawWorkerCreator implements WorkerCreator {
 
     private final Logger LOGGER = Logger.getLogger(ArrebolController.class);
+    private RawConfiguration configuration;
+
+    public RawWorkerCreator(Configuration configuration) throws Exception {
+        this.configuration = new RawConfiguration(configuration);
+    }
 
     @Override
-    public Collection<Worker> createWorkers(Integer poolId, Configuration configuration) {
+    public Collection<Worker> createWorkers(Integer poolId) {
         Collection<Worker> workers = new LinkedList<>();
         int poolSize = new Integer(configuration.getWorkerPoolSize());
         for (int i = 0; i < poolSize; i++) {
