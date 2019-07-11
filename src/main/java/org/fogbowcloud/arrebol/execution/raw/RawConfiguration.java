@@ -10,17 +10,17 @@ public class RawConfiguration {
 
     public RawConfiguration(Configuration configuration) throws Exception {
         checkRawConfigurationProperties(configuration);
-        Property<Integer> workerPoolSize = configuration.getProperty(DockerConstants.JSON_WORKER_PULL_SIZE_KEY);
-        this.workerPoolSize = workerPoolSize.getValue();
+        Property<Double> workerPoolSize = configuration.getProperty(DockerConstants.JSON_WORKER_PULL_SIZE_KEY);
+        this.workerPoolSize = workerPoolSize.getValue().intValue();
     }
 
     private void checkRawConfigurationProperties(Configuration configuration) throws Exception {
         String verifyMsg = " Please, verify your configuration file.";
         String workerPoolSizeMsg = "Worker pool size configuration property wrong or missing." + verifyMsg;
 
-        Property<Integer> workerPoolSize = configuration.getProperty(DockerConstants.JSON_WORKER_PULL_SIZE_KEY);
+        Property<Double> workerPoolSize = configuration.getProperty(DockerConstants.JSON_WORKER_PULL_SIZE_KEY);
 
-        if (workerPoolSize.getValue() == null || workerPoolSize.getValue() == 0) {
+        if (workerPoolSize.getValue() == null || workerPoolSize.getValue().intValue() == 0) {
             throw new Exception(workerPoolSizeMsg);
         }
     }
