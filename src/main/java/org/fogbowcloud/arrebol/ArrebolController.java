@@ -172,7 +172,8 @@ public class ArrebolController {
                 this.workerCreator = new RawWorkerCreator(configuration);
                 break;
             default:
-                throw new IllegalArgumentException("The pool type is invalid.");
+                String poolTypeMsg = "Worker Pool Type configuration property wrong or missing. Please, verify your configuration file.";
+                throw new IllegalArgumentException(poolTypeMsg);
         }
     }
 

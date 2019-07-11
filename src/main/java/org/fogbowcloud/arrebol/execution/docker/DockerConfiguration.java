@@ -24,14 +24,9 @@ public class DockerConfiguration {
 
     private void checkDockerConfigurationProperties(Configuration configuration) throws Exception {
         String verifyMsg = " Please, verify your configuration file.";
-        String imageIdMsg =
-            "Docker Image ID configuration property wrong or missing." + verifyMsg;
-        String poolTypeMsg =
-            "Worker Pool Type configuration property wrong or missing." + verifyMsg;
-        String resourceAddressesMsg =
-            "Docker Image ID configuration property wrong or missing." + verifyMsg;
-        String workerPoolSizeMsg =
-            "Docker Image ID configuration property wrong or missing." + verifyMsg;
+        String imageIdMsg = "Docker Image ID configuration property wrong or missing." + verifyMsg;
+        String resourceAddressesMsg = "Resource addresses configuration property wrong or missing." + verifyMsg;
+        String workerPoolSizeMsg = "Worker pool size configuration property wrong or missing." + verifyMsg;
 
         Property<Double> workerPoolSize = configuration.getProperty(DockerConstants.JSON_WORKER_PULL_SIZE_KEY);
         Property<String> imageId = configuration.getProperty(DockerConstants.JSON_IMAGE_ID_KEY);
