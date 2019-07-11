@@ -19,7 +19,6 @@ public class DockerConfiguration {
         this.workerPoolSize = workerPoolSize.getValue().intValue();
         this.imageId = imageId.getValue();
         this.resourceAddresses = resourceAddresses.getValue();
-        DockerVariable.DEFAULT_IMAGE = imageId.getValue();
     }
 
     private void checkDockerConfigurationProperties(Configuration configuration) throws Exception {
