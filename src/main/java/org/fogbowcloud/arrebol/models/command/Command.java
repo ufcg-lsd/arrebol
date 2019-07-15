@@ -1,15 +1,18 @@
 package org.fogbowcloud.arrebol.models.command;
 
+import java.io.Serializable;
 import org.json.JSONException;
 import org.json.JSONObject;
 import javax.persistence.*;
 
 @Entity
-public class Command {
+public class Command implements Serializable {
+
+    private static final long serialVersionUID = -5555900503095L;
 
     @Id
     @GeneratedValue(strategy=GenerationType.IDENTITY)
-    private Integer id;
+    private long id;
 
     @Column(length=10240)
     private String command;

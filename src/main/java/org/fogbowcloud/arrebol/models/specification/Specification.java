@@ -14,7 +14,7 @@ public class Specification implements Serializable {
 
     @Id
     @GeneratedValue(strategy= GenerationType.IDENTITY)
-    private String id;
+    private long id;
 
     private String image;
 

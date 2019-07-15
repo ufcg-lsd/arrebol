@@ -20,6 +20,7 @@ public class Job implements Serializable {
 	private JobState jobState;
 
 	@OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+	@JoinColumn(name = "job_id")
 	private Collection<Task> tasks;
 
 	public Job(String label, Collection<Task> tasks){
