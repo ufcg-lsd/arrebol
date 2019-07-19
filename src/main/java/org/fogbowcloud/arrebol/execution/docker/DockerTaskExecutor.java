@@ -4,15 +4,11 @@ import java.util.Arrays;
 import org.apache.log4j.Logger;
 import org.fogbowcloud.arrebol.execution.TaskExecutionResult;
 import org.fogbowcloud.arrebol.execution.TaskExecutor;
-import org.fogbowcloud.arrebol.execution.docker.exceptions.DockerCreateContainerException;
 import org.fogbowcloud.arrebol.execution.docker.exceptions.DockerRemoveContainerException;
-import org.fogbowcloud.arrebol.execution.docker.exceptions.DockerStartException;
-import org.fogbowcloud.arrebol.execution.docker.exceptions.NotFoundDockerImage;
 import org.fogbowcloud.arrebol.execution.docker.request.WorkerDockerRequestHelper;
 import org.fogbowcloud.arrebol.models.command.Command;
 import org.fogbowcloud.arrebol.models.command.CommandState;
 import org.fogbowcloud.arrebol.models.task.Task;
-import org.fogbowcloud.arrebol.models.task.TaskState;
 
 import java.io.UnsupportedEncodingException;
 import java.util.List;
@@ -161,6 +157,11 @@ public class DockerTaskExecutor implements TaskExecutor {
                 c.setExitcode(TaskExecutionResult.UNDETERMINED_RESULT);
             }
         }
+    }
+
+    protected void setWorkerDockerRequestHelper(
+        WorkerDockerRequestHelper workerDockerRequestHelper) {
+        this.workerDockerRequestHelper = workerDockerRequestHelper;
     }
 
     private String getContainerName() {
