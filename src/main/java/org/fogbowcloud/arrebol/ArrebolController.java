@@ -86,7 +86,8 @@ public class ArrebolController {
     private Configuration loadConfigurationFile(String path) throws FileNotFoundException {
         Configuration configuration;
         Gson gson = new Gson();
-        BufferedReader bufferedReader = new BufferedReader(new FileReader(path + File.separator + "arrebol.json"));
+        BufferedReader bufferedReader = new BufferedReader(
+            new FileReader(path + File.separator + "arrebol.json"));
         configuration = gson.fromJson(bufferedReader, Configuration.class);
         return configuration;
     }
@@ -162,9 +163,9 @@ public class ArrebolController {
 
     private void buildWorkerCreator(Configuration configuration) throws Exception {
         String poolType = configuration.getPoolType();
-        if(poolType.equals(WorkerTypes.DOCKER.getType())){
+        if (poolType.equals(WorkerTypes.DOCKER.getType())) {
             this.workerCreator = new DockerWorkerCreator(configuration);
-        } else if (poolType.equals(WorkerTypes.RAW.getType())){
+        } else if (poolType.equals(WorkerTypes.RAW.getType())) {
             this.workerCreator = new RawWorkerCreator(configuration);
         } else {
             String poolTypeMsg = "Worker Pool Type configuration property wrong or missing. Please, verify your configuration file.";
