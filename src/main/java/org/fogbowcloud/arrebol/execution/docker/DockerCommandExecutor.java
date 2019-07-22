@@ -15,17 +15,9 @@ public class DockerCommandExecutor {
         this.workerDockerRequestHelper = workerDockerRequestHelper;
     }
 
-    public Integer executeCommand(String command) throws Exception {
+    public ExecInstanceResult executeCommand(String command) throws Exception {
         LOGGER.info("Sending command [" + command + "] to the [" + this.workerDockerRequestHelper.getContainerName() + "].");
 
-        ExecInstanceResult execInstanceResult = executeCommandInWorker(command);
-
-        LOGGER.info("Executed command [" + command + "] + with exitcode=[" + execInstanceResult.getExitCode() + "] in worker ["
-            + this.workerDockerRequestHelper.getContainerName() + "].");
-        return execInstanceResult.getExitCode();
-    }
-
-    private ExecInstanceResult executeCommandInWorker(String command) throws Exception {
         String execId = this.workerDockerRequestHelper.createExecInstance(command, false, false);
         this.workerDockerRequestHelper.startExecInstance(execId);
 
@@ -41,6 +33,9 @@ public class DockerCommandExecutor {
                 LOGGER.error(e.getMessage(), e);
             }
         }
+
+        LOGGER.info("Executed command [" + command + "] + with exitcode=[" + execInstanceResult.getExitCode() + "] in worker ["
+            + this.workerDockerRequestHelper.getContainerName() + "].");
         return execInstanceResult;
     }
 
