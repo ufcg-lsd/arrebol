@@ -8,10 +8,10 @@ public class TaskExecutionResult {
     // this class is more like an struct, not very much OO but it ok
 
     // A task results is SUCCESS when it was able to execute
-    // all the command. Failure otherwise
+    // all the commands. Failure otherwise
     public enum RESULT {
         SUCCESS, FAILURE
-    };
+    }
 
     public static final int UNDETERMINED_RESULT = Integer.MAX_VALUE;
 
@@ -29,7 +29,7 @@ public class TaskExecutionResult {
 
     /**
      * It returns the exit codes for the execution of the commands. When the @{link TaskExecutor}
-     * was not able to execute the command, the exit code is is
+     * was not able to execute the command, the exit code is
      * {@link TaskExecutionResult#UNDETERMINED_RESULT}.
      *
      * @return
