@@ -23,7 +23,7 @@ public class DockerTaskExecutor implements TaskExecutor {
     private final Logger LOGGER = Logger.getLogger(DockerTaskExecutor.class);
 
     private WorkerDockerRequestHelper workerDockerRequestHelper;
-    private final DockerExecutorHelper dockerExecutorHelper;
+    private DockerExecutorHelper dockerExecutorHelper;
 
     public DockerTaskExecutor(String containerName, String address, String taskScriptContent, String defaultImageId) {
         this.workerDockerRequestHelper = new WorkerDockerRequestHelper(address, containerName, defaultImageId);
@@ -62,7 +62,7 @@ public class DockerTaskExecutor implements TaskExecutor {
 
     }
 
-    private void setupAndRun(Task task) throws Exception {
+    protected void setupAndRun(Task task) throws Exception {
         List<Command> commands = task.getTaskSpec().getCommands();
         this.dockerExecutorHelper.sendTaskScriptExecutor(task.getId());
         String taskScriptFilepath = "/tmp/" + task.getId() + ".ts";
@@ -162,6 +162,11 @@ public class DockerTaskExecutor implements TaskExecutor {
     protected void setWorkerDockerRequestHelper(
         WorkerDockerRequestHelper workerDockerRequestHelper) {
         this.workerDockerRequestHelper = workerDockerRequestHelper;
+    }
+
+    protected void setDockerExecutorHelper(
+        DockerExecutorHelper dockerExecutorHelper) {
+        this.dockerExecutorHelper = dockerExecutorHelper;
     }
 
     private String getContainerName() {

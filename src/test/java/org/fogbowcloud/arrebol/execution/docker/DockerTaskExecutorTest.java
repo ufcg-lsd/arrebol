@@ -2,11 +2,14 @@ package org.fogbowcloud.arrebol.execution.docker;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyString;
 
 import java.io.UnsupportedEncodingException;
 import java.util.Collections;
 import java.util.List;
 import org.fogbowcloud.arrebol.execution.TaskExecutionResult;
+import org.fogbowcloud.arrebol.execution.TaskExecutionResult.RESULT;
 import org.fogbowcloud.arrebol.execution.docker.exceptions.DockerCreateContainerException;
 import org.fogbowcloud.arrebol.execution.docker.exceptions.DockerStartException;
 import org.fogbowcloud.arrebol.execution.docker.exceptions.NotFoundDockerImageException;
@@ -32,18 +35,20 @@ public class DockerTaskExecutorTest {
     @Test
     public void testNotFoundImage() throws Exception {
         Mockito.when(task.getTaskSpec().getImage()).thenReturn("anyImage");
-        DockerTaskExecutor dockerTaskExecutor = mockDockerTaskExecutor(new NotFoundDockerImageException("Error to pull docker image"));
+        DockerTaskExecutor dockerTaskExecutor = mockDockerTaskExecutor(
+            new NotFoundDockerImageException("Error to pull docker image"));
         TaskExecutionResult taskExecutionResult = dockerTaskExecutor.execute(task);
-        assertTrue(isAllFailed(task.getTaskSpec().getCommands()));
+        assertTrue(isAll(task.getTaskSpec().getCommands(), CommandState.FAILED));
         assertEquals(TaskExecutionResult.RESULT.FAILURE, taskExecutionResult.getResult());
     }
 
     @Test
     public void testErrorCreatingContainer() throws UnsupportedEncodingException {
         Task task = mockTask();
-        DockerTaskExecutor dockerTaskExecutor = mockDockerTaskExecutor(new DockerCreateContainerException("Could not create container"));
+        DockerTaskExecutor dockerTaskExecutor = mockDockerTaskExecutor(
+            new DockerCreateContainerException("Could not create container"));
         TaskExecutionResult taskExecutionResult = dockerTaskExecutor.execute(task);
-        assertTrue(isAllFailed(task.getTaskSpec().getCommands()));
+        assertTrue(isAll(task.getTaskSpec().getCommands(), CommandState.FAILED));
         assertEquals(TaskExecutionResult.RESULT.FAILURE, taskExecutionResult.getResult());
 
     }
@@ -51,10 +56,39 @@ public class DockerTaskExecutorTest {
     @Test
     public void testErrorStartingContainer() throws UnsupportedEncodingException {
         Task task = mockTask();
-        DockerTaskExecutor dockerTaskExecutor = mockDockerTaskExecutor(new DockerStartException("Could not start container"));
+        DockerTaskExecutor dockerTaskExecutor = mockDockerTaskExecutor(
+            new DockerStartException("Could not start container"));
         TaskExecutionResult taskExecutionResult = dockerTaskExecutor.execute(task);
-        assertTrue(isAllFailed(task.getTaskSpec().getCommands()));
+        assertTrue(isAll(task.getTaskSpec().getCommands(), CommandState.FAILED));
         assertEquals(TaskExecutionResult.RESULT.FAILURE, taskExecutionResult.getResult());
+
+    }
+
+    @Test
+    public void testSuccessfulExecution() throws Exception {
+
+        WorkerDockerRequestHelper workerDockerRequestHelper = Mockito
+            .mock(WorkerDockerRequestHelper.class);
+        Mockito.when(workerDockerRequestHelper.getContainerName()).thenReturn("MockedContainer");
+        Mockito.when(workerDockerRequestHelper.start(any(TaskSpec.class)))
+            .thenReturn("MockedContainerId");
+        Mockito.doNothing().when(workerDockerRequestHelper).stopContainer();
+
+        DockerExecutorHelper dockerExecutorHelper = Mockito
+            .spy(new DockerExecutorHelper("mockTaskScript", workerDockerRequestHelper));
+        String ecContent = "0\r\n0\r\n0\r\n0\r\n0";
+        Mockito.doReturn(ecContent).when(dockerExecutorHelper)
+            .getEcFile("/tmp/" + task.getId() + ".ts.ec");
+
+        DockerTaskExecutor dockerTaskExecutor = Mockito.spy(new DockerTaskExecutor("mockAddress",
+            "mockContainerName", "mockScript", "mockImageId"));
+        Mockito.doNothing().when(dockerTaskExecutor).setupAndRun(any(Task.class));
+        dockerTaskExecutor.setWorkerDockerRequestHelper(workerDockerRequestHelper);
+        dockerTaskExecutor.setDockerExecutorHelper(dockerExecutorHelper);
+
+        TaskExecutionResult taskExecutionResult = dockerTaskExecutor.execute(task);
+        assertTrue(isAll(task.getTaskSpec().getCommands(), CommandState.FINISHED));
+        assertEquals(RESULT.SUCCESS, taskExecutionResult.getResult());
 
     }
 
@@ -62,11 +96,11 @@ public class DockerTaskExecutorTest {
         throws UnsupportedEncodingException {
         WorkerDockerRequestHelper workerDockerRequestHelper = Mockito
             .mock(WorkerDockerRequestHelper.class);
-        Mockito.when(workerDockerRequestHelper.start(Mockito.any(TaskSpec.class)))
+        Mockito.when(workerDockerRequestHelper.start(any(TaskSpec.class)))
             .thenThrow(e);
 
-        DockerTaskExecutor dockerTaskExecutor = new DockerTaskExecutor("anyAddress",
-            "anyContainerName", "anyScript", "anyImageId");
+        DockerTaskExecutor dockerTaskExecutor = new DockerTaskExecutor("mockAddress",
+            "mockContainerName", "mockScript", "mockImageId");
         dockerTaskExecutor.setWorkerDockerRequestHelper(workerDockerRequestHelper);
         return dockerTaskExecutor;
     }
@@ -79,18 +113,18 @@ public class DockerTaskExecutorTest {
         Mockito.when(taskSpec.getImage()).thenReturn(null);
         Mockito.when(taskSpec.getCommands()).thenReturn(commands);
 
-        Task task = new Task("anyTaskId", taskSpec);
+        Task task = new Task("mockTaskId", taskSpec);
         return task;
     }
 
-    private boolean isAllFailed(List<Command> commands) {
-        boolean isAllFailed = true;
+    private boolean isAll(List<Command> commands, CommandState commandState) {
+        boolean isAll = true;
         for (Command c : commands) {
-            if (!c.getState().equals(CommandState.FAILED)) {
-                isAllFailed = false;
+            if (!c.getState().equals(commandState)) {
+                isAll = false;
                 break;
             }
         }
-        return isAllFailed;
+        return isAll;
     }
 }
