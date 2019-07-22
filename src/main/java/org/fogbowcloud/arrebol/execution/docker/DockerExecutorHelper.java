@@ -31,7 +31,7 @@ public class DockerExecutorHelper {
         LOGGER.debug("Sending Task Script Executor to Docker Worker");
         String writeCommand = "echo '" + this.taskScriptContent + "' > " + TASK_SCRIPT_EXECUTOR;
         try {
-            int exitCode = this.dockerCommandExecutor.executeCommand(writeCommand, taskId);
+            int exitCode = this.dockerCommandExecutor.executeCommand(writeCommand);
             if (exitCode != 0) {
                 throw new Exception(
                         "Error while trying to execute send task script executor, exit code ["
@@ -90,7 +90,7 @@ public class DockerExecutorHelper {
         for (Command cmd : commands) {
             Integer exitCode;
             try {
-                exitCode = writeToFile(cmd.getCommand(), tsFilepath, taskId);
+                exitCode = writeToFile(cmd.getCommand(), tsFilepath);
             } catch (Throwable t) {
                 exitCode = TaskExecutionResult.UNDETERMINED_RESULT;
             }
@@ -99,7 +99,7 @@ public class DockerExecutorHelper {
         return exitCodes;
     }
 
-    private Integer writeToFile(String command, String file, String taskId) throws Exception {
-        return this.dockerCommandExecutor.executeCommand("echo '" + command + "' >> " + file, taskId);
+    private Integer writeToFile(String command, String file) throws Exception {
+        return this.dockerCommandExecutor.executeCommand("echo '" + command + "' >> " + file);
     }
 }
