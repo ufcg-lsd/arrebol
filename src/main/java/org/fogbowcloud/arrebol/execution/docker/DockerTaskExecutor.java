@@ -4,37 +4,60 @@ import java.util.Arrays;
 import org.apache.log4j.Logger;
 import org.fogbowcloud.arrebol.execution.TaskExecutionResult;
 import org.fogbowcloud.arrebol.execution.TaskExecutor;
-import org.fogbowcloud.arrebol.execution.docker.exceptions.DockerCreateContainerException;
 import org.fogbowcloud.arrebol.execution.docker.exceptions.DockerRemoveContainerException;
-import org.fogbowcloud.arrebol.execution.docker.exceptions.DockerStartException;
-import org.fogbowcloud.arrebol.execution.docker.exceptions.NotFoundDockerImage;
 import org.fogbowcloud.arrebol.execution.docker.request.WorkerDockerRequestHelper;
 import org.fogbowcloud.arrebol.models.command.Command;
 import org.fogbowcloud.arrebol.models.command.CommandState;
 import org.fogbowcloud.arrebol.models.task.Task;
-import org.fogbowcloud.arrebol.models.task.TaskState;
 
 import java.io.UnsupportedEncodingException;
 import java.util.List;
 
 import static java.lang.Thread.sleep;
 
+/**
+ * This class consists of an entity of remote execution of tasks using docker containers. At each
+ * execution a new container is started and after the execution of the task is finished the
+ * container is removed. The execution of each command is not done directly by this class but by a
+ * bash script sent into the container. In cases where container initialization error occurs, the
+ * commands go to failure state and a failure result is returned.
+ */
 public class DockerTaskExecutor implements TaskExecutor {
 
     private static final int SUCCESS_EXIT_CODE = 0;
     private static final int FAIL_EXIT_CODE = 127;
+    private static final long poolingPeriodTime = 2000;
 
     private final Logger LOGGER = Logger.getLogger(DockerTaskExecutor.class);
 
     private WorkerDockerRequestHelper workerDockerRequestHelper;
     private final DockerExecutorHelper dockerExecutorHelper;
 
-    public DockerTaskExecutor(String containerName, String address, String taskScriptContent, String defaultImageId) {
-        this.workerDockerRequestHelper = new WorkerDockerRequestHelper(address, containerName, defaultImageId);
+    /**
+     * @param containerName Sets the name of the container, is an identifier.
+     * @param address Defines the address where requests for the Docker API should be made
+     * @param taskScriptContent Script that will be sent to the container with the function to
+     * execute the commands
+     * @param defaultImageId Image docker used as default if no one is specified in the task.
+     */
+    public DockerTaskExecutor(String containerName, String address, String taskScriptContent,
+        String defaultImageId) {
+        this.workerDockerRequestHelper = new WorkerDockerRequestHelper(address, containerName,
+            defaultImageId);
         this.dockerExecutorHelper = new DockerExecutorHelper(taskScriptContent,
             this.workerDockerRequestHelper);
     }
 
+    /**
+     * It has function to execute a task. First, the container is started. A task may have
+     * requirements such as docker image, which are set at that time. Next, a bash script called
+     * task-script-executor is sent, which will execute all commands internally in the container.
+     * All the commands of the task are written to a .ts file inside the container, and then the
+     * task-script-executor reads this file, executes line by line and each executed command is
+     * written its exit code in the .ts.ec file. Execution ends only when the number of ec in the
+     * file corresponds to the number of commands. At the end of execution, the result is returned
+     * and the container is killed
+     */
     @Override
     public TaskExecutionResult execute(Task task) {
         // FIXME: We should catch the errors when starting/finishing the container and move the task
@@ -66,6 +89,10 @@ public class DockerTaskExecutor implements TaskExecutor {
 
     }
 
+    /**
+     * Sends the executor task script, sends the file with the task commands and executes the
+     * executor task script
+     */
     private void setupAndRun(Task task) throws Exception {
         List<Command> commands = task.getTaskSpec().getCommands();
         this.dockerExecutorHelper.sendTaskScriptExecutor(task.getId());
@@ -75,6 +102,9 @@ public class DockerTaskExecutor implements TaskExecutor {
         this.dockerExecutorHelper.runScriptExecutor(task.getId(), taskScriptFilepath);
     }
 
+    /**
+     * Check the state of the commands until all are finalized
+     */
     private void checkTask(Task task) throws Exception {
         List<Command> commands = task.getTaskSpec().getCommands();
         final String EC_FILEPATH = "/tmp/" + task.getId() + ".ts.ec";
@@ -95,8 +125,12 @@ public class DockerTaskExecutor implements TaskExecutor {
         this.workerDockerRequestHelper.stopContainer();
     }
 
+    /**
+     * It reads the exit codes file and then updates the states of the commands, performing this
+     * update each period of time {@link DockerTaskExecutor#poolingPeriodTime} until the result of
+     * all the commands.
+     */
     private void updateCommandsState(List<Command> cmds, String ecFilepath) throws Exception {
-        final long poolingPeriodTime = 2000;
         int nextRunningIndex = 0;
         while (nextRunningIndex < cmds.size()) {
             Command cmd = cmds.get(nextRunningIndex);
