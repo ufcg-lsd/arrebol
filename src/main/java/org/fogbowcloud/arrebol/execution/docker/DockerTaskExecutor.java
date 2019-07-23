@@ -66,11 +66,14 @@ public class DockerTaskExecutor implements TaskExecutor {
         TaskExecutionResult taskExecutionResult;
 
         try {
+            List<Command> commands = task.getTaskSpec().getCommands();
             startContainer(task);
-            containerEnvironmentSetup(task.getId(), task.getTaskSpec().getCommands());
-            LOGGER.debug("Starting to execute commands [len=" + task.getTaskSpec().getCommands().size() + "] of task " + task.getId());
+            containerEnvironmentSetup(task.getId(), commands);
+            LOGGER.debug(
+                "Starting to execute commands [len=" + commands.size() + "] of task " + task
+                    .getId());
             runScript(task.getId());
-            checkTask(task);
+            trackTaskExecution(task.getId(), commands);
             stopContainer();
         } catch (DockerRemoveContainerException de) {
             LOGGER.error(de.getMessage(), de);
@@ -92,7 +95,8 @@ public class DockerTaskExecutor implements TaskExecutor {
      * Sends the executor task script, sends the file with the task commands and executes the
      * executor task script
      */
-    private String containerEnvironmentSetup (String taskId, List<Command> commands) throws Exception {
+    private String containerEnvironmentSetup(String taskId, List<Command> commands)
+        throws Exception {
         this.dockerExecutorHelper.sendTaskScriptExecutor();
         LOGGER.debug(
             "Starting to write commands [len=" + commands.size() + "] of task " + taskId
@@ -108,12 +112,24 @@ public class DockerTaskExecutor implements TaskExecutor {
     }
 
     /**
-     * Check the state of the commands until all are finalized
+     * It reads the exit codes file and then updates the states of the commands, performing this
+     * update each period of time {@link DockerTaskExecutor#poolingPeriodTime} until the result of
+     * all the commands.
      */
-    private void checkTask(Task task) throws Exception {
-        List<Command> commands = task.getTaskSpec().getCommands();
-        String ecFilePath = String.format(ecFilePathPattern, task.getId());
-        updateCommandsState(commands, ecFilePath);
+    private void trackTaskExecution(String taskId, List<Command> commands) throws Exception {
+        String ecFilePath = String.format(ecFilePathPattern, taskId);
+        int currentIndex = 0;
+        while (currentIndex < commands.size()) {
+            Command cmd = commands.get(currentIndex);
+            cmd.setState(CommandState.RUNNING);
+            currentIndex = updateCommandsState(commands, ecFilePath, currentIndex);
+            LOGGER.debug("After sync waiting for index [" + currentIndex + "]");
+            try {
+                sleep(poolingPeriodTime);
+            } catch (InterruptedException e) {
+                LOGGER.error(e);
+            }
+        }
     }
 
     /**
@@ -133,31 +149,10 @@ public class DockerTaskExecutor implements TaskExecutor {
         this.workerDockerRequestHelper.stopContainer();
     }
 
-    /**
-     * It reads the exit codes file and then updates the states of the commands, performing this
-     * update each period of time {@link DockerTaskExecutor#poolingPeriodTime} until the result of
-     * all the commands.
-     */
-    private void updateCommandsState(List<Command> cmds, String ecFilepath) throws Exception {
-        int currentIndex = 0;
-        while (currentIndex < cmds.size()) {
-            Command cmd = cmds.get(currentIndex);
-            cmd.setState(CommandState.RUNNING);
-            updateCommandsState(cmds, ecFilepath, currentIndex);
-            try {
-                sleep(poolingPeriodTime);
-            } catch (InterruptedException e) {
-                LOGGER.error(e);
-            }
-        }
-    }
-
     private int updateCommandsState(List<Command> cmds, String ecFilepath, int startIndex)
         throws Exception {
-        int lastIndex;
         int[] exitcodes = getExitCodeFromEcFile(ecFilepath, cmds.size());
-        lastIndex = syncUntilTheLastCmdFinished(cmds, exitcodes, startIndex);
-        LOGGER.debug("After sync waiting for index [" + lastIndex + "]");
+        int lastIndex = syncUntilTheLastCmdFinished(cmds, exitcodes, startIndex);
         return lastIndex;
     }
 
