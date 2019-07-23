@@ -9,7 +9,7 @@ import org.fogbowcloud.arrebol.execution.docker.constans.DockerConstants;
 import org.fogbowcloud.arrebol.execution.docker.exceptions.DockerCreateContainerException;
 import org.fogbowcloud.arrebol.execution.docker.exceptions.DockerRemoveContainerException;
 import org.fogbowcloud.arrebol.execution.docker.exceptions.DockerStartException;
-import org.fogbowcloud.arrebol.execution.docker.exceptions.NotFoundDockerImage;
+import org.fogbowcloud.arrebol.execution.docker.exceptions.DockerImageNotFoundException;
 import org.fogbowcloud.arrebol.models.task.TaskSpec;
 import org.fogbowcloud.arrebol.utils.AppUtil;
 import org.json.JSONObject;
@@ -38,7 +38,7 @@ public class WorkerDockerRequestHelper {
         this.defaultImageId = defaultImageId;
     }
 
-    public String start(TaskSpec taskSpec) throws DockerCreateContainerException, DockerStartException, NotFoundDockerImage, UnsupportedEncodingException {
+    public String start(TaskSpec taskSpec) throws DockerCreateContainerException, DockerStartException, DockerImageNotFoundException, UnsupportedEncodingException {
         String image = setUpImage(taskSpec);
         Map<String, String> requirements  = setUpContainerRequirements(taskSpec);
         String containerId = this.containerRequestHelper.createContainer(image, requirements);
@@ -109,7 +109,7 @@ public class WorkerDockerRequestHelper {
             }
             this.pullImage(image);
         } catch (Exception e) {
-            throw new NotFoundDockerImage("Error to pull docker image: " + image + " for the task spec " + taskSpec.getSpec() +
+            throw new DockerImageNotFoundException("Error to pull docker image: " + image + " for the task spec " + taskSpec.getSpec() +
                     " with error " + e.getMessage());
         }
         return image;
