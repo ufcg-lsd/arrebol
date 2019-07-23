@@ -23,7 +23,7 @@ import static java.lang.Thread.sleep;
  * commands go to failure state and a failure result is returned.
  */
 public class DockerTaskExecutor implements TaskExecutor {
-    
+
     private static final long poolingPeriodTime = 2000;
 
     private final Logger LOGGER = Logger.getLogger(DockerTaskExecutor.class);
@@ -74,7 +74,8 @@ public class DockerTaskExecutor implements TaskExecutor {
             LOGGER.error("Set task [" + task.getId() + "] to FAILED [" + t.getMessage() + "]", t);
             setNotFinishedToFailed(task.getTaskSpec().getCommands());
         } finally {
-            taskExecutionResult = getTaskResult(task.getTaskSpec().getCommands());
+            List<Command> commands = task.getTaskSpec().getCommands();
+            taskExecutionResult =  new TaskExecutionResult(getTaskResult(commands), getExitCodes(commands));
             LOGGER.debug("Result of task [" + task.getId() + "]: "
                 + taskExecutionResult.getResult().toString());
             return taskExecutionResult;
@@ -195,7 +196,7 @@ public class DockerTaskExecutor implements TaskExecutor {
         return isUndetermined;
     }
 
-    private TaskExecutionResult getTaskResult(List<Command> commands) {
+    private TaskExecutionResult.RESULT getTaskResult(List<Command> commands) {
         TaskExecutionResult.RESULT result = TaskExecutionResult.RESULT.SUCCESS;
         for (Command cmd : commands) {
             if (cmd.getState().equals(CommandState.FAILED)) {
@@ -203,7 +204,7 @@ public class DockerTaskExecutor implements TaskExecutor {
                 break;
             }
         }
-        return new TaskExecutionResult(result, getExitCodes(commands));
+        return result;
     }
 
     private int[] getExitCodes(List<Command> commands) {
