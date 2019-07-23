@@ -79,7 +79,7 @@ public class DockerTaskExecutor implements TaskExecutor {
             LOGGER.error(de.getMessage(), de);
         } catch (Throwable t) {
             LOGGER.error("Set task [" + task.getId() + "] to FAILED [" + t.getMessage() + "]", t);
-            setNotFinishedToFailed(task.getTaskSpec().getCommands());
+            failUnfinishedCommands(task.getTaskSpec().getCommands());
         } finally {
             List<Command> commands = task.getTaskSpec().getCommands();
             taskExecutionResult = new TaskExecutionResult(getTaskResult(commands),
@@ -221,7 +221,7 @@ public class DockerTaskExecutor implements TaskExecutor {
         return exitcodes;
     }
 
-    private void setNotFinishedToFailed(List<Command> commands) {
+    private void failUnfinishedCommands(List<Command> commands) {
         for (Command c : commands) {
             if (!c.getState().equals(CommandState.FINISHED)) {
                 c.setState(CommandState.FAILED);
