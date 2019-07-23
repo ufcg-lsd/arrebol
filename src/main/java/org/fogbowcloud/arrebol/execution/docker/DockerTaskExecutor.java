@@ -23,9 +23,7 @@ import static java.lang.Thread.sleep;
  * commands go to failure state and a failure result is returned.
  */
 public class DockerTaskExecutor implements TaskExecutor {
-
-    private static final int SUCCESS_EXIT_CODE = 0;
-    private static final int FAIL_EXIT_CODE = 127;
+    
     private static final long poolingPeriodTime = 2000;
 
     private final Logger LOGGER = Logger.getLogger(DockerTaskExecutor.class);
