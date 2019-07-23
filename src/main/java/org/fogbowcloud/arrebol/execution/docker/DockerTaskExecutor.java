@@ -92,8 +92,7 @@ public class DockerTaskExecutor implements TaskExecutor {
     }
 
     /**
-     * Sends the executor task script, sends the file with the task commands and executes the
-     * executor task script
+     * Sends the executor task script and write task commands inside the .ts file.
      */
     private String containerEnvironmentSetup(String taskId, List<Command> commands)
         throws Exception {
@@ -112,7 +111,7 @@ public class DockerTaskExecutor implements TaskExecutor {
     }
 
     /**
-     * It reads the exit codes file and then updates the states of the commands, performing this
+     * It reads the .ts.ec file and then updates the states of the commands, performing this
      * update each period of time {@link DockerTaskExecutor#poolingPeriodTime} until the result of
      * all the commands.
      */
