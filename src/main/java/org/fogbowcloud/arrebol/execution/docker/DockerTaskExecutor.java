@@ -25,6 +25,8 @@ import static java.lang.Thread.sleep;
 public class DockerTaskExecutor implements TaskExecutor {
 
     private static final long poolingPeriodTime = 2000;
+    private static final String taskScriptFilePathPattern = "/tmp/%s/.ts";
+    private static final String ecFilePathPattern = "/tmp/%s/.ts.ec";
 
     private final Logger LOGGER = Logger.getLogger(DockerTaskExecutor.class);
 
@@ -65,8 +67,9 @@ public class DockerTaskExecutor implements TaskExecutor {
 
         try {
             startContainer(task);
-            String taskScriptFilePath = setup(task);
-            run(taskScriptFilePath);
+            containerEnvironmentSetup(task.getId(), task.getTaskSpec().getCommands());
+            LOGGER.debug("Starting to execute commands [len=" + task.getTaskSpec().getCommands().size() + "] of task " + task.getId());
+            runScript(task.getId());
             checkTask(task);
             stopContainer();
         } catch (DockerRemoveContainerException de) {
@@ -89,15 +92,18 @@ public class DockerTaskExecutor implements TaskExecutor {
      * Sends the executor task script, sends the file with the task commands and executes the
      * executor task script
      */
-    private String setup(Task task) throws Exception {
-        List<Command> commands = task.getTaskSpec().getCommands();
-        this.dockerExecutorHelper.sendTaskScriptExecutor(task.getId());
-        String taskScriptFilePath = "/tmp/" + task.getId() + ".ts";
-        this.dockerExecutorHelper.sendTaskScript(commands, taskScriptFilePath, task.getId());
+    private String containerEnvironmentSetup (String taskId, List<Command> commands) throws Exception {
+        this.dockerExecutorHelper.sendTaskScriptExecutor();
+        LOGGER.debug(
+            "Starting to write commands [len=" + commands.size() + "] of task " + taskId
+                + " to .ts file.");
+        String taskScriptFilePath = String.format(taskScriptFilePathPattern, taskId);
+        this.dockerExecutorHelper.writeTaskScript(commands, taskScriptFilePath);
         return taskScriptFilePath;
     }
 
-    private void run(String taskScriptFilepath) throws Exception {
+    private void runScript(String taskId) throws Exception {
+        String taskScriptFilepath = String.format(taskScriptFilePathPattern, taskId);
         this.dockerExecutorHelper.runScriptExecutor(taskScriptFilepath);
     }
 
@@ -106,8 +112,8 @@ public class DockerTaskExecutor implements TaskExecutor {
      */
     private void checkTask(Task task) throws Exception {
         List<Command> commands = task.getTaskSpec().getCommands();
-        final String EC_FILEPATH = "/tmp/" + task.getId() + ".ts.ec";
-        updateCommandsState(commands, EC_FILEPATH);
+        String ecFilePath = String.format(ecFilePathPattern, task.getId());
+        updateCommandsState(commands, ecFilePath);
     }
 
     /**

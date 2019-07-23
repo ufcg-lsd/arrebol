@@ -42,8 +42,15 @@ public class RawTaskExecutor implements TaskExecutor {
             }
         }
 
-        return new TaskExecutionResult(result,
-                commandsList.toArray(new Command[commandsList.size()]));
+        return new TaskExecutionResult(result, getExitCodes(commandsList));
+    }
+
+    private int[] getExitCodes(List<Command> commands) {
+        int[] exitcodes = new int[commands.size()];
+        for (int i = 0; i < commands.size(); i++) {
+            exitcodes[i] = commands.get(i).getExitcode();
+        }
+        return exitcodes;
     }
 
     private int executeCommand(Command command) throws IOException, InterruptedException {
