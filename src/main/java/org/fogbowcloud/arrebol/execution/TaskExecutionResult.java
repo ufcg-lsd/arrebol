@@ -16,11 +16,11 @@ public class TaskExecutionResult {
     public static final int UNDETERMINED_RESULT = Integer.MAX_VALUE;
 
     private final RESULT taskResult;
-    private final Command[] commands;
+    private final int[] exitcodes;
 
-    public TaskExecutionResult(RESULT result, Command[] commands) {
+    public TaskExecutionResult(RESULT result, int[] exitcodes) {
         this.taskResult = result;
-        this.commands = commands;
+        this.exitcodes = exitcodes;
     }
 
     public RESULT getResult() {
@@ -34,8 +34,8 @@ public class TaskExecutionResult {
      *
      * @return
      */
-    public Command[] commands() {
-        return Arrays.copyOf(this.commands, this.commands.length);
+    public int[] getExitcodes() {
+        return Arrays.copyOf(this.exitcodes, this.exitcodes.length);
     }
 
 }

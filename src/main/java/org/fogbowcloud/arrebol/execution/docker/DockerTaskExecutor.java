@@ -142,7 +142,8 @@ public class DockerTaskExecutor implements TaskExecutor {
         }
     }
 
-    private int updateCommandsState(List<Command> cmds, String ecFilepath, int startIndex) throws Exception {
+    private int updateCommandsState(List<Command> cmds, String ecFilepath, int startIndex)
+        throws Exception {
         int lastIndex;
         int[] exitcodes = getExitCodeFromEcFile(ecFilepath, cmds.size());
         lastIndex = syncUntilTheLastCmdFinished(cmds, exitcodes, startIndex);
@@ -159,7 +160,8 @@ public class DockerTaskExecutor implements TaskExecutor {
         return exitcodes;
     }
 
-    private Integer syncUntilTheLastCmdFinished(List<Command> cmds, int[] exitcodes, int startIndex) {
+    private Integer syncUntilTheLastCmdFinished(List<Command> cmds, int[] exitcodes,
+        int startIndex) {
         int currentIndex = startIndex;
         while (currentIndex < cmds.size()) {
             int exitCode = exitcodes[currentIndex];
@@ -203,7 +205,15 @@ public class DockerTaskExecutor implements TaskExecutor {
                 break;
             }
         }
-        return new TaskExecutionResult(result, new Command[commands.size()]);
+        return new TaskExecutionResult(result, getExitCodes(commands));
+    }
+
+    private int[] getExitCodes(List<Command> commands) {
+        int[] exitcodes = new int[commands.size()];
+        for (int i = 0; i < commands.size(); i++) {
+            exitcodes[i] = commands.get(i).getExitcode();
+        }
+        return exitcodes;
     }
 
     private void setNotFinishedToFailed(List<Command> commands) {
