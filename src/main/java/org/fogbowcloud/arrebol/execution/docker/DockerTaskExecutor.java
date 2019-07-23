@@ -64,21 +64,16 @@ public class DockerTaskExecutor implements TaskExecutor {
         // to its FAILURE state
         // FIXME: also, follow the SAME log format we used in the RawTaskExecutor
         TaskExecutionResult taskExecutionResult;
-        Integer startStatus = FAIL_EXIT_CODE;
 
         try {
-            startExecution(task);
+            startContainer(task);
             setupAndRun(task);
             checkTask(task);
-            stopExecution();
+            stopContainer();
         } catch (DockerRemoveContainerException de) {
-            LOGGER.error(de);
-            LOGGER.error("Failed to stop container with name " + this.workerDockerRequestHelper
-                .getContainerName() + " with exit code " + FAIL_EXIT_CODE);
+            LOGGER.error(de.getMessage(), de);
         } catch (Throwable t) {
-            LOGGER.error(t);
-            LOGGER.error("Set task [" + task.getId() + "] to FAILED [" + t.getMessage() + "]");
-            LOGGER.error("Exit code from container start: " + startStatus);
+            LOGGER.error("Set task [" + task.getId() + "] to FAILED [" + t.getMessage() + "]", t);
             setNotFinishedToFailed(task.getTaskSpec().getCommands());
         } finally {
             taskExecutionResult = getTaskResult(task.getTaskSpec().getCommands());
@@ -111,7 +106,10 @@ public class DockerTaskExecutor implements TaskExecutor {
         updateCommandsState(commands, EC_FILEPATH);
     }
 
-    private void startExecution(Task task) throws UnsupportedEncodingException {
+    /**
+     * Start the container considering task specifications
+     */
+    private void startContainer(Task task) throws UnsupportedEncodingException {
         LOGGER.info(
             "Starting DockerTaskExecutor " + this.workerDockerRequestHelper.getContainerName());
         this.workerDockerRequestHelper.start(task.getTaskSpec());
@@ -119,7 +117,7 @@ public class DockerTaskExecutor implements TaskExecutor {
             "Container " + getContainerName() + " started successfully for task " + task.getId());
     }
 
-    private void stopExecution() throws DockerRemoveContainerException {
+    private void stopContainer() throws DockerRemoveContainerException {
         LOGGER.info(
             "Stopping DockerTaskExecutor " + this.workerDockerRequestHelper.getContainerName());
         this.workerDockerRequestHelper.stopContainer();
@@ -167,6 +165,10 @@ public class DockerTaskExecutor implements TaskExecutor {
         return nextRunningIndex;
     }
 
+    /**
+     * Checks if the command has finished, if finished changes its state to finished, sets its exit
+     * code and returns true.
+     */
     private boolean evaluateCommand(Command command, int exitcode) {
         boolean isRunning = true;
         if (exitcode != TaskExecutionResult.UNDETERMINED_RESULT) {
