@@ -70,15 +70,15 @@ public class DockerExecutorHelper {
         return response;
     }
 
-    public int[] parseEcContentToArray(String ecContent, int cmdsSize) {
+    public int[] parseEcContentToArray(String ecContent, int size) {
         String[] strExitcodes = ecContent.split("\r\n");
-        int[] exitcodes = new int[cmdsSize];
+        int[] exitcodes = new int[size];
         if(!ecContent.trim().isEmpty()){
             for (int i = 0; i < strExitcodes.length; i++) {
                 exitcodes[i] = Integer.valueOf(strExitcodes[i]);
             }
         }
-        for (int i = strExitcodes.length; i < cmdsSize; i++) {
+        for (int i = strExitcodes.length; i < size; i++) {
             exitcodes[i] = TaskExecutionResult.UNDETERMINED_RESULT;
         }
         return exitcodes;

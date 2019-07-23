@@ -129,21 +129,11 @@ public class DockerTaskExecutor implements TaskExecutor {
      * all the commands.
      */
     private void updateCommandsState(List<Command> cmds, String ecFilepath) throws Exception {
-        int nextRunningIndex = 0;
-        while (nextRunningIndex < cmds.size()) {
-            Command cmd = cmds.get(nextRunningIndex);
+        int currentIndex = 0;
+        while (currentIndex < cmds.size()) {
+            Command cmd = cmds.get(currentIndex);
             cmd.setState(CommandState.RUNNING);
-
-            String ecContent = this.dockerExecutorHelper.getEcFile(ecFilepath);
-            LOGGER.debug("Exit code file content [" + ecContent + "]");
-
-            int[] exitcodes =
-                this.dockerExecutorHelper.parseEcContentToArray(ecContent, cmds.size());
-            LOGGER.debug("Exits codes array [" + Arrays.toString(exitcodes) + "]");
-
-            nextRunningIndex = syncCommandsWithEC(cmds, exitcodes, nextRunningIndex);
-            LOGGER.debug("After sync waiting for index [" + nextRunningIndex + "]");
-
+            updateCommandsState(cmds, ecFilepath, currentIndex);
             try {
                 sleep(poolingPeriodTime);
             } catch (InterruptedException e) {
@@ -152,31 +142,57 @@ public class DockerTaskExecutor implements TaskExecutor {
         }
     }
 
-    private Integer syncCommandsWithEC(List<Command> cmds, int[] exitcodes, int nextRunningIndex) {
-        while (nextRunningIndex < cmds.size()) {
-            int exitCode = exitcodes[nextRunningIndex];
-            Command cmd = cmds.get(nextRunningIndex);
-            if (evaluateCommand(cmd, exitCode)) {
-                nextRunningIndex++;
+    private int updateCommandsState(List<Command> cmds, String ecFilepath, int startIndex) throws Exception {
+        int lastIndex;
+        int[] exitcodes = getExitCodeFromEcFile(ecFilepath, cmds.size());
+        lastIndex = syncUntilTheLastCmdFinished(cmds, exitcodes, startIndex);
+        LOGGER.debug("After sync waiting for index [" + lastIndex + "]");
+        return lastIndex;
+    }
+
+    private int[] getExitCodeFromEcFile(String ecFilePath, int size) throws Exception {
+        String ecContent = this.dockerExecutorHelper.getEcFile(ecFilePath);
+        LOGGER.debug("Exit code file content [" + ecContent + "]");
+
+        int[] exitcodes = this.dockerExecutorHelper.parseEcContentToArray(ecContent, size);
+        LOGGER.debug("Exits codes array [" + Arrays.toString(exitcodes) + "]");
+        return exitcodes;
+    }
+
+    private Integer syncUntilTheLastCmdFinished(List<Command> cmds, int[] exitcodes, int startIndex) {
+        int currentIndex = startIndex;
+        while (currentIndex < cmds.size()) {
+            int exitCode = exitcodes[currentIndex];
+            Command cmd = cmds.get(currentIndex);
+            boolean hasFinished = updateCommandState(cmd, exitCode);
+            if (hasFinished) {
+                currentIndex++;
             } else {
                 break;
             }
         }
-        return nextRunningIndex;
+        return currentIndex;
     }
 
     /**
      * Checks if the command has finished, if finished changes its state to finished, sets its exit
      * code and returns true.
      */
-    private boolean evaluateCommand(Command command, int exitcode) {
-        boolean isRunning = true;
-        if (exitcode != TaskExecutionResult.UNDETERMINED_RESULT) {
+    private boolean updateCommandState(Command command, int exitcode) {
+        boolean hasFinished = !isUndetermined(exitcode);
+        if (hasFinished) {
             command.setState(CommandState.FINISHED);
             command.setExitcode(exitcode);
-            isRunning = false;
         }
-        return !isRunning;
+        return hasFinished;
+    }
+
+    private boolean isUndetermined(int exitcode) {
+        boolean isUndetermined = false;
+        if (exitcode == TaskExecutionResult.UNDETERMINED_RESULT) {
+            isUndetermined = true;
+        }
+        return isUndetermined;
     }
 
     private TaskExecutionResult getTaskResult(List<Command> commands) {
