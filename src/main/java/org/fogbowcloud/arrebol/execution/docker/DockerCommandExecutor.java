@@ -51,9 +51,10 @@ public class DockerCommandExecutor {
      * It creates the command execution instance and sends it to the docker, without waiting for the
      * end of execution and nor for its exit code.
      */
-    public void asyncExecuteCommand(String command, String taskId) throws Exception {
-        LOGGER.info("Sending command to the [" + command + "] for the task [" + taskId + "]"
-            + this.workerDockerRequestHelper.getContainerName() + "].");
+    public void asyncExecuteCommand(String command) throws Exception {
+        LOGGER.info(
+            "Sending command [" + command + "] to the container [" + this.workerDockerRequestHelper
+                .getContainerName() + "].");
 
         String execId = this.workerDockerRequestHelper.createExecInstance(command, false, false);
         this.workerDockerRequestHelper.startExecInstance(execId);

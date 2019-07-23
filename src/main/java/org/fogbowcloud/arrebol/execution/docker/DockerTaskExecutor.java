@@ -65,7 +65,8 @@ public class DockerTaskExecutor implements TaskExecutor {
 
         try {
             startContainer(task);
-            setupAndRun(task);
+            String taskScriptFilePath = setup(task);
+            run(taskScriptFilePath);
             checkTask(task);
             stopContainer();
         } catch (DockerRemoveContainerException de) {
@@ -75,7 +76,8 @@ public class DockerTaskExecutor implements TaskExecutor {
             setNotFinishedToFailed(task.getTaskSpec().getCommands());
         } finally {
             List<Command> commands = task.getTaskSpec().getCommands();
-            taskExecutionResult =  new TaskExecutionResult(getTaskResult(commands), getExitCodes(commands));
+            taskExecutionResult = new TaskExecutionResult(getTaskResult(commands),
+                getExitCodes(commands));
             LOGGER.debug("Result of task [" + task.getId() + "]: "
                 + taskExecutionResult.getResult().toString());
             return taskExecutionResult;
@@ -87,13 +89,16 @@ public class DockerTaskExecutor implements TaskExecutor {
      * Sends the executor task script, sends the file with the task commands and executes the
      * executor task script
      */
-    private void setupAndRun(Task task) throws Exception {
+    private String setup(Task task) throws Exception {
         List<Command> commands = task.getTaskSpec().getCommands();
         this.dockerExecutorHelper.sendTaskScriptExecutor(task.getId());
-        String taskScriptFilepath = "/tmp/" + task.getId() + ".ts";
-        this.dockerExecutorHelper.sendTaskScript(commands, taskScriptFilepath,
-            task.getId());
-        this.dockerExecutorHelper.runScriptExecutor(task.getId(), taskScriptFilepath);
+        String taskScriptFilePath = "/tmp/" + task.getId() + ".ts";
+        this.dockerExecutorHelper.sendTaskScript(commands, taskScriptFilePath, task.getId());
+        return taskScriptFilePath;
+    }
+
+    private void run(String taskScriptFilepath) throws Exception {
+        this.dockerExecutorHelper.runScriptExecutor(taskScriptFilepath);
     }
 
     /**
