@@ -11,10 +11,10 @@ public class Command implements Serializable {
     private static final long serialVersionUID = -5555900503095L;
 
     @Id
-    @GeneratedValue(strategy=GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
-    @Column(length=10240)
+    @Column(length = 10240)
     private String command;
     @Enumerated(EnumType.STRING)
     private CommandState state;

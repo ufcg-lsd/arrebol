@@ -20,9 +20,9 @@ public class Configuration {
         return properties;
     }
 
-    public Property getProperty(String key){
-        for(Property p : this.getProperties()){
-            if(p.getKey().equals(key)){
+    public Property getProperty(String key) {
+        for (Property p : this.getProperties()) {
+            if (p.getKey().equals(key)) {
                 return p;
             }
         }

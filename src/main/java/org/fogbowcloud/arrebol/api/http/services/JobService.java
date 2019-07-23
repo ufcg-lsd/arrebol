@@ -44,30 +44,32 @@ public class JobService {
 
     public Job getJobById(String id) {
         Job job = this.jobDAO.getJobById(id);
-        if(job == null){
+        if (job == null) {
             String message = String.format("Job id not found : %s", id);
             throw new JobNotFoundException(message);
         }
         return job;
     }
 
-    private Job createJobFromSpec(JobSpec jobSpec){
+    private Job createJobFromSpec(JobSpec jobSpec) {
 
         Collection<Task> taskList = new LinkedList<>();
 
-        for(TaskSpec taskSpec : jobSpec.getTasksSpecs()){
+        for (TaskSpec taskSpec : jobSpec.getTasksSpecs()) {
             String taskId = UUID.randomUUID().toString();
             Task task = new Task(taskId, taskSpec);
             taskList.add(task);
         }
         Job job = new Job(jobSpec.getLabel(), taskList);
-        LOGGER.debug("Created job object of " + job.getLabel() + " with " + taskList.size() + " tasks.");
+        LOGGER.debug(
+            "Created job object of " + job.getLabel() + " with " + taskList.size() + " tasks.");
         return job;
     }
 
-    private void validateJobSpec(JobSpec jobSpec){
-        if(jobSpec == null || jobSpec.getTasksSpecs() == null || jobSpec.getTasksSpecs().isEmpty() ||
-                ! validateTasksSpecs(jobSpec.getTasksSpecs())){
+    private void validateJobSpec(JobSpec jobSpec) {
+        if (jobSpec == null || jobSpec.getTasksSpecs() == null || jobSpec.getTasksSpecs().isEmpty()
+            ||
+            !validateTasksSpecs(jobSpec.getTasksSpecs())) {
             String message = String.format("JobSpec is invalid: %s", jobSpec.toString());
             LOGGER.error(message);
             throw new InvalidJobSpecException(message);
@@ -76,9 +78,10 @@ public class JobService {
         }
     }
 
-    private boolean validateTasksSpecs(List<TaskSpec> tasksSpecsList){
-        for(TaskSpec taskSpec : tasksSpecsList){
-            if(taskSpec == null || taskSpec.getCommands() == null || taskSpec.getCommands().isEmpty()){
+    private boolean validateTasksSpecs(List<TaskSpec> tasksSpecsList) {
+        for (TaskSpec taskSpec : tasksSpecsList) {
+            if (taskSpec == null || taskSpec.getCommands() == null || taskSpec.getCommands()
+                .isEmpty()) {
                 return false;
             }
         }

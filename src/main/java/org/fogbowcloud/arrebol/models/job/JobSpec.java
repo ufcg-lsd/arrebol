@@ -14,19 +14,20 @@ public class JobSpec implements Serializable {
     private String label;
     private List<TaskSpec> tasksSpecs;
 
-    JobSpec(){}
+    JobSpec() {
+    }
 
-    public JobSpec(String label, List<TaskSpec> taskSpecs){
+    public JobSpec(String label, List<TaskSpec> taskSpecs) {
         this.label = label;
         this.tasksSpecs = taskSpecs;
     }
 
 
-    public String getLabel(){
+    public String getLabel() {
         return this.label;
     }
 
-    public List<TaskSpec> getTasksSpecs(){
+    public List<TaskSpec> getTasksSpecs() {
         return this.tasksSpecs;
     }
 

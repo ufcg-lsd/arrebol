@@ -5,7 +5,7 @@ public class Property<T> {
     private String key;
     private T value;
 
-    public Property(String key, T value){
+    public Property(String key, T value) {
         this.key = key;
         this.value = value;
     }

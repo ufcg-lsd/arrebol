@@ -22,46 +22,54 @@ public class JobController {
     private JobService jobService;
 
     @Autowired
-    public JobController(JobService jobService){
+    public JobController(JobService jobService) {
         this.jobService = jobService;
     }
 
     @RequestMapping(method = RequestMethod.POST)
-    public ResponseEntity<String> addJob(@RequestBody JobSpec jobSpec){
+    public ResponseEntity<String> addJob(@RequestBody JobSpec jobSpec) {
         LOGGER.info("Adding new Job: " + jobSpec + ".");
 
-        try{
+        try {
             String jobId = jobService.addJob(jobSpec);
             JobResponse jobResponse = new JobResponse(jobId);
 
             LOGGER.info("Added " + jobSpec.getLabel() + " with id " + jobId + ".");
             return new ResponseEntity(jobResponse, HttpStatus.CREATED);
-        } catch (Throwable t){
+        } catch (Throwable t) {
             LOGGER.error(String.format(Messages.Exception.GENERIC_EXCEPTION, t.getMessage()), t);
             throw t;
         }
     }
 
     @RequestMapping(value = ApiDocumentation.ApiEndpoints.JOB_PATH, method = RequestMethod.GET)
-    public ResponseEntity<String> getJob(@PathVariable String id){
+    public ResponseEntity<String> getJob(@PathVariable String id) {
         LOGGER.info("Getting an job with id: " + id);
 
         try {
             Job job = jobService.getJobById(id);
             return new ResponseEntity(job, HttpStatus.CREATED);
-        } catch(Throwable t){
+        } catch (Throwable t) {
             LOGGER.error(String.format(Messages.Exception.GENERIC_EXCEPTION, t.getMessage()), t);
             throw t;
         }
     }
 
     public class JobResponse {
+
         private String id;
-        public JobResponse(String id) { this.id = id; }
+
+        public JobResponse(String id) {
+            this.id = id;
+        }
+
         public String getId() {
             return this.id;
         }
-        public void setIt(String id) { this.id = id;}
+
+        public void setIt(String id) {
+            this.id = id;
+        }
     }
 
 }

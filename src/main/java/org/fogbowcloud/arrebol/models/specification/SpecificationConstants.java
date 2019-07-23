@@ -1,6 +1,7 @@
 package org.fogbowcloud.arrebol.models.specification;
 
 public class SpecificationConstants {
+
     public static final String REQUIREMENTS_MAP_STR = "requirements";
 
     public static final String CONTEXT_SCRIPT_STR = "contextScript";
