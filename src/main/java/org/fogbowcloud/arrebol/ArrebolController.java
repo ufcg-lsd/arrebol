@@ -31,6 +31,7 @@ import org.fogbowcloud.arrebol.resource.StaticPool;
 import org.fogbowcloud.arrebol.resource.WorkerPool;
 import org.fogbowcloud.arrebol.scheduler.DefaultScheduler;
 import org.fogbowcloud.arrebol.scheduler.FifoSchedulerPolicy;
+import org.fogbowcloud.arrebol.utils.ConfValidator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -57,6 +58,7 @@ public class ArrebolController {
             .getResource("")).getPath();
         try {
             this.configuration = loadConfigurationFile(path);
+            ConfValidator.validate(configuration);
             buildWorkerCreator(configuration);
         } catch (FileNotFoundException f) {
             LOGGER.error("Error on loading properties file path=" + path, f);
