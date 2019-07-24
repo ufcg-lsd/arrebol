@@ -12,7 +12,7 @@ public class DockerCommandExecutor {
     private static final Logger LOGGER = Logger.getLogger(DockerCommandExecutor.class);
     private final WorkerDockerRequestHelper workerDockerRequestHelper;
 
-    private final long poolingPeriodTime = 300;
+    private final long poolingPeriodInspectExec = 300;
 
     public DockerCommandExecutor(WorkerDockerRequestHelper workerDockerRequestHelper) {
         this.workerDockerRequestHelper = workerDockerRequestHelper;
@@ -20,8 +20,8 @@ public class DockerCommandExecutor {
 
     /**
      * It creates the command execution instance, sends it to the docker and each period of time
-     * {@link DockerCommandExecutor#poolingPeriodTime} checks if exit code already exists. If exists
-     * then returns an {@link ExecInstanceResult}.
+     * {@link DockerCommandExecutor#poolingPeriodInspectExec} checks if exit code already exists. If
+     * exists then returns an {@link ExecInstanceResult}.
      */
     public ExecInstanceResult executeCommand(String command) throws Exception {
         LOGGER.info("Sending command [" + command + "] to the [" + this.workerDockerRequestHelper
@@ -35,7 +35,7 @@ public class DockerCommandExecutor {
         while (Objects.isNull(execInstanceResult.getExitCode())) {
             execInstanceResult = this.workerDockerRequestHelper.inspectExecInstance(execId);
             try {
-                sleep(poolingPeriodTime);
+                sleep(poolingPeriodInspectExec);
             } catch (InterruptedException e) {
                 LOGGER.error(e.getMessage(), e);
             }
@@ -51,7 +51,7 @@ public class DockerCommandExecutor {
      * It creates the command execution instance and sends it to the docker, without waiting for the
      * end of execution and nor for its exit code.
      */
-    public void asyncExecuteCommand(String command) throws Exception {
+    public void executeAsyncCommand(String command) throws Exception {
         LOGGER.info(
             "Sending command [" + command + "] to the container [" + this.workerDockerRequestHelper
                 .getContainerName() + "].");

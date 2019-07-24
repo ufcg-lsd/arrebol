@@ -24,7 +24,7 @@ import static java.lang.Thread.sleep;
  */
 public class DockerTaskExecutor implements TaskExecutor {
 
-    private static final long poolingPeriodTime = 2000;
+    private static final long poolingPeriodTrackExecution = 2000;
     private static final String taskScriptFilePathPattern = "/tmp/%s/.ts";
     private static final String ecFilePathPattern = "/tmp/%s/.ts.ec";
 
@@ -68,7 +68,7 @@ public class DockerTaskExecutor implements TaskExecutor {
         try {
             List<Command> commands = task.getTaskSpec().getCommands();
             startContainer(task);
-            containerEnvironmentSetup(task.getId(), commands);
+            setupContainerEnviroment(task.getId(), commands);
             LOGGER.debug(
                 "Starting to execute commands [len=" + commands.size() + "] of task " + task
                     .getId());
@@ -94,9 +94,9 @@ public class DockerTaskExecutor implements TaskExecutor {
     /**
      * Sends the executor task script and write task commands inside the .ts file.
      */
-    private String containerEnvironmentSetup(String taskId, List<Command> commands)
+    private String setupContainerEnviroment(String taskId, List<Command> commands)
         throws Exception {
-        this.dockerExecutorHelper.sendTaskScriptExecutor();
+        this.dockerExecutorHelper.sendTaskExecutorScript();
         LOGGER.debug(
             "Starting to write commands [len=" + commands.size() + "] of task " + taskId
                 + " to .ts file.");
@@ -107,13 +107,13 @@ public class DockerTaskExecutor implements TaskExecutor {
 
     private void runScript(String taskId) throws Exception {
         String taskScriptFilepath = String.format(taskScriptFilePathPattern, taskId);
-        this.dockerExecutorHelper.runScriptExecutor(taskScriptFilepath);
+        this.dockerExecutorHelper.runExecutorScript(taskScriptFilepath);
     }
 
     /**
-     * It reads the .ts.ec file and then updates the states of the commands, performing this
-     * update each period of time {@link DockerTaskExecutor#poolingPeriodTime} until the result of
-     * all the commands.
+     * It reads the .ts.ec file and then updates the states of the commands, performing this update
+     * each period of time {@link DockerTaskExecutor#poolingPeriodTrackExecution} until the result
+     * of all the commands.
      */
     private void trackTaskExecution(String taskId, List<Command> commands) throws Exception {
         String ecFilePath = String.format(ecFilePathPattern, taskId);
@@ -124,7 +124,7 @@ public class DockerTaskExecutor implements TaskExecutor {
             currentIndex = updateCommandsState(commands, ecFilePath, currentIndex);
             LOGGER.debug("After sync waiting for index [" + currentIndex + "]");
             try {
-                sleep(poolingPeriodTime);
+                sleep(poolingPeriodTrackExecution);
             } catch (InterruptedException e) {
                 LOGGER.error(e);
             }

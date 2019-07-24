@@ -24,13 +24,13 @@ public class DockerExecutorHelper {
         this.dockerCommandExecutor = new DockerCommandExecutor(workerDockerRequestHelper);
     }
 
-    public void runScriptExecutor(String tsFilepath) throws Exception {
+    public void runExecutorScript(String tsFilepath) throws Exception {
         LOGGER.info("Running script executor to task file [" + tsFilepath + "].");
         this.dockerCommandExecutor
-            .asyncExecuteCommand("/bin/bash " + TASK_SCRIPT_EXECUTOR + " -d -tsf=" + tsFilepath);
+            .executeAsyncCommand("/bin/bash " + TASK_SCRIPT_EXECUTOR + " -d -tsf=" + tsFilepath);
     }
 
-    public void sendTaskScriptExecutor() throws Exception {
+    public void sendTaskExecutorScript() throws Exception {
         LOGGER.debug("Sending Task Script Executor to Docker Worker");
         String writeCommand = "echo '" + this.taskScriptContent + "' > " + TASK_SCRIPT_EXECUTOR;
         try {
