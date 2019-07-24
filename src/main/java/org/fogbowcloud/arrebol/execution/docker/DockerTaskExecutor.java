@@ -4,61 +4,84 @@ import java.util.Arrays;
 import org.apache.log4j.Logger;
 import org.fogbowcloud.arrebol.execution.TaskExecutionResult;
 import org.fogbowcloud.arrebol.execution.TaskExecutor;
-import org.fogbowcloud.arrebol.execution.docker.exceptions.DockerCreateContainerException;
 import org.fogbowcloud.arrebol.execution.docker.exceptions.DockerRemoveContainerException;
-import org.fogbowcloud.arrebol.execution.docker.exceptions.DockerStartException;
-import org.fogbowcloud.arrebol.execution.docker.exceptions.NotFoundDockerImage;
 import org.fogbowcloud.arrebol.execution.docker.request.WorkerDockerRequestHelper;
 import org.fogbowcloud.arrebol.models.command.Command;
 import org.fogbowcloud.arrebol.models.command.CommandState;
 import org.fogbowcloud.arrebol.models.task.Task;
-import org.fogbowcloud.arrebol.models.task.TaskState;
 
 import java.io.UnsupportedEncodingException;
 import java.util.List;
 
 import static java.lang.Thread.sleep;
 
+/**
+ * This class consists of an entity of remote execution of tasks using docker containers. At each
+ * execution a new container is started and after the execution of the task is finished the
+ * container is removed. The execution of each command is not done directly by this class but by a
+ * bash script sent into the container. In cases where container initialization error occurs, the
+ * commands go to failure state and a failure result is returned.
+ */
 public class DockerTaskExecutor implements TaskExecutor {
 
-    private static final int SUCCESS_EXIT_CODE = 0;
-    private static final int FAIL_EXIT_CODE = 127;
+    private static final long poolingPeriodTimeMs = 2000;
+    private static final String taskScriptFilePathPattern = "/tmp/%s/.ts";
+    private static final String ecFilePathPattern = "/tmp/%s/.ts.ec";
 
     private final Logger LOGGER = Logger.getLogger(DockerTaskExecutor.class);
 
     private WorkerDockerRequestHelper workerDockerRequestHelper;
     private final DockerExecutorHelper dockerExecutorHelper;
 
-    public DockerTaskExecutor(String containerName, String address, String taskScriptContent, String defaultImageId) {
-        this.workerDockerRequestHelper = new WorkerDockerRequestHelper(address, containerName, defaultImageId);
+    /**
+     * @param containerName Sets the name of the container, is an identifier.
+     * @param address Defines the address where requests for the Docker API should be made
+     * @param taskScriptContent Script that will be sent to the container with the function to
+     * execute the commands
+     * @param defaultImageId Image docker used as default if no one is specified in the task.
+     */
+    public DockerTaskExecutor(String containerName, String address, String taskScriptContent,
+        String defaultImageId) {
+        this.workerDockerRequestHelper = new WorkerDockerRequestHelper(address, containerName,
+            defaultImageId);
         this.dockerExecutorHelper = new DockerExecutorHelper(taskScriptContent,
             this.workerDockerRequestHelper);
     }
 
+    /**
+     * It has function to execute a task. First, the container is started. A task may have
+     * requirements such as docker image, which are set at that time. Next, a bash script called
+     * task-script-executor is sent, which will execute all commands internally in the container.
+     * All the commands of the task are written to a .ts file inside the container, and then the
+     * task-script-executor reads this file, executes line by line and each executed command is
+     * written its exit code in the .ts.ec file. Execution ends only when the number of ec in the
+     * file corresponds to the number of commands. At the end of execution, the result is returned
+     * and the container is killed
+     */
     @Override
     public TaskExecutionResult execute(Task task) {
-        // FIXME: We should catch the errors when starting/finishing the container and move the task
-        // to its FAILURE state
         // FIXME: also, follow the SAME log format we used in the RawTaskExecutor
         TaskExecutionResult taskExecutionResult;
-        Integer startStatus = FAIL_EXIT_CODE;
 
         try {
-            startExecution(task);
-            setupAndRun(task);
-            checkTask(task);
-            stopExecution();
+            List<Command> commands = task.getTaskSpec().getCommands();
+            startContainer(task);
+            setupContainerEnviroment(task.getId(), commands);
+            LOGGER.debug(
+                "Starting to execute commands [len=" + commands.size() + "] of task " + task
+                    .getId());
+            runScript(task.getId());
+            trackTaskExecution(task.getId(), commands);
+            stopContainer();
         } catch (DockerRemoveContainerException de) {
-            LOGGER.error(de);
-            LOGGER.error("Failed to stop container with name " + this.workerDockerRequestHelper
-                .getContainerName() + " with exit code " + FAIL_EXIT_CODE);
+            LOGGER.error(de.getMessage(), de);
         } catch (Throwable t) {
-            LOGGER.error(t);
-            LOGGER.error("Set task [" + task.getId() + "] to FAILED [" + t.getMessage() + "]");
-            LOGGER.error("Exit code from container start: " + startStatus);
-            setNotFinishedToFailed(task.getTaskSpec().getCommands());
+            LOGGER.error("Set task [" + task.getId() + "] to FAILED [" + t.getMessage() + "]", t);
+            failUnfinishedCommands(task.getTaskSpec().getCommands());
         } finally {
-            taskExecutionResult = getTaskResult(task.getTaskSpec().getCommands());
+            List<Command> commands = task.getTaskSpec().getCommands();
+            taskExecutionResult = new TaskExecutionResult(getTaskResult(commands),
+                getExitCodes(commands));
             LOGGER.debug("Result of task [" + task.getId() + "]: "
                 + taskExecutionResult.getResult().toString());
             return taskExecutionResult;
@@ -66,22 +89,50 @@ public class DockerTaskExecutor implements TaskExecutor {
 
     }
 
-    private void setupAndRun(Task task) throws Exception {
-        List<Command> commands = task.getTaskSpec().getCommands();
-        this.dockerExecutorHelper.sendTaskScriptExecutor(task.getId());
-        String taskScriptFilepath = "/tmp/" + task.getId() + ".ts";
-        this.dockerExecutorHelper.sendTaskScript(commands, taskScriptFilepath,
-            task.getId());
-        this.dockerExecutorHelper.runScriptExecutor(task.getId(), taskScriptFilepath);
+    /**
+     * Sends the executor task script and write task commands inside the .ts file.
+     */
+    private String setupContainerEnviroment(String taskId, List<Command> commands)
+        throws Exception {
+        this.dockerExecutorHelper.sendTaskExecutorScript();
+        LOGGER.debug(
+            "Starting to write commands [len=" + commands.size() + "] of task " + taskId
+                + " to .ts file.");
+        String taskScriptFilePath = String.format(taskScriptFilePathPattern, taskId);
+        this.dockerExecutorHelper.writeTaskScript(commands, taskScriptFilePath);
+        return taskScriptFilePath;
     }
 
-    private void checkTask(Task task) throws Exception {
-        List<Command> commands = task.getTaskSpec().getCommands();
-        final String EC_FILEPATH = "/tmp/" + task.getId() + ".ts.ec";
-        updateCommandsState(commands, EC_FILEPATH);
+    private void runScript(String taskId) throws Exception {
+        String taskScriptFilepath = String.format(taskScriptFilePathPattern, taskId);
+        this.dockerExecutorHelper.runExecutorScript(taskScriptFilepath);
     }
 
-    private void startExecution(Task task) throws UnsupportedEncodingException {
+    /**
+     * It reads the .ts.ec file and then updates the states of the commands, performing this update
+     * each period of time {@link DockerTaskExecutor#poolingPeriodTimeMs} until the result
+     * of all the commands.
+     */
+    private void trackTaskExecution(String taskId, List<Command> commands) throws Exception {
+        String ecFilePath = String.format(ecFilePathPattern, taskId);
+        int currentIndex = 0;
+        while (currentIndex < commands.size()) {
+            Command cmd = commands.get(currentIndex);
+            cmd.setState(CommandState.RUNNING);
+            currentIndex = updateCommandsState(commands, ecFilePath, currentIndex);
+            LOGGER.debug("After sync waiting for index [" + currentIndex + "]");
+            try {
+                sleep(poolingPeriodTimeMs);
+            } catch (InterruptedException e) {
+                LOGGER.error(e);
+            }
+        }
+    }
+
+    /**
+     * Start the container considering task specifications
+     */
+    private void startContainer(Task task) throws UnsupportedEncodingException {
         LOGGER.info(
             "Starting DockerTaskExecutor " + this.workerDockerRequestHelper.getContainerName());
         this.workerDockerRequestHelper.start(task.getTaskSpec());
@@ -89,61 +140,66 @@ public class DockerTaskExecutor implements TaskExecutor {
             "Container " + getContainerName() + " started successfully for task " + task.getId());
     }
 
-    private void stopExecution() throws DockerRemoveContainerException {
+    private void stopContainer() throws DockerRemoveContainerException {
         LOGGER.info(
             "Stopping DockerTaskExecutor " + this.workerDockerRequestHelper.getContainerName());
         this.workerDockerRequestHelper.stopContainer();
     }
 
-    private void updateCommandsState(List<Command> cmds, String ecFilepath) throws Exception {
-        final long poolingPeriodTime = 2000;
-        int nextRunningIndex = 0;
-        while (nextRunningIndex < cmds.size()) {
-            Command cmd = cmds.get(nextRunningIndex);
-            cmd.setState(CommandState.RUNNING);
-
-            String ecContent = this.dockerExecutorHelper.getEcFile(ecFilepath);
-            LOGGER.debug("Exit code file content [" + ecContent + "]");
-
-            int[] exitcodes =
-                this.dockerExecutorHelper.parseEcContentToArray(ecContent, cmds.size());
-            LOGGER.debug("Exits codes array [" + Arrays.toString(exitcodes) + "]");
-
-            nextRunningIndex = syncCommandsWithEC(cmds, exitcodes, nextRunningIndex);
-            LOGGER.debug("After sync waiting for index [" + nextRunningIndex + "]");
-
-            try {
-                sleep(poolingPeriodTime);
-            } catch (InterruptedException e) {
-                LOGGER.error(e);
-            }
-        }
+    private int updateCommandsState(List<Command> cmds, String ecFilepath, int startIndex)
+        throws Exception {
+        int[] exitcodes = getExitCodeFromEcFile(ecFilepath, cmds.size());
+        int lastIndex = syncUntilTheLastCmdFinished(cmds, exitcodes, startIndex);
+        return lastIndex;
     }
 
-    private Integer syncCommandsWithEC(List<Command> cmds, int[] exitcodes, int nextRunningIndex) {
-        while (nextRunningIndex < cmds.size()) {
-            int exitCode = exitcodes[nextRunningIndex];
-            Command cmd = cmds.get(nextRunningIndex);
-            if (evaluateCommand(cmd, exitCode)) {
-                nextRunningIndex++;
+    private int[] getExitCodeFromEcFile(String ecFilePath, int size) throws Exception {
+        String ecContent = this.dockerExecutorHelper.getEcFile(ecFilePath);
+        LOGGER.debug("Exit code file content [" + ecContent + "]");
+
+        int[] exitcodes = this.dockerExecutorHelper.parseEcContentToArray(ecContent, size);
+        LOGGER.debug("Exits codes array [" + Arrays.toString(exitcodes) + "]");
+        return exitcodes;
+    }
+
+    private Integer syncUntilTheLastCmdFinished(List<Command> cmds, int[] exitcodes,
+        int startIndex) {
+        int currentIndex = startIndex;
+        while (currentIndex < cmds.size()) {
+            int exitCode = exitcodes[currentIndex];
+            Command cmd = cmds.get(currentIndex);
+            boolean hasFinished = updateCommandState(cmd, exitCode);
+            if (hasFinished) {
+                currentIndex++;
             } else {
                 break;
             }
         }
-        return nextRunningIndex;
+        return currentIndex;
     }
 
-    private boolean evaluateCommand(Command command, int exitcode) {
-        boolean isRunning = true;
-        if (exitcode != TaskExecutionResult.UNDETERMINED_RESULT) {
+    /**
+     * Checks if the command has finished, if finished changes its state to finished, sets its exit
+     * code and returns true.
+     */
+    private boolean updateCommandState(Command command, int exitcode) {
+        boolean hasFinished = !isUndetermined(exitcode);
+        if (hasFinished) {
             command.setState(CommandState.FINISHED);
             command.setExitcode(exitcode);
-            isRunning = false;
         }
-        return !isRunning;
+        return hasFinished;
     }
 
-    private TaskExecutionResult getTaskResult(List<Command> commands) {
+    private boolean isUndetermined(int exitcode) {
+        boolean isUndetermined = false;
+        if (exitcode == TaskExecutionResult.UNDETERMINED_RESULT) {
+            isUndetermined = true;
+        }
+        return isUndetermined;
+    }
+
+    private TaskExecutionResult.RESULT getTaskResult(List<Command> commands) {
         TaskExecutionResult.RESULT result = TaskExecutionResult.RESULT.SUCCESS;
         for (Command cmd : commands) {
             if (cmd.getState().equals(CommandState.FAILED)) {
@@ -151,10 +207,18 @@ public class DockerTaskExecutor implements TaskExecutor {
                 break;
             }
         }
-        return new TaskExecutionResult(result, new Command[commands.size()]);
+        return result;
     }
 
-    private void setNotFinishedToFailed(List<Command> commands) {
+    private int[] getExitCodes(List<Command> commands) {
+        int[] exitcodes = new int[commands.size()];
+        for (int i = 0; i < commands.size(); i++) {
+            exitcodes[i] = commands.get(i).getExitcode();
+        }
+        return exitcodes;
+    }
+
+    private void failUnfinishedCommands(List<Command> commands) {
         for (Command c : commands) {
             if (!c.getState().equals(CommandState.FINISHED)) {
                 c.setState(CommandState.FAILED);

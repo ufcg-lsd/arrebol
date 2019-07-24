@@ -25,7 +25,8 @@ public class TaskSpec implements Serializable {
     @ElementCollection
     private Map<String, String> metadata;
 
-    public TaskSpec(String id, Specification spec, List<Command> commands, Map<String, String> metadata){
+    public TaskSpec(String id, Specification spec, List<Command> commands,
+        Map<String, String> metadata) {
         this.id = id;
         this.spec = spec;
         this.commands = commands;
@@ -36,13 +37,15 @@ public class TaskSpec implements Serializable {
         //Default constructor.
     }
 
-    public String getId() { return this.id; }
+    public String getId() {
+        return this.id;
+    }
 
-    public List<Command> getCommands(){
+    public List<Command> getCommands() {
         return this.commands;
     }
 
-    public Specification getSpec(){
+    public Specification getSpec() {
         return this.spec;
     }
 
@@ -50,16 +53,16 @@ public class TaskSpec implements Serializable {
         return this.metadata;
     }
 
-    public String getImage(){
+    public String getImage() {
         return this.spec.getImage();
     }
 
     @Override
     public String toString() {
         return "TaskSpec{" +
-                "spec=" + spec +
-                ", commands=" + commands +
-                ", metadata=" + metadata +
-                '}';
+            "spec=" + spec +
+            ", commands=" + commands +
+            ", metadata=" + metadata +
+            '}';
     }
 }

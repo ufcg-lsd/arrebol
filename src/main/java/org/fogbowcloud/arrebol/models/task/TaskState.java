@@ -10,7 +10,7 @@ public enum TaskState {
         this.value = id;
     }
 
-    public int getValue(){
+    public int getValue() {
         return this.value;
     }
 }

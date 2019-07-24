@@ -16,11 +16,10 @@ import java.util.TimerTask;
 import java.util.UUID;
 import org.apache.log4j.Logger;
 import org.fogbowcloud.arrebol.execution.Worker;
+import org.fogbowcloud.arrebol.execution.WorkerTypes;
 import org.fogbowcloud.arrebol.execution.creator.DockerWorkerCreator;
 import org.fogbowcloud.arrebol.execution.creator.RawWorkerCreator;
 import org.fogbowcloud.arrebol.execution.creator.WorkerCreator;
-import org.fogbowcloud.arrebol.execution.docker.constans.DockerConstants;
-import org.fogbowcloud.arrebol.execution.raw.RawConstants;
 import org.fogbowcloud.arrebol.models.configuration.Configuration;
 import org.fogbowcloud.arrebol.models.job.Job;
 import org.fogbowcloud.arrebol.models.job.JobState;
@@ -62,7 +61,7 @@ public class ArrebolController {
         } catch (FileNotFoundException f) {
             LOGGER.error("Error on loading properties file path=" + path, f);
             System.exit(FAIL_EXIT_CODE);
-        } catch (Exception e) {
+        } catch (Throwable e) {
             LOGGER.error(e.getMessage(), e);
             System.exit(FAIL_EXIT_CODE);
         }
@@ -84,12 +83,11 @@ public class ArrebolController {
         this.jobStateMonitor = new Timer(true);
     }
 
-
-
     private Configuration loadConfigurationFile(String path) throws FileNotFoundException {
         Configuration configuration;
         Gson gson = new Gson();
-        BufferedReader bufferedReader = new BufferedReader(new FileReader(path + File.separator + "arrebol.json"));
+        BufferedReader bufferedReader = new BufferedReader(
+            new FileReader(path + File.separator + "arrebol.json"));
         configuration = gson.fromJson(bufferedReader, Configuration.class);
         return configuration;
     }
@@ -164,16 +162,14 @@ public class ArrebolController {
     }
 
     private void buildWorkerCreator(Configuration configuration) throws Exception {
-        switch (configuration.getPoolType()) {
-            case DockerConstants.DOCKER_TYPE:
-                this.workerCreator = new DockerWorkerCreator(configuration);
-                break;
-            case RawConstants.RAW_TYPE:
-                this.workerCreator = new RawWorkerCreator(configuration);
-                break;
-            default:
-                String poolTypeMsg = "Worker Pool Type configuration property wrong or missing. Please, verify your configuration file.";
-                throw new IllegalArgumentException(poolTypeMsg);
+        String poolType = configuration.getPoolType();
+        if (poolType.equals(WorkerTypes.DOCKER.getType())) {
+            this.workerCreator = new DockerWorkerCreator(configuration);
+        } else if (poolType.equals(WorkerTypes.RAW.getType())) {
+            this.workerCreator = new RawWorkerCreator(configuration);
+        } else {
+            String poolTypeMsg = "Worker Pool Type configuration property wrong or missing. Please, verify your configuration file.";
+            throw new IllegalArgumentException(poolTypeMsg);
         }
     }
 
