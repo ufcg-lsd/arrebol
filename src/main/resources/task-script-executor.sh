@@ -5,6 +5,7 @@
 # Use -tsf= or --task_filepath= to input the task file path (Required).
 # Use the flag -d or --debug to store .out and .err from execution (Optional).
 
+# This flag does the execution not stop on non-zero exit code commands
 set +e
 
 for i in "$@"
