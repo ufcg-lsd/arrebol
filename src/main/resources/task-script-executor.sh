@@ -1,5 +1,10 @@
 #!/bin/bash
 
+# Read the task script file and execute one command at a time, saving your exitcodes in the .ts.ec file.
+# Each command executed is written to the .cmds file.
+# Use -tsf= or --task_filepath= to input the task file path (Required).
+# Use the flag -d or --debug to store .out and .err from execution (Optional).
+
 set +e
 
 for i in "$@"
