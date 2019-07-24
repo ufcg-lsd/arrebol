@@ -60,8 +60,6 @@ public class DockerTaskExecutor implements TaskExecutor {
      */
     @Override
     public TaskExecutionResult execute(Task task) {
-        // FIXME: We should catch the errors when starting/finishing the container and move the task
-        // to its FAILURE state
         // FIXME: also, follow the SAME log format we used in the RawTaskExecutor
         TaskExecutionResult taskExecutionResult;
 
