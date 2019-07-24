@@ -102,4 +102,9 @@ public class DockerExecutorHelper {
     private Integer writeToFile(String command, String file, String taskId) throws Exception {
         return this.dockerCommandExecutor.executeCommand("echo '" + command + "' >> " + file, taskId);
     }
+
+    protected void setDockerCommandExecutor(
+        DockerCommandExecutor dockerCommandExecutor) {
+        this.dockerCommandExecutor = dockerCommandExecutor;
+    }
 }

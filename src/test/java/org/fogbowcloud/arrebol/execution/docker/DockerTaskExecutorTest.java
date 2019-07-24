@@ -1,12 +1,13 @@
 package org.fogbowcloud.arrebol.execution.docker;
 
+import static org.fogbowcloud.arrebol.execution.docker.DockerUnitTestUtil.mockEcFileContent;
+import static org.fogbowcloud.arrebol.execution.docker.DockerUnitTestUtil.mockTask;
+import static org.fogbowcloud.arrebol.execution.docker.DockerUnitTestUtil.mockWorkerDockerRequestHelper;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
 
 import java.io.UnsupportedEncodingException;
-import java.util.Collections;
 import java.util.List;
 import org.fogbowcloud.arrebol.execution.TaskExecutionResult;
 import org.fogbowcloud.arrebol.execution.TaskExecutionResult.RESULT;
@@ -69,15 +70,9 @@ public class DockerTaskExecutorTest {
 
         WorkerDockerRequestHelper workerDockerRequestHelper = Mockito
             .mock(WorkerDockerRequestHelper.class);
-        Mockito.when(workerDockerRequestHelper.getContainerName()).thenReturn("MockedContainer");
-        Mockito.when(workerDockerRequestHelper.start(any(TaskSpec.class)))
-            .thenReturn("MockedContainerId");
-        Mockito.doNothing().when(workerDockerRequestHelper).stopContainer();
-
         DockerExecutorHelper dockerExecutorHelper = Mockito
             .spy(new DockerExecutorHelper("mockTaskScript", workerDockerRequestHelper));
-        String ecContent = "0\r\n0\r\n0\r\n0\r\n0";
-        Mockito.doReturn(ecContent).when(dockerExecutorHelper)
+        Mockito.doReturn(mockEcFileContent).when(dockerExecutorHelper)
             .getEcFile("/tmp/" + task.getId() + ".ts.ec");
 
         DockerTaskExecutor dockerTaskExecutor = Mockito.spy(new DockerTaskExecutor("mockAddress",
@@ -94,8 +89,7 @@ public class DockerTaskExecutorTest {
 
     private DockerTaskExecutor mockDockerTaskExecutor(RuntimeException e)
         throws UnsupportedEncodingException {
-        WorkerDockerRequestHelper workerDockerRequestHelper = Mockito
-            .mock(WorkerDockerRequestHelper.class);
+        WorkerDockerRequestHelper workerDockerRequestHelper = mockWorkerDockerRequestHelper();
         Mockito.when(workerDockerRequestHelper.start(any(TaskSpec.class)))
             .thenThrow(e);
 
@@ -103,18 +97,6 @@ public class DockerTaskExecutorTest {
             "mockContainerName", "mockScript", "mockImageId");
         dockerTaskExecutor.setWorkerDockerRequestHelper(workerDockerRequestHelper);
         return dockerTaskExecutor;
-    }
-
-    private Task mockTask() {
-        Command command = new Command("echo Hello World");
-        List<Command> commands = Collections.nCopies(5, command);
-
-        TaskSpec taskSpec = Mockito.mock(TaskSpec.class);
-        Mockito.when(taskSpec.getImage()).thenReturn(null);
-        Mockito.when(taskSpec.getCommands()).thenReturn(commands);
-
-        Task task = new Task("mockTaskId", taskSpec);
-        return task;
     }
 
     private boolean isAll(List<Command> commands, CommandState commandState) {
