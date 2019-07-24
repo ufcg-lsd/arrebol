@@ -1,18 +1,17 @@
 package org.fogbowcloud.arrebol.execution.docker;
 
+import static java.lang.Thread.sleep;
+
 import java.util.Objects;
 import org.apache.log4j.Logger;
 import org.fogbowcloud.arrebol.execution.docker.request.ExecInstanceResult;
 import org.fogbowcloud.arrebol.execution.docker.request.WorkerDockerRequestHelper;
 
-import static java.lang.Thread.sleep;
-
 public class DockerCommandExecutor {
 
     private static final Logger LOGGER = Logger.getLogger(DockerCommandExecutor.class);
-    private final WorkerDockerRequestHelper workerDockerRequestHelper;
-
     private static final long poolingPeriodTimeMs = 300;
+    private final WorkerDockerRequestHelper workerDockerRequestHelper;
 
     public DockerCommandExecutor(WorkerDockerRequestHelper workerDockerRequestHelper) {
         this.workerDockerRequestHelper = workerDockerRequestHelper;

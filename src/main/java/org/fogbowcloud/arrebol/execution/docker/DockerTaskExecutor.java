@@ -1,6 +1,10 @@
 package org.fogbowcloud.arrebol.execution.docker;
 
+import static java.lang.Thread.sleep;
+
+import java.io.UnsupportedEncodingException;
 import java.util.Arrays;
+import java.util.List;
 import org.apache.log4j.Logger;
 import org.fogbowcloud.arrebol.execution.TaskExecutionResult;
 import org.fogbowcloud.arrebol.execution.TaskExecutor;
@@ -9,11 +13,6 @@ import org.fogbowcloud.arrebol.execution.docker.request.WorkerDockerRequestHelpe
 import org.fogbowcloud.arrebol.models.command.Command;
 import org.fogbowcloud.arrebol.models.command.CommandState;
 import org.fogbowcloud.arrebol.models.task.Task;
-
-import java.io.UnsupportedEncodingException;
-import java.util.List;
-
-import static java.lang.Thread.sleep;
 
 /**
  * This class consists of an entity of remote execution of tasks using docker containers. At each
@@ -29,9 +28,8 @@ public class DockerTaskExecutor implements TaskExecutor {
     private static final String ecFilePathPattern = "/tmp/%s/.ts.ec";
 
     private final Logger LOGGER = Logger.getLogger(DockerTaskExecutor.class);
-
-    private WorkerDockerRequestHelper workerDockerRequestHelper;
     private final DockerExecutorHelper dockerExecutorHelper;
+    private WorkerDockerRequestHelper workerDockerRequestHelper;
 
     /**
      * @param containerName Sets the name of the container, is an identifier.
@@ -110,8 +108,8 @@ public class DockerTaskExecutor implements TaskExecutor {
 
     /**
      * It reads the .ts.ec file and then updates the states of the commands, performing this update
-     * each period of time {@link DockerTaskExecutor#poolingPeriodTimeMs} until the result
-     * of all the commands.
+     * each period of time {@link DockerTaskExecutor#poolingPeriodTimeMs} until the result of all
+     * the commands.
      */
     private void trackTaskExecution(String taskId, List<Command> commands) throws Exception {
         String ecFilePath = String.format(ecFilePathPattern, taskId);
