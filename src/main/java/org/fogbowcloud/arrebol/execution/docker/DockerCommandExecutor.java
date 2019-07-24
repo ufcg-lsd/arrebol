@@ -12,7 +12,7 @@ public class DockerCommandExecutor {
     private static final Logger LOGGER = Logger.getLogger(DockerCommandExecutor.class);
     private final WorkerDockerRequestHelper workerDockerRequestHelper;
 
-    private final long poolingPeriodInspectExec = 300;
+    private static final long poolingPeriodTimeMs = 300;
 
     public DockerCommandExecutor(WorkerDockerRequestHelper workerDockerRequestHelper) {
         this.workerDockerRequestHelper = workerDockerRequestHelper;
@@ -20,7 +20,7 @@ public class DockerCommandExecutor {
 
     /**
      * It creates the command execution instance, sends it to the docker and each period of time
-     * {@link DockerCommandExecutor#poolingPeriodInspectExec} checks if exit code already exists. If
+     * {@link DockerCommandExecutor#poolingPeriodTimeMs} checks if exit code already exists. If
      * exists then returns an {@link ExecInstanceResult}.
      */
     public ExecInstanceResult executeCommand(String command) throws Exception {
@@ -35,7 +35,7 @@ public class DockerCommandExecutor {
         while (Objects.isNull(execInstanceResult.getExitCode())) {
             execInstanceResult = this.workerDockerRequestHelper.inspectExecInstance(execId);
             try {
-                sleep(poolingPeriodInspectExec);
+                sleep(poolingPeriodTimeMs);
             } catch (InterruptedException e) {
                 LOGGER.error(e.getMessage(), e);
             }

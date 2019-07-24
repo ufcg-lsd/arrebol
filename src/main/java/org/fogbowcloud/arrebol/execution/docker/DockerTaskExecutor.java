@@ -24,7 +24,7 @@ import static java.lang.Thread.sleep;
  */
 public class DockerTaskExecutor implements TaskExecutor {
 
-    private static final long poolingPeriodTrackExecution = 2000;
+    private static final long poolingPeriodTimeMs = 2000;
     private static final String taskScriptFilePathPattern = "/tmp/%s/.ts";
     private static final String ecFilePathPattern = "/tmp/%s/.ts.ec";
 
@@ -110,7 +110,7 @@ public class DockerTaskExecutor implements TaskExecutor {
 
     /**
      * It reads the .ts.ec file and then updates the states of the commands, performing this update
-     * each period of time {@link DockerTaskExecutor#poolingPeriodTrackExecution} until the result
+     * each period of time {@link DockerTaskExecutor#poolingPeriodTimeMs} until the result
      * of all the commands.
      */
     private void trackTaskExecution(String taskId, List<Command> commands) throws Exception {
@@ -122,7 +122,7 @@ public class DockerTaskExecutor implements TaskExecutor {
             currentIndex = updateCommandsState(commands, ecFilePath, currentIndex);
             LOGGER.debug("After sync waiting for index [" + currentIndex + "]");
             try {
-                sleep(poolingPeriodTrackExecution);
+                sleep(poolingPeriodTimeMs);
             } catch (InterruptedException e) {
                 LOGGER.error(e);
             }
