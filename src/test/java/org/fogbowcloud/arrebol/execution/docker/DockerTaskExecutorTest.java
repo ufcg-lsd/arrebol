@@ -16,8 +16,8 @@ import java.util.List;
 import org.fogbowcloud.arrebol.execution.TaskExecutionResult;
 import org.fogbowcloud.arrebol.execution.TaskExecutionResult.RESULT;
 import org.fogbowcloud.arrebol.execution.docker.exceptions.DockerCreateContainerException;
+import org.fogbowcloud.arrebol.execution.docker.exceptions.DockerImageNotFoundException;
 import org.fogbowcloud.arrebol.execution.docker.exceptions.DockerStartException;
-import org.fogbowcloud.arrebol.execution.docker.exceptions.NotFoundDockerImageException;
 import org.fogbowcloud.arrebol.execution.docker.request.WorkerDockerRequestHelper;
 import org.fogbowcloud.arrebol.models.command.Command;
 import org.fogbowcloud.arrebol.models.command.CommandState;
@@ -41,7 +41,7 @@ public class DockerTaskExecutorTest {
     public void testNotFoundImage() throws Exception {
         Mockito.when(task.getTaskSpec().getImage()).thenReturn("anyImage");
         DockerTaskExecutor dockerTaskExecutor = mockDockerTaskExecutor(
-            new NotFoundDockerImageException("Error to pull docker image"));
+            new DockerImageNotFoundException("Error to pull docker image"));
         TaskExecutionResult taskExecutionResult = dockerTaskExecutor.execute(task);
         assertTrue(isAll(task.getTaskSpec().getCommands(), CommandState.FAILED));
         assertEquals(TaskExecutionResult.RESULT.FAILURE, taskExecutionResult.getResult());
