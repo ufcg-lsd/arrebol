@@ -1,5 +1,6 @@
 package org.fogbowcloud.arrebol.api.http.controllers;
 
+import javax.validation.Valid;
 import org.apache.log4j.Logger;
 import org.fogbowcloud.arrebol.api.constants.ApiDocumentation;
 import org.fogbowcloud.arrebol.api.constants.Messages;
@@ -27,7 +28,7 @@ public class JobController {
     }
 
     @RequestMapping(method = RequestMethod.POST)
-    public ResponseEntity<String> addJob(@RequestBody JobSpec jobSpec) {
+    public ResponseEntity<String> addJob(@Valid @RequestBody JobSpec jobSpec) {
         LOGGER.info("Adding new Job: " + jobSpec + ".");
 
         try {

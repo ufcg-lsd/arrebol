@@ -1,6 +1,7 @@
 package org.fogbowcloud.arrebol.models.command;
 
 import java.io.Serializable;
+import javax.validation.constraints.Size;
 import org.json.JSONException;
 import org.json.JSONObject;
 import javax.persistence.*;
@@ -15,7 +16,9 @@ public class Command implements Serializable {
     private long id;
 
     @Column(length = 10240)
+    @Size(min=1,  max = 10240, message = "Command may be not smaller than one and greater than 10240")
     private String command;
+
     @Enumerated(EnumType.STRING)
     private CommandState state;
 

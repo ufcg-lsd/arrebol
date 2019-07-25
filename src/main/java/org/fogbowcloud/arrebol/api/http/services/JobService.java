@@ -1,9 +1,10 @@
 package org.fogbowcloud.arrebol.api.http.services;
 
+import java.util.Collection;
+import java.util.LinkedList;
+import java.util.UUID;
 import org.apache.log4j.Logger;
 import org.fogbowcloud.arrebol.ArrebolFacade;
-import org.fogbowcloud.arrebol.api.constants.Messages;
-import org.fogbowcloud.arrebol.api.exceptions.InvalidJobSpecException;
 import org.fogbowcloud.arrebol.api.exceptions.JobNotFoundException;
 import org.fogbowcloud.arrebol.api.http.dataaccessobject.JobDAO;
 import org.fogbowcloud.arrebol.models.job.Job;
@@ -14,27 +15,19 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
-import java.util.Collection;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.UUID;
-
 @Lazy
 @Service
 public class JobService {
 
+    private final Logger LOGGER = Logger.getLogger(JobService.class);
     @Lazy
     @Autowired
     private ArrebolFacade arrebolFacade;
-
     @Autowired
     private JobDAO jobDAO;
 
-    private final Logger LOGGER = Logger.getLogger(JobService.class);
-
     public String addJob(JobSpec jobSpec) {
         LOGGER.debug("Create job object from job specification.");
-        validateJobSpec(jobSpec);
         Job job = createJobFromSpec(jobSpec);
         LOGGER.info("Created job [ " + job.getId() + " ] from jobSpec");
         String id = this.arrebolFacade.addJob(job);
@@ -64,28 +57,6 @@ public class JobService {
         LOGGER.debug(
             "Created job object of " + job.getLabel() + " with " + taskList.size() + " tasks.");
         return job;
-    }
-
-    private void validateJobSpec(JobSpec jobSpec) {
-        if (jobSpec == null || jobSpec.getTasksSpecs() == null || jobSpec.getTasksSpecs().isEmpty()
-            ||
-            !validateTasksSpecs(jobSpec.getTasksSpecs())) {
-            String message = String.format("JobSpec is invalid: %s", jobSpec.toString());
-            LOGGER.error(message);
-            throw new InvalidJobSpecException(message);
-        } else {
-            LOGGER.info(String.format("JobSpec was validate: %s", jobSpec.toString()));
-        }
-    }
-
-    private boolean validateTasksSpecs(List<TaskSpec> tasksSpecsList) {
-        for (TaskSpec taskSpec : tasksSpecsList) {
-            if (taskSpec == null || taskSpec.getCommands() == null || taskSpec.getCommands()
-                .isEmpty()) {
-                return false;
-            }
-        }
-        return true;
     }
 
 }

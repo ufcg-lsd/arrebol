@@ -1,5 +1,8 @@
 package org.fogbowcloud.arrebol.models.job;
 
+import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 import org.apache.log4j.Logger;
 import org.fogbowcloud.arrebol.models.task.TaskSpec;
 
@@ -12,6 +15,10 @@ public class JobSpec implements Serializable {
     private static final Logger LOGGER = Logger.getLogger(JobSpec.class);
 
     private String label;
+
+    @Valid
+    @NotNull(message = "TasksSpecs list may be not null.")
+    @Size(min = 1, max = 10000, message = "TasksSpecs list may not be smaller than one and greater than 10000")
     private List<TaskSpec> tasksSpecs;
 
     JobSpec() {
