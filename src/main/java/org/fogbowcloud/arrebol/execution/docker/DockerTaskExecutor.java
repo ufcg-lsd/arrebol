@@ -160,6 +160,11 @@ public class DockerTaskExecutor implements TaskExecutor {
         return exitcodes;
     }
 
+    /**
+     * Step through the commands and update their state according to their respective exitcode, if
+     * your exit code is equal to {@link TaskExecutionResult#UNDETERMINED_RESULT}, the iteration is stopped
+     * and the current index is returned.
+     */
     private Integer syncUntilTheLastCmdFinished(List<Command> cmds, int[] exitcodes,
         int startIndex) {
         int currentIndex = startIndex;
