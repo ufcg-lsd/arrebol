@@ -1,11 +1,15 @@
 package org.fogbowcloud.arrebol.execution.docker;
 
+import static org.fogbowcloud.arrebol.execution.docker.DockerUnitTestUtil.loadTaskScriptExecutor;
 import static org.fogbowcloud.arrebol.execution.docker.DockerUnitTestUtil.mockEcFileContent;
+import static org.fogbowcloud.arrebol.execution.docker.DockerUnitTestUtil.mockEcFilePath;
 import static org.fogbowcloud.arrebol.execution.docker.DockerUnitTestUtil.mockTask;
+import static org.fogbowcloud.arrebol.execution.docker.DockerUnitTestUtil.mockTsFilePath;
 import static org.fogbowcloud.arrebol.execution.docker.DockerUnitTestUtil.mockWorkerDockerRequestHelper;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyListOf;
 
 import java.io.UnsupportedEncodingException;
 import java.util.List;
@@ -68,16 +72,20 @@ public class DockerTaskExecutorTest {
     @Test
     public void testSuccessfulExecution() throws Exception {
 
-        WorkerDockerRequestHelper workerDockerRequestHelper = Mockito
-            .mock(WorkerDockerRequestHelper.class);
-        DockerExecutorHelper dockerExecutorHelper = Mockito
-            .spy(new DockerExecutorHelper("mockTaskScript", workerDockerRequestHelper));
-        Mockito.doReturn(mockEcFileContent).when(dockerExecutorHelper)
-            .getEcFile("/tmp/" + task.getId() + ".ts.ec");
+        WorkerDockerRequestHelper workerDockerRequestHelper = mockWorkerDockerRequestHelper();
+        DockerExecutorHelper dockerExecutorHelper = Mockito.mock(DockerExecutorHelper.class);
+        Mockito.doNothing().when(dockerExecutorHelper).sendTaskExecutorScript();
+        Mockito.doNothing().when(dockerExecutorHelper)
+            .writeTaskScript(anyListOf(Command.class), Mockito.eq(mockTsFilePath));
+        Mockito.doNothing().when(dockerExecutorHelper)
+            .runExecutorScript(Mockito.eq(mockTsFilePath));
+        Mockito.when(dockerExecutorHelper.getEcFile(Mockito.eq(mockEcFilePath)))
+            .thenReturn(mockEcFileContent);
+        Mockito.doCallRealMethod().when(dockerExecutorHelper)
+            .parseEcContentToArray(Mockito.anyString(), Mockito.anyInt());
 
-        DockerTaskExecutor dockerTaskExecutor = Mockito.spy(new DockerTaskExecutor("mockAddress",
-            "mockContainerName", "mockScript", "mockImageId"));
-        Mockito.doNothing().when(dockerTaskExecutor).setupAndRun(any(Task.class));
+        DockerTaskExecutor dockerTaskExecutor = new DockerTaskExecutor("mockAddress",
+            "mockContainerName", loadTaskScriptExecutor(), "mockImageId");
         dockerTaskExecutor.setWorkerDockerRequestHelper(workerDockerRequestHelper);
         dockerTaskExecutor.setDockerExecutorHelper(dockerExecutorHelper);
 

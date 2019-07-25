@@ -1,21 +1,21 @@
 package org.fogbowcloud.arrebol.execution.docker;
 
+import static org.fogbowcloud.arrebol.execution.docker.DockerUnitTestUtil.TASK_SCRIPT_EXECUTOR_NAME;
 import static org.fogbowcloud.arrebol.execution.docker.DockerUnitTestUtil.defaultMockCommand;
+import static org.fogbowcloud.arrebol.execution.docker.DockerUnitTestUtil.getFileContent;
+import static org.fogbowcloud.arrebol.execution.docker.DockerUnitTestUtil.loadTaskScriptExecutor;
 import static org.fogbowcloud.arrebol.execution.docker.DockerUnitTestUtil.mockEcArray;
 import static org.fogbowcloud.arrebol.execution.docker.DockerUnitTestUtil.mockEcFileContent;
 import static org.fogbowcloud.arrebol.execution.docker.DockerUnitTestUtil.mockEcFilePath;
 import static org.fogbowcloud.arrebol.execution.docker.DockerUnitTestUtil.mockExecInstanceId;
-import static org.fogbowcloud.arrebol.execution.docker.DockerUnitTestUtil.mockFailStatusCode;
-import static org.fogbowcloud.arrebol.execution.docker.DockerUnitTestUtil.mockSuccessStatusCode;
+import static org.fogbowcloud.arrebol.execution.docker.DockerUnitTestUtil.mockFailExecInstanceResult;
+import static org.fogbowcloud.arrebol.execution.docker.DockerUnitTestUtil.mockSuccessExecInstanceResult;
 import static org.fogbowcloud.arrebol.execution.docker.DockerUnitTestUtil.mockTask;
 import static org.fogbowcloud.arrebol.execution.docker.DockerUnitTestUtil.mockTsFilePath;
 import static org.fogbowcloud.arrebol.execution.docker.DockerUnitTestUtil.mockWorkerDockerRequestHelper;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
-import org.apache.commons.io.IOUtils;
-import org.fogbowcloud.arrebol.execution.docker.request.ExecInstanceResult;
 import org.fogbowcloud.arrebol.execution.docker.request.WorkerDockerRequestHelper;
 import org.fogbowcloud.arrebol.models.task.Task;
 import org.junit.Assert;
@@ -23,11 +23,9 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 import org.springframework.core.io.ClassPathResource;
-import org.springframework.core.io.Resource;
 
 public class DockerExecutorHelperTest {
 
-    private static final String TASK_SCRIPT_EXECUTOR_NAME = "task-script-executor.sh";
     String badFormattedSameLineContent;
     String emptyContent;
     String badFormattedContent;
@@ -56,18 +54,6 @@ public class DockerExecutorHelperTest {
         this.task = mockTask();
     }
 
-    private String loadTaskScriptExecutor() throws IOException {
-        Resource resource = new ClassPathResource(TASK_SCRIPT_EXECUTOR_NAME);
-        return getFileContent(resource);
-    }
-
-    private String getFileContent(Resource file) throws IOException {
-        try (InputStream is = file.getInputStream()) {
-            String content = IOUtils.toString(is, "UTF-8");
-            return content;
-        }
-    }
-
     @Test
     public void testNotEmptyContent() {
         Assert.assertFalse(this.wellFormattedContent.isEmpty());
@@ -86,12 +72,12 @@ public class DockerExecutorHelperTest {
 
         String expectedWriteCommand =
             "echo '" + this.taskScriptContent + "' > /tmp/" + TASK_SCRIPT_EXECUTOR_NAME;
-        Mockito.when(dockerCommandExecutor.executeCommand(expectedWriteCommand, task.getId()))
-            .thenReturn(0);
+        Mockito.when(dockerCommandExecutor.executeCommand(Mockito.eq(expectedWriteCommand)))
+            .thenReturn(mockSuccessExecInstanceResult);
 
         DockerExecutorHelper dockerExecutorHelper = mockSpyDockerExecutorHelper(
             dockerCommandExecutor);
-        dockerExecutorHelper.sendTaskScriptExecutor(task.getId());
+        dockerExecutorHelper.sendTaskExecutorScript();
     }
 
     @Test(expected = Exception.class)
@@ -101,38 +87,38 @@ public class DockerExecutorHelperTest {
         String expectedWriteCommand =
             "echo '" + this.taskScriptContent + "' > /tmp/" + TASK_SCRIPT_EXECUTOR_NAME;
         Mockito.when(dockerCommandExecutor
-            .executeCommand(Mockito.eq(expectedWriteCommand), Mockito.eq(task.getId())))
-            .thenReturn(mockFailStatusCode);
+            .executeCommand(Mockito.eq(expectedWriteCommand)))
+            .thenReturn(mockFailExecInstanceResult);
 
         DockerExecutorHelper dockerExecutorHelper = mockSpyDockerExecutorHelper(
             dockerCommandExecutor);
-        dockerExecutorHelper.sendTaskScriptExecutor(task.getId());
+        dockerExecutorHelper.sendTaskExecutorScript();
     }
 
     @Test
     public void testSendTaskScript() throws Exception {
         DockerCommandExecutor dockerCommandExecutor = Mockito.mock(DockerCommandExecutor.class);
         String expectedWriteCommand = "echo '" + defaultMockCommand + "' >> " + mockTsFilePath;
-        Mockito.when(dockerCommandExecutor.executeCommand(expectedWriteCommand, task.getId()))
-            .thenReturn(mockSuccessStatusCode);
+        Mockito.when(dockerCommandExecutor.executeCommand(Mockito.eq(expectedWriteCommand)))
+            .thenReturn(mockSuccessExecInstanceResult);
 
         DockerExecutorHelper dockerExecutorHelper = mockSpyDockerExecutorHelper(
             dockerCommandExecutor);
         dockerExecutorHelper
-            .sendTaskScript(task.getTaskSpec().getCommands(), mockTsFilePath, task.getId());
+            .writeTaskScript(task.getTaskSpec().getCommands(), mockTsFilePath);
     }
 
     @Test(expected = Exception.class)
     public void testFailSendTaskScript() throws Exception {
         DockerCommandExecutor dockerCommandExecutor = Mockito.mock(DockerCommandExecutor.class);
         String expectedWriteCommand = "echo '" + defaultMockCommand + "' >> " + mockTsFilePath;
-        Mockito.when(dockerCommandExecutor.executeCommand(expectedWriteCommand, task.getId()))
-            .thenReturn(mockFailStatusCode);
+        Mockito.when(dockerCommandExecutor.executeCommand(Mockito.eq(expectedWriteCommand)))
+            .thenReturn(mockFailExecInstanceResult);
 
         DockerExecutorHelper dockerExecutorHelper = mockSpyDockerExecutorHelper(
             dockerCommandExecutor);
         dockerExecutorHelper
-            .sendTaskScript(task.getTaskSpec().getCommands(), mockTsFilePath, task.getId());
+            .writeTaskScript(task.getTaskSpec().getCommands(), mockTsFilePath);
     }
 
     @Test
@@ -144,7 +130,7 @@ public class DockerExecutorHelperTest {
         Mockito.when(workerDockerRequestHelper.startExecInstance(mockExecInstanceId))
             .thenReturn(mockEcFileContent);
         Mockito.when(workerDockerRequestHelper.inspectExecInstance(mockExecInstanceId))
-            .thenReturn(new ExecInstanceResult(mockExecInstanceId, mockSuccessStatusCode, false));
+            .thenReturn(mockSuccessExecInstanceResult);
 
         DockerExecutorHelper dockerExecutorHelper = Mockito
             .spy(new DockerExecutorHelper(this.taskScriptContent, workerDockerRequestHelper));
@@ -154,7 +140,8 @@ public class DockerExecutorHelperTest {
     @Test
     public void testParseEcContentToArray() throws UnsupportedEncodingException {
         DockerExecutorHelper dockerExecutorHelper = mockSpyDockerExecutorHelper();
-        int[] result = dockerExecutorHelper.parseEcContentToArray(mockEcFileContent, task.getTaskSpec().getCommands().size());
+        int[] result = dockerExecutorHelper
+            .parseEcContentToArray(mockEcFileContent, task.getTaskSpec().getCommands().size());
         Assert.assertArrayEquals(mockEcArray, result);
     }
 

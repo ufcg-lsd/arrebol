@@ -24,8 +24,8 @@ import org.fogbowcloud.arrebol.models.task.Task;
 public class DockerTaskExecutor implements TaskExecutor {
 
     private static final long poolingPeriodTimeMs = 2000;
-    private static final String taskScriptFilePathPattern = "/tmp/%s/.ts";
-    private static final String ecFilePathPattern = "/tmp/%s/.ts.ec";
+    private static final String taskScriptFilePathPattern = "/tmp/%s.ts";
+    private static final String ecFilePathPattern = "/tmp/%s.ts.ec";
 
     private final Logger LOGGER = Logger.getLogger(DockerTaskExecutor.class);
 
@@ -91,7 +91,7 @@ public class DockerTaskExecutor implements TaskExecutor {
     /**
      * Sends the executor task script and write task commands inside the .ts file.
      */
-    private String setupContainerEnviroment(String taskId, List<Command> commands)
+    protected void setupContainerEnviroment(String taskId, List<Command> commands)
         throws Exception {
         this.dockerExecutorHelper.sendTaskExecutorScript();
         LOGGER.debug(
@@ -99,10 +99,9 @@ public class DockerTaskExecutor implements TaskExecutor {
                 + " to .ts file.");
         String taskScriptFilePath = String.format(taskScriptFilePathPattern, taskId);
         this.dockerExecutorHelper.writeTaskScript(commands, taskScriptFilePath);
-        return taskScriptFilePath;
     }
 
-    private void runScript(String taskId) throws Exception {
+    protected void runScript(String taskId) throws Exception {
         String taskScriptFilepath = String.format(taskScriptFilePathPattern, taskId);
         this.dockerExecutorHelper.runExecutorScript(taskScriptFilepath);
     }
