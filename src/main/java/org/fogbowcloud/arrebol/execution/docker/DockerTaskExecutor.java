@@ -24,8 +24,8 @@ import org.fogbowcloud.arrebol.models.task.Task;
 public class DockerTaskExecutor implements TaskExecutor {
 
     private static final long poolingPeriodTimeMs = 2000;
-    private static final String taskScriptFilePathPattern = "/tmp/%s/.ts";
-    private static final String ecFilePathPattern = "/tmp/%s/.ts.ec";
+    private static final String taskScriptFilePathPattern = "/tmp/%s.ts";
+    private static final String ecFilePathPattern = "/tmp/%s.ts.ec";
 
     private final Logger LOGGER = Logger.getLogger(DockerTaskExecutor.class);
     private final DockerExecutorHelper dockerExecutorHelper;
