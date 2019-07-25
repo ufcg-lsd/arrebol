@@ -153,4 +153,9 @@ public class WorkerDockerRequestHelper {
     public String getContainerName() {
         return containerName;
     }
+
+    public void setContainerRequestHelper(
+        ContainerRequestHelper containerRequestHelper) {
+        this.containerRequestHelper = containerRequestHelper;
+    }
 }

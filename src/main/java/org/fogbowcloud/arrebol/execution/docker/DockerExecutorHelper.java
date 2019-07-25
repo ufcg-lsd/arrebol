@@ -106,4 +106,9 @@ public class DockerExecutorHelper {
         return this.dockerCommandExecutor.executeCommand("echo '" + command + "' >> " + file)
             .getExitCode();
     }
+
+    protected void setDockerCommandExecutor(
+        DockerCommandExecutor dockerCommandExecutor) {
+        this.dockerCommandExecutor = dockerCommandExecutor;
+    }
 }

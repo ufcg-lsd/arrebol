@@ -28,8 +28,9 @@ public class DockerTaskExecutor implements TaskExecutor {
     private static final String ecFilePathPattern = "/tmp/%s.ts.ec";
 
     private final Logger LOGGER = Logger.getLogger(DockerTaskExecutor.class);
-    private final DockerExecutorHelper dockerExecutorHelper;
+
     private WorkerDockerRequestHelper workerDockerRequestHelper;
+    private DockerExecutorHelper dockerExecutorHelper;
 
     /**
      * @param containerName Sets the name of the container, is an identifier.
@@ -90,7 +91,7 @@ public class DockerTaskExecutor implements TaskExecutor {
     /**
      * Sends the executor task script and write task commands inside the .ts file.
      */
-    private String setupContainerEnviroment(String taskId, List<Command> commands)
+    protected void setupContainerEnviroment(String taskId, List<Command> commands)
         throws Exception {
         this.dockerExecutorHelper.sendTaskExecutorScript();
         LOGGER.debug(
@@ -98,10 +99,9 @@ public class DockerTaskExecutor implements TaskExecutor {
                 + " to .ts file.");
         String taskScriptFilePath = String.format(taskScriptFilePathPattern, taskId);
         this.dockerExecutorHelper.writeTaskScript(commands, taskScriptFilePath);
-        return taskScriptFilePath;
     }
 
-    private void runScript(String taskId) throws Exception {
+    protected void runScript(String taskId) throws Exception {
         String taskScriptFilepath = String.format(taskScriptFilePathPattern, taskId);
         this.dockerExecutorHelper.runExecutorScript(taskScriptFilepath);
     }
@@ -223,6 +223,16 @@ public class DockerTaskExecutor implements TaskExecutor {
                 c.setExitcode(TaskExecutionResult.UNDETERMINED_RESULT);
             }
         }
+    }
+
+    protected void setWorkerDockerRequestHelper(
+        WorkerDockerRequestHelper workerDockerRequestHelper) {
+        this.workerDockerRequestHelper = workerDockerRequestHelper;
+    }
+
+    protected void setDockerExecutorHelper(
+        DockerExecutorHelper dockerExecutorHelper) {
+        this.dockerExecutorHelper = dockerExecutorHelper;
     }
 
     private String getContainerName() {
