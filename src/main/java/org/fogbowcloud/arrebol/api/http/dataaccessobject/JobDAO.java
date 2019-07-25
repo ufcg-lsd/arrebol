@@ -14,18 +14,18 @@ public class JobDAO {
     @Autowired
     private JobRepository jobRepository;
 
-    public Job getJobById(String id){
+    public Job getJobById(String id) {
         LOGGER.debug("Accessing database to getting a job with id " + id);
         Job job = jobRepository.findOne(id);
         return job;
     }
 
-    public void addJob(Job job){
+    public void addJob(Job job) {
         LOGGER.debug("Adding job with id " + job.getId() + " to the database.");
         jobRepository.save(job);
     }
 
-    public String deleteJobById(String id){
+    public String deleteJobById(String id) {
         LOGGER.debug("Removing job with " + id + " from the database.");
         return jobRepository.deleteById(id);
     }

@@ -24,7 +24,7 @@ public class Task implements Serializable {
         this.state = TaskState.PENDING;
     }
 
-    Task(){
+    Task() {
         //Default constructor
     }
 
@@ -46,12 +46,16 @@ public class Task implements Serializable {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
         Task task = (Task) o;
         return Objects.equals(id, task.id) &&
-                state == task.state &&
-                Objects.equals(taskSpec, task.taskSpec);
+            state == task.state &&
+            Objects.equals(taskSpec, task.taskSpec);
     }
 
     @Override

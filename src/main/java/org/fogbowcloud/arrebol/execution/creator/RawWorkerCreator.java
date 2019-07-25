@@ -34,10 +34,11 @@ public class RawWorkerCreator implements WorkerCreator {
         return workers;
     }
 
-    private Worker createRawWorker(Integer poolId, int resourceId){
+    private Worker createRawWorker(Integer poolId, int resourceId) {
         TaskExecutor executor = new RawTaskExecutor();
         Specification resourceSpec = null;
-        Worker worker = new MatchAnyWorker(resourceSpec, "resourceId-"+resourceId, poolId, executor);
+        Worker worker = new MatchAnyWorker(resourceSpec, "resourceId-" + resourceId, poolId,
+            executor);
         return worker;
     }
 }
