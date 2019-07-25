@@ -1,6 +1,7 @@
 package org.fogbowcloud.arrebol.execution.docker;
 
 import static org.fogbowcloud.arrebol.execution.docker.DockerUnitTestUtil.defaultMockCommand;
+import static org.fogbowcloud.arrebol.execution.docker.DockerUnitTestUtil.mockEcArray;
 import static org.fogbowcloud.arrebol.execution.docker.DockerUnitTestUtil.mockEcFileContent;
 import static org.fogbowcloud.arrebol.execution.docker.DockerUnitTestUtil.mockEcFilePath;
 import static org.fogbowcloud.arrebol.execution.docker.DockerUnitTestUtil.mockExecInstanceId;
@@ -55,16 +56,16 @@ public class DockerExecutorHelperTest {
         this.task = mockTask();
     }
 
+    private String loadTaskScriptExecutor() throws IOException {
+        Resource resource = new ClassPathResource(TASK_SCRIPT_EXECUTOR_NAME);
+        return getFileContent(resource);
+    }
+
     private String getFileContent(Resource file) throws IOException {
         try (InputStream is = file.getInputStream()) {
             String content = IOUtils.toString(is, "UTF-8");
             return content;
         }
-    }
-
-    private String loadTaskScriptExecutor() throws IOException {
-        Resource resource = new ClassPathResource(TASK_SCRIPT_EXECUTOR_NAME);
-        return getFileContent(resource);
     }
 
     @Test
@@ -149,6 +150,18 @@ public class DockerExecutorHelperTest {
             .spy(new DockerExecutorHelper(this.taskScriptContent, workerDockerRequestHelper));
         Assert.assertEquals(mockEcFileContent, dockerExecutorHelper.getEcFile(mockEcFilePath));
     }
+
+    @Test
+    public void testParseEcContentToArray() throws UnsupportedEncodingException {
+        DockerExecutorHelper dockerExecutorHelper = mockSpyDockerExecutorHelper();
+        int[] result = dockerExecutorHelper.parseEcContentToArray(mockEcFileContent, task.getTaskSpec().getCommands().size());
+        Assert.assertArrayEquals(mockEcArray, result);
+    }
+
+    private DockerExecutorHelper mockSpyDockerExecutorHelper() throws UnsupportedEncodingException {
+        return this.mockSpyDockerExecutorHelper(null);
+    }
+
 
     private DockerExecutorHelper mockSpyDockerExecutorHelper(
         DockerCommandExecutor dockerCommandExecutor) throws UnsupportedEncodingException {

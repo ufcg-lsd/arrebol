@@ -19,6 +19,7 @@ public class DockerUnitTestUtil {
     protected static final String mockEcFilePath = "/tmp/" + defaultMockTaskId + ".ts.ec";
     protected static final String mockExecInstanceId = "mockExecId";
     protected static final String mockEcFileContent = "0\r\n0\r\n0\r\n0\r\n0";
+    protected static final int[] mockEcArray = {0, 0, 0, 0, 0};
     protected static final Integer mockSuccessStatusCode = 0;
     protected static final Integer mockFailStatusCode = 1;
 
