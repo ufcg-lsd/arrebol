@@ -54,9 +54,10 @@ public class ArrebolController {
 
     public ArrebolController() {
 
-        String path = Objects.requireNonNull(Thread.currentThread().getContextClassLoader()
-            .getResource("")).getPath();
+        String path = null;
         try {
+             path = Objects.requireNonNull(Thread.currentThread().getContextClassLoader()
+                .getResource("")).getPath();
             this.configuration = loadConfigurationFile(path);
             ConfValidator.validate(configuration);
             buildWorkerCreator(configuration);
