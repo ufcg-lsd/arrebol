@@ -15,11 +15,11 @@ import org.fogbowcloud.arrebol.models.command.CommandState;
 import org.fogbowcloud.arrebol.models.task.Task;
 
 /**
- * This class consists of an entity of remote execution of tasks using docker containers. At each
- * execution a new container is started and after the execution of the task is finished the
- * container is removed. The execution of each command is not done directly by this class but by a
- * bash script sent into the container. In cases where container initialization error occurs, the
- * commands go to failure state and a failure result is returned.
+ * This implementation of {@link TaskExecutor} manages the execution of a {@link Task} in a, possible remote,
+ * DockerContainer. A new container is created to execute every {@link Task} and destroy after the execution
+ * has finished. A task representation is sent to the container, which drives the execution of the
+ * commands itself. This objects monitors the execution until it ends on success or failure. If any container
+ * initialization error occurs, the return {@link TaskExecutionResult} indicates the Failure.
  */
 public class DockerTaskExecutor implements TaskExecutor {
 
@@ -48,24 +48,27 @@ public class DockerTaskExecutor implements TaskExecutor {
     }
 
     /**
-     * It has function to execute a task. First, the container is started. A task may have
-     * requirements such as docker image, which are set at that time. Next, a bash script called
-     * task-script-executor is sent, which will execute all commands internally in the container.
-     * All the commands of the task are written to a .ts file inside the container, and then the
-     * task-script-executor reads this file, executes line by line and each executed command is
-     * written its exit code in the .ts.ec file. Execution ends only when the number of ec in the
-     * file corresponds to the number of commands. At the end of execution, the result is returned
-     * and the container is killed
+     * {@inheritDoc}
      */
     @Override
     public TaskExecutionResult execute(Task task) {
+
+        // It has function to execute a task. First, the container is started. A task may have
+        //requirements such as docker image, which are set at that time. Next, a bash script called
+        //task-script-executor is sent, which will execute all commands internally in the container.
+        //All the commands of the task are written to a .ts file inside the container, and then the
+        //task-script-executor reads this file, executes line by line and each executed command is
+        //written its exit code in the .ts.ec file. Execution ends only when the number of ec in the
+        //file corresponds to the number of commands. At the end of execution, the result is returned
+        //and the container is killed
+
         // FIXME: also, follow the SAME log format we used in the RawTaskExecutor
         TaskExecutionResult taskExecutionResult;
 
         try {
             List<Command> commands = task.getTaskSpec().getCommands();
             startContainer(task);
-            setupContainerEnviroment(task.getId(), commands);
+            setupContainerEnvironment(task.getId(), commands);
             LOGGER.debug(
                 "Starting to execute commands [len=" + commands.size() + "] of task " + task
                     .getId());
@@ -83,16 +86,15 @@ public class DockerTaskExecutor implements TaskExecutor {
                 getExitCodes(commands));
             LOGGER.debug("Result of task [" + task.getId() + "]: "
                 + taskExecutionResult.getResult().toString());
-            return taskExecutionResult;
         }
 
+        return taskExecutionResult;
     }
 
-    /**
-     * Sends the executor task script and write task commands inside the .ts file.
-     */
-    protected void setupContainerEnviroment(String taskId, List<Command> commands)
+    private void setupContainerEnvironment(String taskId, List<Command> commands)
         throws Exception {
+
+        //Sends the executor task script and write task commands inside the .ts file
         this.dockerExecutorHelper.sendTaskExecutorScript();
         LOGGER.debug(
             "Starting to write commands [len=" + commands.size() + "] of task " + taskId
@@ -101,7 +103,7 @@ public class DockerTaskExecutor implements TaskExecutor {
         this.dockerExecutorHelper.writeTaskScript(commands, taskScriptFilePath);
     }
 
-    protected void runScript(String taskId) throws Exception {
+    private void runScript(String taskId) throws Exception {
         String taskScriptFilepath = String.format(taskScriptFilePathPattern, taskId);
         this.dockerExecutorHelper.runExecutorScript(taskScriptFilepath);
     }
@@ -127,9 +129,6 @@ public class DockerTaskExecutor implements TaskExecutor {
         }
     }
 
-    /**
-     * Start the container considering task specifications
-     */
     private void startContainer(Task task) throws UnsupportedEncodingException {
         LOGGER.info(
             "Starting DockerTaskExecutor " + this.workerDockerRequestHelper.getContainerName());
