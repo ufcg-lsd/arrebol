@@ -1,17 +1,18 @@
 package org.fogbowcloud.arrebol.execution.docker;
 
 import static org.fogbowcloud.arrebol.execution.docker.DockerUnitTestUtil.loadTaskScriptExecutor;
+import static org.fogbowcloud.arrebol.execution.docker.DockerUnitTestUtil.mockAddress;
+import static org.fogbowcloud.arrebol.execution.docker.DockerUnitTestUtil.mockContainerName;
 import static org.fogbowcloud.arrebol.execution.docker.DockerUnitTestUtil.mockEcFileContent;
 import static org.fogbowcloud.arrebol.execution.docker.DockerUnitTestUtil.mockEcFilePath;
+import static org.fogbowcloud.arrebol.execution.docker.DockerUnitTestUtil.mockImageId;
 import static org.fogbowcloud.arrebol.execution.docker.DockerUnitTestUtil.mockTask;
 import static org.fogbowcloud.arrebol.execution.docker.DockerUnitTestUtil.mockTsFilePath;
 import static org.fogbowcloud.arrebol.execution.docker.DockerUnitTestUtil.mockWorkerDockerRequestHelper;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyListOf;
 
-import java.io.UnsupportedEncodingException;
 import java.util.List;
 import org.fogbowcloud.arrebol.execution.TaskExecutionResult;
 import org.fogbowcloud.arrebol.execution.TaskExecutionResult.RESULT;
@@ -27,7 +28,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 
-
 public class DockerTaskExecutorTest {
 
     private Task task;
@@ -39,72 +39,82 @@ public class DockerTaskExecutorTest {
 
     @Test
     public void testNotFoundImage() throws Exception {
-        Mockito.when(task.getTaskSpec().getImage()).thenReturn("anyImage");
-        DockerTaskExecutor dockerTaskExecutor = mockDockerTaskExecutor(
-            new DockerImageNotFoundException("Error to pull docker image"));
+        DockerTaskExecutor dockerTaskExecutor =
+                mockDockerTaskExecutorWithStartException(
+                        new DockerImageNotFoundException("Error to pull docker image"));
+
         TaskExecutionResult taskExecutionResult = dockerTaskExecutor.execute(task);
         assertTrue(isAll(task.getTaskSpec().getCommands(), CommandState.FAILED));
         assertEquals(TaskExecutionResult.RESULT.FAILURE, taskExecutionResult.getResult());
     }
 
     @Test
-    public void testErrorCreatingContainer() throws UnsupportedEncodingException {
-        Task task = mockTask();
-        DockerTaskExecutor dockerTaskExecutor = mockDockerTaskExecutor(
-            new DockerCreateContainerException("Could not create container"));
+    public void testErrorCreatingContainer() throws Exception {
+        DockerTaskExecutor dockerTaskExecutor =
+                mockDockerTaskExecutorWithStartException(
+                        new DockerCreateContainerException("Could not create container"));
         TaskExecutionResult taskExecutionResult = dockerTaskExecutor.execute(task);
         assertTrue(isAll(task.getTaskSpec().getCommands(), CommandState.FAILED));
         assertEquals(TaskExecutionResult.RESULT.FAILURE, taskExecutionResult.getResult());
-
     }
 
     @Test
-    public void testErrorStartingContainer() throws UnsupportedEncodingException {
-        Task task = mockTask();
-        DockerTaskExecutor dockerTaskExecutor = mockDockerTaskExecutor(
-            new DockerStartException("Could not start container"));
+    public void testErrorStartingContainer() throws Exception {
+        DockerTaskExecutor dockerTaskExecutor =
+                mockDockerTaskExecutorWithStartException(
+                        new DockerStartException("Could not start container"));
         TaskExecutionResult taskExecutionResult = dockerTaskExecutor.execute(task);
         assertTrue(isAll(task.getTaskSpec().getCommands(), CommandState.FAILED));
         assertEquals(TaskExecutionResult.RESULT.FAILURE, taskExecutionResult.getResult());
-
     }
 
     @Test
     public void testSuccessfulExecution() throws Exception {
 
         WorkerDockerRequestHelper workerDockerRequestHelper = mockWorkerDockerRequestHelper();
-        DockerExecutorHelper dockerExecutorHelper = Mockito.mock(DockerExecutorHelper.class);
-        Mockito.doNothing().when(dockerExecutorHelper).sendTaskExecutorScript();
-        Mockito.doNothing().when(dockerExecutorHelper)
-            .writeTaskScript(anyListOf(Command.class), Mockito.eq(mockTsFilePath));
-        Mockito.doNothing().when(dockerExecutorHelper)
-            .runExecutorScript(Mockito.eq(mockTsFilePath));
-        Mockito.when(dockerExecutorHelper.getEcFile(Mockito.eq(mockEcFilePath)))
-            .thenReturn(mockEcFileContent);
-        Mockito.doCallRealMethod().when(dockerExecutorHelper)
-            .parseEcContentToArray(Mockito.anyString(), Mockito.anyInt());
+        DockerExecutorHelper dockerExecutorHelper = mockDockerExecutorHelper();
 
-        DockerTaskExecutor dockerTaskExecutor = new DockerTaskExecutor("mockAddress",
-            "mockContainerName", loadTaskScriptExecutor(), "mockImageId");
+        DockerTaskExecutor dockerTaskExecutor =
+                new DockerTaskExecutor(
+                        mockContainerName, mockAddress, loadTaskScriptExecutor(), mockImageId);
         dockerTaskExecutor.setWorkerDockerRequestHelper(workerDockerRequestHelper);
         dockerTaskExecutor.setDockerExecutorHelper(dockerExecutorHelper);
 
         TaskExecutionResult taskExecutionResult = dockerTaskExecutor.execute(task);
         assertTrue(isAll(task.getTaskSpec().getCommands(), CommandState.FINISHED));
         assertEquals(RESULT.SUCCESS, taskExecutionResult.getResult());
-
     }
 
-    private DockerTaskExecutor mockDockerTaskExecutor(RuntimeException e)
-        throws UnsupportedEncodingException {
+    private DockerTaskExecutor mockDockerTaskExecutorWithStartException(Exception e)
+            throws Exception {
+        DockerExecutorHelper dockerExecutorHelper = mockDockerExecutorHelper();
         WorkerDockerRequestHelper workerDockerRequestHelper = mockWorkerDockerRequestHelper();
-        Mockito.when(workerDockerRequestHelper.start(any(TaskSpec.class)))
-            .thenThrow(e);
+        Mockito.when(workerDockerRequestHelper.start(Mockito.any(TaskSpec.class))).thenThrow(e);
 
-        DockerTaskExecutor dockerTaskExecutor = new DockerTaskExecutor("mockAddress",
-            "mockContainerName", "mockScript", "mockImageId");
+        DockerTaskExecutor dockerTaskExecutor =
+                new DockerTaskExecutor(
+                        mockContainerName, mockAddress, loadTaskScriptExecutor(), mockImageId);
+        dockerTaskExecutor.setDockerExecutorHelper(dockerExecutorHelper);
         dockerTaskExecutor.setWorkerDockerRequestHelper(workerDockerRequestHelper);
+
         return dockerTaskExecutor;
+    }
+
+    private DockerExecutorHelper mockDockerExecutorHelper() throws Exception {
+        DockerExecutorHelper dockerExecutorHelper = Mockito.mock(DockerExecutorHelper.class);
+        Mockito.doNothing().when(dockerExecutorHelper).sendTaskExecutorScript();
+        Mockito.doNothing()
+                .when(dockerExecutorHelper)
+                .writeTaskScript(anyListOf(Command.class), Mockito.eq(mockTsFilePath));
+        Mockito.doNothing()
+                .when(dockerExecutorHelper)
+                .runExecutorScript(Mockito.eq(mockTsFilePath));
+        Mockito.when(dockerExecutorHelper.getEcFile(Mockito.eq(mockEcFilePath)))
+                .thenReturn(mockEcFileContent);
+        Mockito.doCallRealMethod()
+                .when(dockerExecutorHelper)
+                .parseEcContentToArray(Mockito.anyString(), Mockito.anyInt());
+        return dockerExecutorHelper;
     }
 
     private boolean isAll(List<Command> commands, CommandState commandState) {
