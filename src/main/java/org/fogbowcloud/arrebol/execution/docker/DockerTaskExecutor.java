@@ -58,8 +58,8 @@ public class DockerTaskExecutor implements TaskExecutor {
         // FIXME: also, follow the SAME log format we used in the RawTaskExecutor
         TaskExecutionResult taskExecutionResult;
 
+        List<Command> commands = task.getTaskSpec().getCommands();
         try {
-            List<Command> commands = task.getTaskSpec().getCommands();
             startContainer(task);
             setupContainerEnvironment(task.getId(), commands);
             LOGGER.debug(
@@ -72,9 +72,8 @@ public class DockerTaskExecutor implements TaskExecutor {
             LOGGER.error(de.getMessage(), de);
         } catch (Throwable t) {
             LOGGER.error("Set task [" + task.getId() + "] to FAILED [" + t.getMessage() + "]", t);
-            failUnfinishedCommands(task.getTaskSpec().getCommands());
+            failUnfinishedCommands(commands);
         } finally {
-            List<Command> commands = task.getTaskSpec().getCommands();
             taskExecutionResult = new TaskExecutionResult(getTaskResult(commands),
                 getExitCodes(commands));
             LOGGER.debug("Result of task [" + task.getId() + "]: "
