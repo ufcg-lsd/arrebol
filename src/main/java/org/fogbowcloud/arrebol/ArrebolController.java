@@ -1,19 +1,6 @@
 package org.fogbowcloud.arrebol;
 
 import com.google.gson.Gson;
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Timer;
-import java.util.TimerTask;
-import java.util.UUID;
 import org.apache.log4j.Logger;
 import org.fogbowcloud.arrebol.execution.Worker;
 import org.fogbowcloud.arrebol.execution.WorkerTypes;
@@ -34,6 +21,12 @@ import org.fogbowcloud.arrebol.scheduler.FifoSchedulerPolicy;
 import org.fogbowcloud.arrebol.utils.ConfValidator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.util.*;
 
 @Component
 public class ArrebolController {
@@ -193,6 +186,9 @@ public class ArrebolController {
         }
     }
 
+    /**
+     * Checks whether all tasks in the collection have only states that the mask represents.
+     */
     private boolean all(Collection<Task> tasks, int mask) {
         for (Task t : tasks) {
             if ((t.getState().getValue() & mask) == 0) {

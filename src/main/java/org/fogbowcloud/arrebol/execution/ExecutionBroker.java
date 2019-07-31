@@ -39,9 +39,7 @@ public class ExecutionBroker {
                             break;
                         }
                         default: {
-                            logger.error(
-                                "inconsistent results for task={" + task + "} worker={" + worker
-                                    + "}");
+                            logger.error("inconsistent results for task={" + task + "} worker={" + worker + "}");
                             //TODO: I guess the task should be rolled be to its previous (before run) state
                         }
                     }
