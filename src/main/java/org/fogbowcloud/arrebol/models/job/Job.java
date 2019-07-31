@@ -1,6 +1,5 @@
 package org.fogbowcloud.arrebol.models.job;
 
-import org.apache.log4j.Logger;
 import org.fogbowcloud.arrebol.models.task.Task;
 
 import javax.persistence.*;

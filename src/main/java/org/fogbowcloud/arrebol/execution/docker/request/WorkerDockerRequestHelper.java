@@ -30,6 +30,11 @@ public class WorkerDockerRequestHelper {
 
     private final Logger LOGGER = Logger.getLogger(WorkerDockerRequestHelper.class);
 
+    /**
+     * @param address Defines the address where requests for the Docker API should be made
+     * @param containerName Sets the name of the container, is an identifier.
+     * @param defaultImageId Image docker used as default if no one is specified in the task.
+     */
     public WorkerDockerRequestHelper(String address, String containerName, String defaultImageId) {
         this.httpWrapper = new HttpWrapper();
         this.address = address;

@@ -17,6 +17,9 @@ public class DockerExecutorHelper {
     private DockerCommandExecutor dockerCommandExecutor;
     private final WorkerDockerRequestHelper workerDockerRequestHelper;
 
+    /**
+     *@param taskScriptContent Script that will be sent to the container with the function to execute the commands
+     */
     public DockerExecutorHelper(String taskScriptContent,
         WorkerDockerRequestHelper workerDockerRequestHelper) {
         this.taskScriptContent = taskScriptContent;

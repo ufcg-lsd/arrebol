@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
 import javax.persistence.CascadeType;
+import javax.persistence.Column;
 import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.Id;
@@ -27,7 +28,7 @@ public class TaskSpec implements Serializable {
 
     @Valid
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
-    @NotNull(message = "Commands list may not be null")
+//    @NotNull(message = "Commands list may not be null")
     @Size(
             min = 1,
             max = 10000,

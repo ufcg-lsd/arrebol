@@ -75,10 +75,7 @@ public class DockerTaskExecutorTest {
         DockerExecutorHelper dockerExecutorHelper = mockDockerExecutorHelper();
 
         DockerTaskExecutor dockerTaskExecutor =
-                new DockerTaskExecutor(
-                        mockContainerName, mockAddress, loadTaskScriptExecutor(), mockImageId);
-        dockerTaskExecutor.setWorkerDockerRequestHelper(workerDockerRequestHelper);
-        dockerTaskExecutor.setDockerExecutorHelper(dockerExecutorHelper);
+                new DockerTaskExecutor(workerDockerRequestHelper, dockerExecutorHelper);
 
         TaskExecutionResult taskExecutionResult = dockerTaskExecutor.execute(task);
         assertTrue(isAll(task.getTaskSpec().getCommands(), CommandState.FINISHED));
@@ -92,10 +89,7 @@ public class DockerTaskExecutorTest {
         Mockito.when(workerDockerRequestHelper.start(Mockito.any(TaskSpec.class))).thenThrow(e);
 
         DockerTaskExecutor dockerTaskExecutor =
-                new DockerTaskExecutor(
-                        mockContainerName, mockAddress, loadTaskScriptExecutor(), mockImageId);
-        dockerTaskExecutor.setDockerExecutorHelper(dockerExecutorHelper);
-        dockerTaskExecutor.setWorkerDockerRequestHelper(workerDockerRequestHelper);
+            new DockerTaskExecutor(workerDockerRequestHelper, dockerExecutorHelper);
 
         return dockerTaskExecutor;
     }

@@ -33,18 +33,11 @@ public class DockerTaskExecutor implements TaskExecutor {
     private DockerExecutorHelper dockerExecutorHelper;
 
     /**
-     * @param containerName Sets the name of the container, is an identifier.
-     * @param address Defines the address where requests for the Docker API should be made
-     * @param taskScriptContent Script that will be sent to the container with the function to
-     * execute the commands
-     * @param defaultImageId Image docker used as default if no one is specified in the task.
+
      */
-    public DockerTaskExecutor(String containerName, String address, String taskScriptContent,
-        String defaultImageId) {
-        this.workerDockerRequestHelper = new WorkerDockerRequestHelper(address, containerName,
-            defaultImageId);
-        this.dockerExecutorHelper = new DockerExecutorHelper(taskScriptContent,
-            this.workerDockerRequestHelper);
+    public DockerTaskExecutor(WorkerDockerRequestHelper workerDockerRequestHelper, DockerExecutorHelper dockerExecutorHelper) {
+        this.workerDockerRequestHelper = workerDockerRequestHelper;
+        this.dockerExecutorHelper = dockerExecutorHelper;
     }
 
     /**
@@ -227,16 +220,6 @@ public class DockerTaskExecutor implements TaskExecutor {
                 c.setExitcode(TaskExecutionResult.UNDETERMINED_RESULT);
             }
         }
-    }
-
-    protected void setWorkerDockerRequestHelper(
-        WorkerDockerRequestHelper workerDockerRequestHelper) {
-        this.workerDockerRequestHelper = workerDockerRequestHelper;
-    }
-
-    protected void setDockerExecutorHelper(
-        DockerExecutorHelper dockerExecutorHelper) {
-        this.dockerExecutorHelper = dockerExecutorHelper;
     }
 
     private String getContainerName() {
