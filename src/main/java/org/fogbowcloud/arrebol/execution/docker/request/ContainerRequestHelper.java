@@ -9,7 +9,7 @@ import org.fogbowcloud.arrebol.execution.docker.exceptions.DockerRemoveContainer
 import org.fogbowcloud.arrebol.execution.docker.exceptions.DockerStartException;
 import org.fogbowcloud.arrebol.utils.AppUtil;
 import org.json.JSONObject;
-import org.fogbowcloud.arrebol.execution.docker.constans.DockerConstants;
+import org.fogbowcloud.arrebol.execution.docker.constants.DockerConstants;
 
 import java.io.UnsupportedEncodingException;
 import java.util.Map;
@@ -27,9 +27,23 @@ public class ContainerRequestHelper {
         this.containerName = containerName;
     }
 
+    public String createContainer(String image) throws DockerCreateContainerException, UnsupportedEncodingException {
+        final String endPoint = String.format("%s/containers/create?name=%s", address, containerName);
+        StringEntity body = jsonCreateContainer(image);
+        String containerId = createContainerRequest(endPoint, body);
+        return containerId;
+        //Todo catch and throw or threat possible exceptions
+    }
+
     public String createContainer(String image, Map<String, String> requirements) throws DockerCreateContainerException, UnsupportedEncodingException {
         final String endPoint = String.format("%s/containers/create?name=%s", address, containerName);
         StringEntity body = jsonCreateContainer(image, requirements);
+        String containerId = createContainerRequest(endPoint, body);
+        return containerId;
+        //Todo catch and throw or threat possible exceptions
+    }
+
+    private String createContainerRequest(String endPoint, StringEntity body){
         String response;
         try {
             response = this.httpWrapper.doRequest(HttpPost.METHOD_NAME, endPoint, body);
@@ -39,9 +53,6 @@ public class ContainerRequestHelper {
         LOGGER.debug("Create container ["+ containerName +"] request response: ["+ response +"]");
         String containerId = AppUtil.getValueFromJsonStr("Id", response);
         return containerId;
-        //Todo catch and throw or threat possible exceptions
-
-
     }
 
     public void startContainer() throws DockerStartException {
@@ -74,6 +85,13 @@ public class ContainerRequestHelper {
 
     private String post(String endpoint) throws Exception {
         return this.httpWrapper.doRequest(HttpPost.METHOD_NAME, endpoint);
+    }
+
+    private StringEntity jsonCreateContainer(String image) throws UnsupportedEncodingException {
+        JSONObject jsonObject = new JSONObject();
+        AppUtil.makeBodyField(jsonObject, "Image", image);
+        AppUtil.makeBodyField(jsonObject, "Tty", true);
+        return new StringEntity(jsonObject.toString());
     }
 
     private StringEntity jsonCreateContainer(String image, Map<String, String> requirements) throws UnsupportedEncodingException {

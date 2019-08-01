@@ -3,8 +3,8 @@ package org.fogbowcloud.arrebol.execution.creator;
 import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
 import org.fogbowcloud.arrebol.ArrebolController;
-import org.fogbowcloud.arrebol.execution.docker.DockerExecutorHelper;
-import org.fogbowcloud.arrebol.execution.docker.request.WorkerDockerRequestHelper;
+import org.fogbowcloud.arrebol.execution.docker.resource.DefaultDockerContainerResource;
+import org.fogbowcloud.arrebol.execution.docker.resource.DockerContainerResource;
 import org.fogbowcloud.arrebol.models.configuration.Configuration;
 import org.fogbowcloud.arrebol.execution.docker.DockerConfiguration;
 import org.fogbowcloud.arrebol.execution.docker.DockerTaskExecutor;
@@ -50,10 +50,9 @@ public class DockerWorkerCreator implements WorkerCreator {
     }
 
     private Worker createDockerWorker(Integer poolId, int resourceId, String address) {
-        WorkerDockerRequestHelper workerDockerRequestHelper = new WorkerDockerRequestHelper(address,
-            "docker-executor-" + UUID.randomUUID().toString(), this.configuration.getImageId());
-        DockerExecutorHelper dockerExecutorHelper = new DockerExecutorHelper(this.tsExecutorFileContent, workerDockerRequestHelper);
-        TaskExecutor executor = new DockerTaskExecutor(workerDockerRequestHelper, dockerExecutorHelper);
+        DockerContainerResource dockerContainerResource = new DefaultDockerContainerResource("docker-executor-" + UUID.randomUUID().toString(),
+            address, this.configuration.getImageId());
+        TaskExecutor executor = new DockerTaskExecutor(dockerContainerResource, this.tsExecutorFileContent);
         Specification resourceSpec = null;
         return new MatchAnyWorker(resourceSpec, "resourceId-" + resourceId, poolId, executor);
     }
