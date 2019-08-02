@@ -105,4 +105,8 @@ public class TaskletHelper {
         }
         return exitcodes;
     }
+
+    public void setDockerCommandExecutor(DockerCommandExecutor dockerCommandExecutor) {
+        this.dockerCommandExecutor = dockerCommandExecutor;
+    }
 }

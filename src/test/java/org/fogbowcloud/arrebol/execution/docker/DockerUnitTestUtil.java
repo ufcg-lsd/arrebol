@@ -27,11 +27,11 @@ import org.springframework.core.io.Resource;
 
 public class DockerUnitTestUtil {
 
-    protected static final String taskScriptExecutorName = "task-script-executor.sh";
-    protected static final String mockCommand = "echo Hello World";
+    public static final String taskScriptExecutorName = "task-script-executor.sh";
+    public static final String mockCommand = "echo Hello World";
     protected static final String mockTaskId = "mockTaskId";
-    protected static final String mockTsFilePath = "/tmp/" + mockTaskId + ".ts";
-    protected static final String mockEcFilePath = "/tmp/" + mockTaskId + ".ts.ec";
+    public static final String mockTsFilePath = "/tmp/" + mockTaskId + ".ts";
+    public static final String mockEcFilePath = "/tmp/" + mockTaskId + ".ts.ec";
     protected static final String mockExecInstanceId = "mockExecId";
     protected static final String mockImageId = "mockImageId";
     public static final String mockContainerName = "mockContainerName";
@@ -40,9 +40,9 @@ public class DockerUnitTestUtil {
     public static final int[] mockEcArray = {0, 0, 0, 0, 0};
     protected static final Integer mockSuccessStatusCode = 0;
     protected static final Integer mockFailStatusCode = 1;
-    protected static final ExecInstanceResult mockSuccessExecInstanceResult =
+    public static final ExecInstanceResult mockSuccessExecInstanceResult =
             new ExecInstanceResult(mockExecInstanceId, mockSuccessStatusCode, false);
-    protected static final ExecInstanceResult mockFailExecInstanceResult =
+    public static final ExecInstanceResult mockFailExecInstanceResult =
             new ExecInstanceResult(mockExecInstanceId, mockFailStatusCode, false);
     protected static final TaskExecutionResult mockSuccessTaskExecutionResult = new TaskExecutionResult(
         RESULT.SUCCESS, mockEcArray);
@@ -63,7 +63,7 @@ public class DockerUnitTestUtil {
         return task;
     }
 
-    protected static String getFileContent(Resource file) throws IOException {
+    public static String getFileContent(Resource file) throws IOException {
         try (InputStream is = file.getInputStream()) {
             String content = IOUtils.toString(is, "UTF-8");
             return content;
