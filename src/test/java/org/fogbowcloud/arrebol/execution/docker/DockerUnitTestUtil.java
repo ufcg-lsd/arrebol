@@ -4,13 +4,20 @@ import static org.mockito.Matchers.any;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import org.apache.commons.io.IOUtils;
+import org.fogbowcloud.arrebol.execution.TaskExecutionResult;
+import org.fogbowcloud.arrebol.execution.TaskExecutionResult.RESULT;
 import org.fogbowcloud.arrebol.execution.docker.request.ExecInstanceResult;
-import org.fogbowcloud.arrebol.execution.docker.request.WorkerDockerRequestHelper;
+import org.fogbowcloud.arrebol.execution.docker.resource.ContainerSpecification;
+import org.fogbowcloud.arrebol.execution.docker.resource.DefaultDockerContainerResource;
+import org.fogbowcloud.arrebol.execution.docker.resource.DockerContainerResource;
 import org.fogbowcloud.arrebol.models.command.Command;
+import org.fogbowcloud.arrebol.models.command.CommandState;
+import org.fogbowcloud.arrebol.models.specification.Specification;
 import org.fogbowcloud.arrebol.models.task.Task;
 import org.fogbowcloud.arrebol.models.task.TaskSpec;
 import org.mockito.Mockito;
@@ -19,57 +26,72 @@ import org.springframework.core.io.Resource;
 
 public class DockerUnitTestUtil {
 
-    protected static final String taskScriptExecutorName = "task-script-executor.sh";
-    protected static final String mockCommand = "echo Hello World";
-    protected static final String mockTaskId = "mockTaskId";
-    protected static final String mockTsFilePath = "/tmp/" + mockTaskId + ".ts";
-    protected static final String mockEcFilePath = "/tmp/" + mockTaskId + ".ts.ec";
-    protected static final String mockExecInstanceId = "mockExecId";
-    protected static final String mockImageId = "mockImageId";
-    protected static final String mockContainerName = "mockContainerName";
-    protected static final String mockAddress = "mockAddress";
-    protected static final String mockEcFileContent = "0\r\n0\r\n0\r\n0\r\n0";
-    protected static final int[] mockEcArray = {0, 0, 0, 0, 0};
-    protected static final Integer mockSuccessStatusCode = 0;
-    protected static final Integer mockFailStatusCode = 1;
-    protected static final ExecInstanceResult mockSuccessExecInstanceResult =
-            new ExecInstanceResult(mockExecInstanceId, mockSuccessStatusCode, false);
-    protected static final ExecInstanceResult mockFailExecInstanceResult =
-            new ExecInstanceResult(mockExecInstanceId, mockFailStatusCode, false);
+    public static final String TASK_SCRIPT_EXECUTOR_NAME = "task-script-executor.sh";
+    public static final String MOCK_COMMAND = "echo Hello World";
+    public static final String MOCK_TASK_ID = "mockTaskId";
+    public static final String MOCK_TS_FILE_PATH = "/tmp/" + MOCK_TASK_ID + ".ts";
+    public static final String MOCK_EC_FILE_PATH = "/tmp/" + MOCK_TASK_ID + ".ts.ec";
+    public static final String MOCK_EXEC_INSTANCE_ID = "mockExecId";
+    public static final String MOCK_IMAGE_ID = "mockImageId";
+    public static final String MOCK_CONTAINER_NAME = "mockContainerName";
+    public static final String MOCK_ADDRESS = "mockAddress";
+    public static final String MOCK_EC_FILE_CONTENT = "0\r\n0\r\n0\r\n0\r\n0";
+    public static final int[] MOCK_EC_ARRAY = {0, 0, 0, 0, 0};
+    public static final Integer MOCK_SUCCESS_STATUS_CODE = 0;
+    public static final Integer MOCK_FAIL_STATUS_CODE = 1;
+    public static final ExecInstanceResult MOCK_SUCCESS_EXEC_INSTANCE_RESULT =
+            new ExecInstanceResult(MOCK_EXEC_INSTANCE_ID, MOCK_SUCCESS_STATUS_CODE, false);
+    public static final ExecInstanceResult MOCK_FAIL_EXEC_INSTANCE_RESULT =
+            new ExecInstanceResult(MOCK_EXEC_INSTANCE_ID, MOCK_FAIL_STATUS_CODE, false);
+    public static final TaskExecutionResult MOCK_SUCCESS_TASK_EXECUTION_RESULT = new TaskExecutionResult(
+        RESULT.SUCCESS, MOCK_EC_ARRAY);
 
-    protected static Task mockTask() {
-        Command command = new Command(mockCommand);
+    public static Task mockTask() {
+        Command command = new Command(MOCK_COMMAND);
         List<Command> commands = Collections.nCopies(5, command);
 
+        Map<String, String> requirements = new HashMap<>();
+        Specification specification = new Specification(null, requirements);
         TaskSpec taskSpec = Mockito.mock(TaskSpec.class);
-        Mockito.when(taskSpec.getImage()).thenReturn(null);
-        Mockito.when(taskSpec.getCommands()).thenReturn(commands);
 
-        Task task = new Task(mockTaskId, taskSpec);
+        Mockito.when(taskSpec.getCommands()).thenReturn(commands);
+        Mockito.when(taskSpec.getSpec()).thenReturn(specification);
+
+        Task task = new Task(MOCK_TASK_ID, taskSpec);
+
         return task;
     }
 
-    protected static WorkerDockerRequestHelper mockWorkerDockerRequestHelper()
-            throws UnsupportedEncodingException {
-        WorkerDockerRequestHelper workerDockerRequestHelper =
-                Mockito.mock(WorkerDockerRequestHelper.class);
-        Mockito.when(workerDockerRequestHelper.start(any(TaskSpec.class)))
-                .thenReturn("mockContainerId");
-        Mockito.when(workerDockerRequestHelper.getContainerName()).thenReturn("mockContainer");
-        Mockito.doNothing().when(workerDockerRequestHelper).stopContainer();
-
-        return workerDockerRequestHelper;
-    }
-
-    protected static String getFileContent(Resource file) throws IOException {
+    public static String getFileContent(Resource file) throws IOException {
         try (InputStream is = file.getInputStream()) {
             String content = IOUtils.toString(is, "UTF-8");
             return content;
         }
     }
 
-    protected static String loadTaskScriptExecutor() throws IOException {
-        Resource resource = new ClassPathResource(taskScriptExecutorName);
+    public static String loadTaskScriptExecutor() throws IOException {
+        Resource resource = new ClassPathResource(TASK_SCRIPT_EXECUTOR_NAME);
         return getFileContent(resource);
     }
+
+    protected static DockerContainerResource mockDockerContainerResource() throws Exception {
+        DockerContainerResource dockerContainerResource = Mockito.mock(
+            DefaultDockerContainerResource.class);
+        Mockito.when(dockerContainerResource.getId()).thenReturn(MOCK_CONTAINER_NAME);
+        Mockito.doNothing().when(dockerContainerResource).start(Mockito.any(ContainerSpecification.class));
+        Mockito.doNothing().when(dockerContainerResource).stop();
+        return dockerContainerResource;
+    }
+
+    public static boolean isAll(List<Command> commands, CommandState commandState) {
+        boolean isAll = true;
+        for (Command c : commands) {
+            if (!c.getState().equals(commandState)) {
+                isAll = false;
+                break;
+            }
+        }
+        return isAll;
+    }
+
 }

@@ -29,25 +29,26 @@ public class HttpWrapper {
     public static final String HTTP_METHOD_GET = HttpGet.METHOD_NAME;
     public static final String HTTP_METHOD_DELETE = HttpDelete.METHOD_NAME;
 
-    private final Logger LOGGER = Logger.getLogger(ContainerRequestHelper.class);
+    private static final Logger LOGGER = Logger.getLogger(ContainerRequestHelper.class);
 
     private static HttpClient createHttpClient() {
         return HttpClients.createMinimal();
     }
 
-    public String doRequest(String method, String endpoint) throws Exception {
+    public static String doRequest(String method, String endpoint) throws Exception {
         return doRequest(method, endpoint, new ArrayList<>());
     }
 
-    public String doRequest(String method, String endpoint, List<Header> additionalHeaders) throws Exception {
+    public static String doRequest(String method, String endpoint, List<Header> additionalHeaders) throws Exception {
         return doRequest(method, endpoint, additionalHeaders, null);
     }
 
-    public String doRequest(String method, String endpoint, StringEntity body) throws Exception {
+    public static String doRequest(String method, String endpoint, StringEntity body) throws Exception {
         return doRequest(method, endpoint, new ArrayList<>(), body);
     }
 
-    public String doRequest(String method, String endpoint, List<Header> additionalHeaders, StringEntity body) throws Exception {
+    public static String doRequest(String method, String endpoint, List<Header> additionalHeaders,
+        StringEntity body) throws Exception {
 
         HttpUriRequest request = null;
 

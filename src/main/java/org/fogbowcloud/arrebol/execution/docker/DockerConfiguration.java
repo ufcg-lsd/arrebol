@@ -3,7 +3,7 @@ package org.fogbowcloud.arrebol.execution.docker;
 import java.util.List;
 import org.fogbowcloud.arrebol.models.configuration.Configuration;
 import org.fogbowcloud.arrebol.models.configuration.Property;
-import org.fogbowcloud.arrebol.execution.docker.constans.DockerConstants;
+import org.fogbowcloud.arrebol.execution.docker.constants.DockerConstants;
 
 public class DockerConfiguration {
 
