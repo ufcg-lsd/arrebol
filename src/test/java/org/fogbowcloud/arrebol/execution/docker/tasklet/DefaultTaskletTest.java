@@ -39,4 +39,49 @@ public class DefaultTaskletTest {
         assertEquals(RESULT.SUCCESS, taskExecutionResult.getResult());
     }
 
+    @Test
+    public void testExceptionWhileSendTaskScriptExecutor() throws Exception {
+        TaskletHelper taskletHelper = Mockito.mock(TaskletHelper.class);
+        Mockito.doThrow(new Exception("Cannot send task script executor to worker=" + MOCK_CONTAINER_NAME))
+            .when(taskletHelper).sendTaskScriptExecutor(loadTaskScriptExecutor());
+
+        DefaultTasklet tasklet = new DefaultTasklet(MOCK_ADDRESS, MOCK_CONTAINER_NAME, loadTaskScriptExecutor());
+        tasklet.setTaskletHelper(taskletHelper);
+
+        TaskExecutionResult taskExecutionResult = tasklet.execute(task);
+
+        assertTrue(isAll(task.getTaskSpec().getCommands(), CommandState.FAILED));
+        assertEquals(RESULT.FAILURE, taskExecutionResult.getResult());
+    }
+
+    @Test
+    public void testExceptionWhileSendTaskScript() throws Exception {
+        TaskletHelper taskletHelper = Mockito.mock(TaskletHelper.class);
+        Mockito.doThrow(new Exception("Error while trying to send command [echo Hello World] exit code=1"))
+            .when(taskletHelper).sendTaskScriptExecutor(loadTaskScriptExecutor());
+
+        DefaultTasklet tasklet = new DefaultTasklet(MOCK_ADDRESS, MOCK_CONTAINER_NAME, loadTaskScriptExecutor());
+        tasklet.setTaskletHelper(taskletHelper);
+
+        TaskExecutionResult taskExecutionResult = tasklet.execute(task);
+
+        assertTrue(isAll(task.getTaskSpec().getCommands(), CommandState.FAILED));
+        assertEquals(RESULT.FAILURE, taskExecutionResult.getResult());
+    }
+
+    @Test
+    public void testExceptionWhileGetExitCodes() throws Exception {
+        TaskletHelper taskletHelper = Mockito.mock(TaskletHelper.class);
+        Mockito.doThrow(new Exception("Error while get ec file content"))
+            .when(taskletHelper).sendTaskScriptExecutor(loadTaskScriptExecutor());
+
+        DefaultTasklet tasklet = new DefaultTasklet(MOCK_ADDRESS, MOCK_CONTAINER_NAME, loadTaskScriptExecutor());
+        tasklet.setTaskletHelper(taskletHelper);
+
+        TaskExecutionResult taskExecutionResult = tasklet.execute(task);
+
+        assertTrue(isAll(task.getTaskSpec().getCommands(), CommandState.FAILED));
+        assertEquals(RESULT.FAILURE, taskExecutionResult.getResult());
+    }
+
 }

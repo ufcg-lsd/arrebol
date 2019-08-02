@@ -1,6 +1,7 @@
 package org.fogbowcloud.arrebol.execution.docker.resource;
 
 import java.util.Map;
+import java.util.Objects;
 
 public class ContainerSpecification {
     private String imageId;
@@ -27,11 +28,13 @@ public class ContainerSpecification {
 
     private String toStringRequirements() {
         StringBuilder mapAsString = new StringBuilder("{");
-        for (String key : requirements.keySet()) {
-            mapAsString.append(key + "=" + requirements.get(key) + ", ");
-        }
-        if(!requirements.isEmpty()){
-            mapAsString.delete(mapAsString.length()-2, mapAsString.length());
+        if(!Objects.isNull(requirements)){
+            for (String key : requirements.keySet()) {
+                mapAsString.append(key + "=" + requirements.get(key) + ", ");
+            }
+            if(!requirements.isEmpty()){
+                mapAsString.delete(mapAsString.length()-2, mapAsString.length());
+            }
         }
         mapAsString.append("}");
         return mapAsString.toString();
