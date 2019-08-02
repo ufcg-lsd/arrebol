@@ -8,6 +8,7 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.log4j.Logger;
 import org.fogbowcloud.arrebol.execution.docker.constants.DockerConstants;
 import org.fogbowcloud.arrebol.execution.docker.exceptions.DockerImageNotFoundException;
+import org.fogbowcloud.arrebol.execution.docker.exceptions.DockerRemoveContainerException;
 import org.fogbowcloud.arrebol.execution.docker.request.ContainerRequestHelper;
 import org.fogbowcloud.arrebol.execution.docker.request.HttpWrapper;
 
@@ -36,6 +37,7 @@ public class DefaultDockerContainerResource implements DockerContainerResource{
 
     @Override
     public void start(ContainerSpecification containerSpecification) throws UnsupportedEncodingException {
+        LOGGER.info("Container specification [" + containerSpecification.toString() + "] to container [" + this.containerName + "]");
         String image = this.setUpImage(containerSpecification.getImageId());
         Map<String, String> containerRequirements = this.getDockerContainerRequirements(containerSpecification.getRequirements());
         this.containerRequestHelper.createContainer(image, containerRequirements);
@@ -91,7 +93,7 @@ public class DefaultDockerContainerResource implements DockerContainerResource{
     }
 
     @Override
-    public void stop() {
+    public void stop() throws DockerRemoveContainerException {
         this.containerRequestHelper.removeContainer();
     }
 

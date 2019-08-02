@@ -45,10 +45,9 @@ public class DockerTaskExecutor implements TaskExecutor {
         TaskExecutionResult taskExecutionResult;
         try {
             ContainerSpecification containerSpecification = createContainerSpecification(task);
-            LOGGER.info("Container specification [" + containerSpecification.toString() + "] defined by task [" + task.getId() + "]");
-            LOGGER.info("Starting the resource [" + this.dockerContainerResource.getId() + "]");
+            LOGGER.info("Starting the Docker Task Executor [" + this.dockerContainerResource.getId() + "] to execute task [" + task.getId() + "]");
             this.dockerContainerResource.start(containerSpecification);
-        } catch (Exception e) {
+        } catch (Throwable e) {
             LOGGER.error("Error while start resource: [" + e.getMessage() + "]", e);
             failTask(task);
             taskExecutionResult = getFailResultInstance(task.getTaskSpec().getCommands().size());
@@ -56,7 +55,13 @@ public class DockerTaskExecutor implements TaskExecutor {
         }
         LOGGER.debug("Starting to execute task " + task.getId() + " in resource[" + this.dockerContainerResource.getId() + "]");
         taskExecutionResult = this.tasklet.execute(task);
-        this.dockerContainerResource.stop();
+        try {
+            LOGGER.info("Stopping DockerTaskExecutor [" + this.dockerContainerResource.getId() + "]");
+            this.dockerContainerResource.stop();
+        } catch (Throwable e) {
+            LOGGER.error("Error while stop Docker Task Executor [" + this.dockerContainerResource.getId() + "]: [" + e.getMessage() + "]", e);
+        }
+
         return taskExecutionResult;
     }
 

@@ -13,8 +13,6 @@ import static java.lang.Thread.sleep;
 
 public class DefaultTasklet implements Tasklet {
 
-    private String apiAddress;
-    private String containerId;
     private String taskScriptExecutor;
     private TaskletHelper taskletHelper;
     private final Logger LOGGER = Logger.getLogger(DefaultTasklet.class);
@@ -22,10 +20,8 @@ public class DefaultTasklet implements Tasklet {
 
 
     public DefaultTasklet(String apiAddress, String containerId, String taskScriptExecutor) {
-        this.apiAddress = apiAddress;
-        this.containerId = containerId;
         this.taskScriptExecutor = taskScriptExecutor;
-        this.taskletHelper = new TaskletHelper();
+        this.taskletHelper = new TaskletHelper(apiAddress, containerId);
     }
 
     @Override
@@ -52,15 +48,15 @@ public class DefaultTasklet implements Tasklet {
     }
 
     private void setupContainerEnvironment(String taskId, List<Command> commands) throws Exception {
-        this.taskletHelper.sendTaskScriptExecutor(apiAddress, containerId, taskScriptExecutor);
+        this.taskletHelper.sendTaskScriptExecutor(taskScriptExecutor);
         LOGGER.debug(
                 "Starting to write commands [len=" + commands.size() + "] of task " + taskId
                         + " to .ts file.");
-        this.taskletHelper.sendTaskScript(apiAddress, containerId, taskId, commands);
+        this.taskletHelper.sendTaskScript(taskId, commands);
     }
 
     private void runScript(String taskId) throws Exception {
-        this.taskletHelper.runTaskScriptExecutor(apiAddress, containerId, taskId);
+        this.taskletHelper.runTaskScriptExecutor(taskId);
     }
 
     private void trackTaskExecution(String taskId, List<Command> commands) throws Exception {
@@ -80,7 +76,7 @@ public class DefaultTasklet implements Tasklet {
 
     private int updateCommandsState(List<Command> cmds, String taskId, int startIndex)
             throws Exception {
-        int[] exitcodes = taskletHelper.getExitCodes(apiAddress, containerId, taskId, cmds.size());
+        int[] exitcodes = taskletHelper.getExitCodes(taskId, cmds.size());
         int lastIndex = syncUntilTheLastCmdFinished(cmds, exitcodes, startIndex);
         return lastIndex;
     }
