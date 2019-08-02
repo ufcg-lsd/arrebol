@@ -18,7 +18,7 @@ import org.fogbowcloud.arrebol.models.task.Task;
 /**
  * This implementation of {@link TaskExecutor} manages the execution of a {@link Task} in a,
  * possible remote, DockerContainer. A new container is created to execute every {@link Task} and
- * destroy after the execution has finished. A task representation is sent to the container, which
+ * destroyed after the execution has finished. A task representation is sent to the container, which
  * drives the execution of the commands itself. This objects monitors the execution until it ends on
  * success or failure. If any container initialization error occurs, the return {@link
  * TaskExecutionResult} indicates the Failure.
