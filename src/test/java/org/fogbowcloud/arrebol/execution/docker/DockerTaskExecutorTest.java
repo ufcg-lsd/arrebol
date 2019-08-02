@@ -3,7 +3,7 @@ package org.fogbowcloud.arrebol.execution.docker;
 import static org.fogbowcloud.arrebol.execution.docker.DockerUnitTestUtil.isAll;
 import static org.fogbowcloud.arrebol.execution.docker.DockerUnitTestUtil.loadTaskScriptExecutor;
 import static org.fogbowcloud.arrebol.execution.docker.DockerUnitTestUtil.mockDockerContainerResource;
-import static org.fogbowcloud.arrebol.execution.docker.DockerUnitTestUtil.mockSuccessTaskExecutionResult;
+import static org.fogbowcloud.arrebol.execution.docker.DockerUnitTestUtil.MOCK_SUCCESS_TASK_EXECUTION_RESULT;
 import static org.fogbowcloud.arrebol.execution.docker.DockerUnitTestUtil.mockTask;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -80,7 +80,7 @@ public class DockerTaskExecutorTest {
         DockerContainerResource dockerContainerResource = mockDockerContainerResource();
         Tasklet tasklet = Mockito.mock(DefaultTasklet.class);
         Mockito.when(tasklet.execute(Mockito.any(Task.class)))
-                .thenReturn(mockSuccessTaskExecutionResult);
+                .thenReturn(MOCK_SUCCESS_TASK_EXECUTION_RESULT);
 
         DockerTaskExecutor dockerTaskExecutor =
                 new DockerTaskExecutor(dockerContainerResource, loadTaskScriptExecutor());
@@ -88,7 +88,7 @@ public class DockerTaskExecutorTest {
 
         TaskExecutionResult taskExecutionResult = dockerTaskExecutor.execute(task);
         assertEquals(RESULT.SUCCESS, taskExecutionResult.getResult());
-        assertEquals(mockSuccessTaskExecutionResult, taskExecutionResult);
+        assertEquals(MOCK_SUCCESS_TASK_EXECUTION_RESULT, taskExecutionResult);
     }
     //
     //    private DockerTaskExecutor mockDockerTaskExecutorWithStartException(Exception e)

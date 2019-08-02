@@ -42,7 +42,7 @@ public class TaskletHelperTest {
         wellFormattedContent = getFileContent(new ClassPathResource(WELL_FORMED_FILE_PATH));
         taskScriptExecutorContent = loadTaskScriptExecutor();
         expectedWriteTsExecutorCommand =
-                "echo '" + taskScriptExecutorContent + "' > /tmp/" + taskScriptExecutorName;
+                "echo '" + taskScriptExecutorContent + "' > /tmp/" + TASK_SCRIPT_EXECUTOR_NAME;
     }
 
 
@@ -69,12 +69,12 @@ public class TaskletHelperTest {
 
         Mockito.when(
                 dockerCommandExecutor.executeCommand(
-                        Mockito.eq(mockAddress),
-                        Mockito.eq(mockContainerName),
+                        Mockito.eq(MOCK_ADDRESS),
+                        Mockito.eq(MOCK_CONTAINER_NAME),
                         Mockito.eq(expectedWriteTsExecutorCommand)))
-                .thenReturn(mockSuccessExecInstanceResult);
+                .thenReturn(MOCK_SUCCESS_EXEC_INSTANCE_RESULT);
 
-        TaskletHelper taskletHelper = new TaskletHelper(mockAddress, mockContainerName);
+        TaskletHelper taskletHelper = new TaskletHelper(MOCK_ADDRESS, MOCK_CONTAINER_NAME);
         taskletHelper.setDockerCommandExecutor(dockerCommandExecutor);
         taskletHelper.sendTaskScriptExecutor(taskScriptExecutorContent);
     }
@@ -85,12 +85,12 @@ public class TaskletHelperTest {
 
         Mockito.when(
                 dockerCommandExecutor.executeCommand(
-                        Mockito.eq(mockAddress),
-                        Mockito.eq(mockContainerName),
+                        Mockito.eq(MOCK_ADDRESS),
+                        Mockito.eq(MOCK_CONTAINER_NAME),
                         Mockito.eq(expectedWriteTsExecutorCommand)))
-                .thenReturn(mockFailExecInstanceResult);
+                .thenReturn(MOCK_FAIL_EXEC_INSTANCE_RESULT);
 
-        TaskletHelper taskletHelper = new TaskletHelper(mockAddress, mockContainerName);
+        TaskletHelper taskletHelper = new TaskletHelper(MOCK_ADDRESS, MOCK_CONTAINER_NAME);
         taskletHelper.setDockerCommandExecutor(dockerCommandExecutor);
         taskletHelper.sendTaskScriptExecutor(loadTaskScriptExecutor());
     }
@@ -98,14 +98,14 @@ public class TaskletHelperTest {
     @Test
     public void testSendTaskScript() throws Exception {
         DockerCommandExecutor dockerCommandExecutor = Mockito.mock(DockerCommandExecutor.class);
-        String expectedWriteCommand = "echo '" + mockCommand + "' >> " + mockTsFilePath;
+        String expectedWriteCommand = "echo '" + MOCK_COMMAND + "' >> " + MOCK_TS_FILE_PATH;
         Mockito.when(dockerCommandExecutor.executeCommand(
-                    Mockito.eq(mockAddress),
-                    Mockito.eq(mockContainerName),
+                    Mockito.eq(MOCK_ADDRESS),
+                    Mockito.eq(MOCK_CONTAINER_NAME),
                     Mockito.eq(expectedWriteCommand)))
-                .thenReturn(mockSuccessExecInstanceResult);
+                .thenReturn(MOCK_SUCCESS_EXEC_INSTANCE_RESULT);
 
-        TaskletHelper taskletHelper = new TaskletHelper(mockAddress, mockContainerName);
+        TaskletHelper taskletHelper = new TaskletHelper(MOCK_ADDRESS, MOCK_CONTAINER_NAME);
         taskletHelper.setDockerCommandExecutor(dockerCommandExecutor);
         taskletHelper.sendTaskScript(task.getId(), task.getTaskSpec().getCommands());
     }
@@ -113,14 +113,14 @@ public class TaskletHelperTest {
     @Test(expected = Exception.class)
     public void testFailSendTaskScript() throws Exception {
         DockerCommandExecutor dockerCommandExecutor = Mockito.mock(DockerCommandExecutor.class);
-        String expectedWriteCommand = "echo '" + mockCommand + "' >> " + mockTsFilePath;
+        String expectedWriteCommand = "echo '" + MOCK_COMMAND + "' >> " + MOCK_TS_FILE_PATH;
         Mockito.when(dockerCommandExecutor.executeCommand(
-                Mockito.eq(mockAddress),
-                Mockito.eq(mockContainerName),
+                Mockito.eq(MOCK_ADDRESS),
+                Mockito.eq(MOCK_CONTAINER_NAME),
                 Mockito.eq(expectedWriteCommand)))
-                .thenReturn(mockFailExecInstanceResult);
+                .thenReturn(MOCK_FAIL_EXEC_INSTANCE_RESULT);
 
-        TaskletHelper taskletHelper = new TaskletHelper(mockAddress, mockContainerName);
+        TaskletHelper taskletHelper = new TaskletHelper(MOCK_ADDRESS, MOCK_CONTAINER_NAME);
         taskletHelper.setDockerCommandExecutor(dockerCommandExecutor);
         taskletHelper.sendTaskScript(task.getId(), task.getTaskSpec().getCommands());
     }
@@ -128,15 +128,16 @@ public class TaskletHelperTest {
     @Test
     public void testGetExitCodes() throws Exception {
         DockerCommandExecutor dockerCommandExecutor = Mockito.mock(DockerCommandExecutor.class);
-        String expectedCommand = "cat " + mockEcFilePath;
+        String expectedCommand = "cat " + MOCK_EC_FILE_PATH;
         Mockito.when(dockerCommandExecutor.executeCommandWithStout(
-                Mockito.eq(mockAddress),
-                Mockito.eq(mockContainerName),
+                Mockito.eq(MOCK_ADDRESS),
+                Mockito.eq(MOCK_CONTAINER_NAME),
                 Mockito.eq(expectedCommand)))
-                .thenReturn(mockEcFileContent);
+                .thenReturn(MOCK_EC_FILE_CONTENT);
 
-        TaskletHelper taskletHelper = new TaskletHelper(mockAddress, mockContainerName);
+        TaskletHelper taskletHelper = new TaskletHelper(MOCK_ADDRESS, MOCK_CONTAINER_NAME);
         taskletHelper.setDockerCommandExecutor(dockerCommandExecutor);
-        assertArrayEquals(mockEcArray, taskletHelper.getExitCodes(task.getId(), task.getTaskSpec().getCommands().size()));
+        assertArrayEquals(
+            MOCK_EC_ARRAY, taskletHelper.getExitCodes(task.getId(), task.getTaskSpec().getCommands().size()));
     }
 }

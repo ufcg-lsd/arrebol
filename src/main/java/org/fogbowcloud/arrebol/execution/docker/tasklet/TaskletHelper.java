@@ -7,9 +7,9 @@ import org.fogbowcloud.arrebol.execution.docker.DockerCommandExecutor;
 import org.fogbowcloud.arrebol.models.command.Command;
 
 public class TaskletHelper {
-    private static final String taskScriptExecutorFilePath = "/tmp/task-script-executor.sh";
-    private static final String taskScriptFilePathPattern = "/tmp/%s.ts";
-    private static final String ecFilePathPattern = "/tmp/%s.ts.ec";
+    private static final String TASK_SCRIPT_EXECUTOR_FILE_PATH = "/tmp/task-script-executor.sh";
+    private static final String TASK_SCRIPT_FILE_PATH_PATTERN = "/tmp/%s.ts";
+    private static final String EC_FILE_PATH_PATTERN = "/tmp/%s.ts.ec";
     private final Logger LOGGER = Logger.getLogger(TaskletHelper.class);
 
     private String apiAddress;
@@ -23,16 +23,16 @@ public class TaskletHelper {
     }
 
     public void runTaskScriptExecutor(String taskId) throws Exception {
-        String taskScriptFilePath = String.format(taskScriptFilePathPattern, taskId);
+        String taskScriptFilePath = String.format(TASK_SCRIPT_FILE_PATH_PATTERN, taskId);
         this.dockerCommandExecutor.executeAsyncCommand(
                 apiAddress,
                 containerId,
-                "/bin/bash " + taskScriptExecutorFilePath + " -d -tsf=" + taskScriptFilePath);
+                "/bin/bash " + TASK_SCRIPT_EXECUTOR_FILE_PATH + " -d -tsf=" + taskScriptFilePath);
     }
 
     public void sendTaskScriptExecutor(String taskScriptExecutor) throws Exception {
         LOGGER.debug("Sending Task Script Executor to Docker Worker");
-        String writeCommand = "echo '" + taskScriptExecutor + "' > " + taskScriptExecutorFilePath;
+        String writeCommand = "echo '" + taskScriptExecutor + "' > " + TASK_SCRIPT_EXECUTOR_FILE_PATH;
         try {
             int exitCode =
                     this.dockerCommandExecutor
@@ -51,7 +51,7 @@ public class TaskletHelper {
     }
 
     public void sendTaskScript(String taskId, List<Command> commands) throws Exception {
-        String taskScriptFilePath = String.format(taskScriptFilePathPattern, taskId);
+        String taskScriptFilePath = String.format(TASK_SCRIPT_FILE_PATH_PATTERN, taskId);
         LOGGER.debug("Starting to write commands to ts file path [" + taskScriptFilePath + "].");
         int[] deliveryResults = writeCommandsToTaskScript(commands, taskScriptFilePath);
 
@@ -88,7 +88,7 @@ public class TaskletHelper {
     }
 
     public int[] getExitCodes(String taskId, Integer size) throws Exception {
-        String ecFilePath = String.format(ecFilePathPattern, taskId);
+        String ecFilePath = String.format(EC_FILE_PATH_PATTERN, taskId);
         String commandToGetFile = String.format("cat %s", ecFilePath);
         String ecFileContent =
                 this.dockerCommandExecutor.executeCommandWithStout(

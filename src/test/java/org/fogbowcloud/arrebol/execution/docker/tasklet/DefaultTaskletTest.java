@@ -2,9 +2,9 @@ package org.fogbowcloud.arrebol.execution.docker.tasklet;
 
 import static org.fogbowcloud.arrebol.execution.docker.DockerUnitTestUtil.isAll;
 import static org.fogbowcloud.arrebol.execution.docker.DockerUnitTestUtil.loadTaskScriptExecutor;
-import static org.fogbowcloud.arrebol.execution.docker.DockerUnitTestUtil.mockAddress;
-import static org.fogbowcloud.arrebol.execution.docker.DockerUnitTestUtil.mockContainerName;
-import static org.fogbowcloud.arrebol.execution.docker.DockerUnitTestUtil.mockEcArray;
+import static org.fogbowcloud.arrebol.execution.docker.DockerUnitTestUtil.MOCK_ADDRESS;
+import static org.fogbowcloud.arrebol.execution.docker.DockerUnitTestUtil.MOCK_CONTAINER_NAME;
+import static org.fogbowcloud.arrebol.execution.docker.DockerUnitTestUtil.MOCK_EC_ARRAY;
 import static org.fogbowcloud.arrebol.execution.docker.DockerUnitTestUtil.mockTask;
 import static org.junit.Assert.*;
 
@@ -27,9 +27,10 @@ public class DefaultTaskletTest {
     @Test
     public void testSuccessfulExecution() throws Exception {
         TaskletHelper taskletHelper = Mockito.mock(TaskletHelper.class);
-        Mockito.when(taskletHelper.getExitCodes(task.getId(), task.getTaskSpec().getCommands().size())).thenReturn(mockEcArray);
+        Mockito.when(taskletHelper.getExitCodes(task.getId(), task.getTaskSpec().getCommands().size())).thenReturn(
+            MOCK_EC_ARRAY);
 
-        DefaultTasklet tasklet = new DefaultTasklet(mockAddress, mockContainerName, loadTaskScriptExecutor());
+        DefaultTasklet tasklet = new DefaultTasklet(MOCK_ADDRESS, MOCK_CONTAINER_NAME, loadTaskScriptExecutor());
         tasklet.setTaskletHelper(taskletHelper);
 
         TaskExecutionResult taskExecutionResult = tasklet.execute(task);

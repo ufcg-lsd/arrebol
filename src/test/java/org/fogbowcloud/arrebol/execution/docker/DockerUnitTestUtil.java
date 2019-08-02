@@ -4,7 +4,6 @@ import static org.mockito.Matchers.any;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -27,28 +26,28 @@ import org.springframework.core.io.Resource;
 
 public class DockerUnitTestUtil {
 
-    public static final String taskScriptExecutorName = "task-script-executor.sh";
-    public static final String mockCommand = "echo Hello World";
-    protected static final String mockTaskId = "mockTaskId";
-    public static final String mockTsFilePath = "/tmp/" + mockTaskId + ".ts";
-    public static final String mockEcFilePath = "/tmp/" + mockTaskId + ".ts.ec";
-    protected static final String mockExecInstanceId = "mockExecId";
-    protected static final String mockImageId = "mockImageId";
-    public static final String mockContainerName = "mockContainerName";
-    public static final String mockAddress = "mockAddress";
-    public static final String mockEcFileContent = "0\r\n0\r\n0\r\n0\r\n0";
-    public static final int[] mockEcArray = {0, 0, 0, 0, 0};
-    protected static final Integer mockSuccessStatusCode = 0;
-    protected static final Integer mockFailStatusCode = 1;
-    public static final ExecInstanceResult mockSuccessExecInstanceResult =
-            new ExecInstanceResult(mockExecInstanceId, mockSuccessStatusCode, false);
-    public static final ExecInstanceResult mockFailExecInstanceResult =
-            new ExecInstanceResult(mockExecInstanceId, mockFailStatusCode, false);
-    protected static final TaskExecutionResult mockSuccessTaskExecutionResult = new TaskExecutionResult(
-        RESULT.SUCCESS, mockEcArray);
+    public static final String TASK_SCRIPT_EXECUTOR_NAME = "task-script-executor.sh";
+    public static final String MOCK_COMMAND = "echo Hello World";
+    public static final String MOCK_TASK_ID = "mockTaskId";
+    public static final String MOCK_TS_FILE_PATH = "/tmp/" + MOCK_TASK_ID + ".ts";
+    public static final String MOCK_EC_FILE_PATH = "/tmp/" + MOCK_TASK_ID + ".ts.ec";
+    public static final String MOCK_EXEC_INSTANCE_ID = "mockExecId";
+    public static final String MOCK_IMAGE_ID = "mockImageId";
+    public static final String MOCK_CONTAINER_NAME = "mockContainerName";
+    public static final String MOCK_ADDRESS = "mockAddress";
+    public static final String MOCK_EC_FILE_CONTENT = "0\r\n0\r\n0\r\n0\r\n0";
+    public static final int[] MOCK_EC_ARRAY = {0, 0, 0, 0, 0};
+    public static final Integer MOCK_SUCCESS_STATUS_CODE = 0;
+    public static final Integer MOCK_FAIL_STATUS_CODE = 1;
+    public static final ExecInstanceResult MOCK_SUCCESS_EXEC_INSTANCE_RESULT =
+            new ExecInstanceResult(MOCK_EXEC_INSTANCE_ID, MOCK_SUCCESS_STATUS_CODE, false);
+    public static final ExecInstanceResult MOCK_FAIL_EXEC_INSTANCE_RESULT =
+            new ExecInstanceResult(MOCK_EXEC_INSTANCE_ID, MOCK_FAIL_STATUS_CODE, false);
+    public static final TaskExecutionResult MOCK_SUCCESS_TASK_EXECUTION_RESULT = new TaskExecutionResult(
+        RESULT.SUCCESS, MOCK_EC_ARRAY);
 
     public static Task mockTask() {
-        Command command = new Command(mockCommand);
+        Command command = new Command(MOCK_COMMAND);
         List<Command> commands = Collections.nCopies(5, command);
 
         Map<String, String> requirements = new HashMap<>();
@@ -58,7 +57,7 @@ public class DockerUnitTestUtil {
         Mockito.when(taskSpec.getCommands()).thenReturn(commands);
         Mockito.when(taskSpec.getSpec()).thenReturn(specification);
 
-        Task task = new Task(mockTaskId, taskSpec);
+        Task task = new Task(MOCK_TASK_ID, taskSpec);
 
         return task;
     }
@@ -71,14 +70,14 @@ public class DockerUnitTestUtil {
     }
 
     public static String loadTaskScriptExecutor() throws IOException {
-        Resource resource = new ClassPathResource(taskScriptExecutorName);
+        Resource resource = new ClassPathResource(TASK_SCRIPT_EXECUTOR_NAME);
         return getFileContent(resource);
     }
 
     protected static DockerContainerResource mockDockerContainerResource() throws Exception {
         DockerContainerResource dockerContainerResource = Mockito.mock(
             DefaultDockerContainerResource.class);
-        Mockito.when(dockerContainerResource.getId()).thenReturn(mockContainerName);
+        Mockito.when(dockerContainerResource.getId()).thenReturn(MOCK_CONTAINER_NAME);
         Mockito.doNothing().when(dockerContainerResource).start(Mockito.any(ContainerSpecification.class));
         Mockito.doNothing().when(dockerContainerResource).stop();
         return dockerContainerResource;
