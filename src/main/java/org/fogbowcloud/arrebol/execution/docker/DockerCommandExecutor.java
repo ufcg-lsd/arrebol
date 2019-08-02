@@ -18,13 +18,9 @@ import java.util.Objects;
 import static java.lang.Thread.sleep;
 
 public class DockerCommandExecutor {
-    private HttpWrapper httpWrapper;
+
     private final Logger LOGGER = Logger.getLogger(DockerCommandExecutor.class);
     private static final long poolingPeriodTimeMs = 300;
-
-    public DockerCommandExecutor() {
-        this.httpWrapper = new HttpWrapper();
-    }
 
     /**
      * It creates the command execution instance, sends it to the docker and each period of time
@@ -78,7 +74,7 @@ public class DockerCommandExecutor {
 
     private ExecInstanceResult inspectExecInstance(String address, String execId) throws Exception {
         final String endpoint = String.format("%s/exec/%s/json", address, execId);
-        String response = this.httpWrapper.doRequest(HttpGet.METHOD_NAME, endpoint);
+        String response = HttpWrapper.doRequest(HttpGet.METHOD_NAME, endpoint);
         return instanceExecResult(response);
     }
 
@@ -86,14 +82,14 @@ public class DockerCommandExecutor {
         final String endpoint = String.format("%s/containers/%s/exec", address, containerId);
         StringEntity body = jsonCreateExecInstance(command, attachStdout, attachStderr);
         LOGGER.debug("body of the request to create an exec=[" + EntityUtils.toString(body) + "]");
-        String response = this.httpWrapper.doRequest(HttpPost.METHOD_NAME, endpoint, body);
+        String response = HttpWrapper.doRequest(HttpPost.METHOD_NAME, endpoint, body);
         return AppUtil.getValueFromJsonStr("Id", response);
     }
 
     private String startExecInstance(String address, String execId) throws Exception {
         final String endpoint = String.format("%s/exec/%s/start", address, execId);
         StringEntity body = jsonStartExecInstance();
-        String response = this.httpWrapper.doRequest(HttpPost.METHOD_NAME, endpoint, body);
+        String response = HttpWrapper.doRequest(HttpPost.METHOD_NAME, endpoint, body);
         return response;
     }
 
