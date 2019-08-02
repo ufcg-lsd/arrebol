@@ -90,35 +90,4 @@ public class DockerTaskExecutorTest {
         assertEquals(RESULT.SUCCESS, taskExecutionResult.getResult());
         assertEquals(MOCK_SUCCESS_TASK_EXECUTION_RESULT, taskExecutionResult);
     }
-    //
-    //    private DockerTaskExecutor mockDockerTaskExecutorWithStartException(Exception e)
-    //            throws Exception {
-    //
-    //        DockerExecutorHelper dockerExecutorHelper = mockDockerExecutorHelper();
-    //        WorkerDockerRequestHelper workerDockerRequestHelper = mockWorkerDockerRequestHelper();
-    //
-    // Mockito.when(workerDockerRequestHelper.start(Mockito.any(TaskSpec.class))).thenThrow(e);
-    //
-    //        DockerTaskExecutor dockerTaskExecutor =
-    //            new DockerTaskExecutor(workerDockerRequestHelper, dockerExecutorHelper);
-    //
-    //        return dockerTaskExecutor;
-    //    }
-    //
-    //    private DockerExecutorHelper mockDockerExecutorHelper() throws Exception {
-    //        DockerExecutorHelper dockerExecutorHelper = Mockito.mock(DockerExecutorHelper.class);
-    //        Mockito.doNothing().when(dockerExecutorHelper).sendTaskExecutorScript();
-    //        Mockito.doNothing()
-    //                .when(dockerExecutorHelper)
-    //                .writeTaskScript(anyListOf(Command.class), Mockito.eq(mockTsFilePath));
-    //        Mockito.doNothing()
-    //                .when(dockerExecutorHelper)
-    //                .runExecutorScript(Mockito.eq(mockTsFilePath));
-    //        Mockito.when(dockerExecutorHelper.getEcFile(Mockito.eq(mockEcFilePath)))
-    //                .thenReturn(mockEcFileContent);
-    //        Mockito.doCallRealMethod()
-    //                .when(dockerExecutorHelper)
-    //                .parseEcContentToArray(Mockito.anyString(), Mockito.anyInt());
-    //        return dockerExecutorHelper;
-    //    }
 }
