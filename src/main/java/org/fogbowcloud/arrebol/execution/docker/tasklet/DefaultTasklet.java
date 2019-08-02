@@ -1,16 +1,19 @@
 package org.fogbowcloud.arrebol.execution.docker.tasklet;
 
+import static java.lang.Thread.sleep;
+
+import java.util.List;
 import org.apache.log4j.Logger;
 import org.fogbowcloud.arrebol.execution.TaskExecutionResult;
-import org.fogbowcloud.arrebol.execution.docker.DockerCommandExecutor;
 import org.fogbowcloud.arrebol.models.command.Command;
 import org.fogbowcloud.arrebol.models.command.CommandState;
 import org.fogbowcloud.arrebol.models.task.Task;
 
-import java.util.List;
-
-import static java.lang.Thread.sleep;
-
+/**
+ * It is responsible for execute a task in a container. For this need a docker api address, an
+ * container id and task script executor. First it send task script executor and task script. Second
+ * it run task script. And finally track task execution until finished.
+ */
 public class DefaultTasklet implements Tasklet {
 
     private String taskScriptExecutor;
