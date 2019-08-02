@@ -12,7 +12,7 @@ import org.fogbowcloud.arrebol.execution.docker.exceptions.DockerRemoveContainer
 import org.fogbowcloud.arrebol.execution.docker.request.ContainerRequestHelper;
 import org.fogbowcloud.arrebol.execution.docker.request.HttpWrapper;
 
-public class DefaultDockerContainerResource implements DockerContainerResource{
+public class DefaultDockerContainerResource implements DockerContainerResource {
     private String containerName;
     private String apiAddress;
     private String defaultImageId;

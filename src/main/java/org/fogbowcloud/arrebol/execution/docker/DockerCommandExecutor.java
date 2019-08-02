@@ -112,7 +112,7 @@ public class DockerCommandExecutor {
         return new StringEntity(jsonObject.toString());
     }
 
-    private ExecInstanceResult instanceExecResult(String response){
+    private ExecInstanceResult instanceExecResult(String response) {
         JSONObject jsonObject = new JSONObject(response);
         String execId = jsonObject.getString("ID");
         Integer exitCode = null;

@@ -103,7 +103,7 @@ public class ContainerRequestHelper {
         return new StringEntity(jsonObject.toString());
     }
 
-    private void jsonAddRequirements(JSONObject jsonObject, Map<String, String> requirements){
+    private void jsonAddRequirements(JSONObject jsonObject, Map<String, String> requirements) {
         JSONObject jsonRequirements = new JSONObject();
         for(Map.Entry<String, String> entry : requirements.entrySet()){
             switch(entry.getKey()){
