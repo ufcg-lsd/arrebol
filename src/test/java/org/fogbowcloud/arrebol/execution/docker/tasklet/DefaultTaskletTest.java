@@ -27,7 +27,7 @@ public class DefaultTaskletTest {
     @Test
     public void testSuccessfulExecution() throws Exception {
         TaskletHelper taskletHelper = Mockito.mock(TaskletHelper.class);
-        Mockito.when(taskletHelper.getExitCodes(mockAddress, mockContainerName, task.getId(), task.getTaskSpec().getCommands().size())).thenReturn(mockEcArray);
+        Mockito.when(taskletHelper.getExitCodes(task.getId(), task.getTaskSpec().getCommands().size())).thenReturn(mockEcArray);
 
         DefaultTasklet tasklet = new DefaultTasklet(mockAddress, mockContainerName, loadTaskScriptExecutor());
         tasklet.setTaskletHelper(taskletHelper);
