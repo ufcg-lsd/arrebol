@@ -2,6 +2,7 @@ package org.fogbowcloud.arrebol.api.http.services;
 
 import java.util.Collection;
 import java.util.LinkedList;
+import java.util.Objects;
 import java.util.UUID;
 import org.apache.log4j.Logger;
 import org.fogbowcloud.arrebol.ArrebolFacade;
@@ -49,6 +50,7 @@ public class JobService {
         Collection<Task> taskList = new LinkedList<>();
 
         for (TaskSpec taskSpec : jobSpec.getTasksSpecs()) {
+            validateTaskSpec(taskSpec);
             String taskId = UUID.randomUUID().toString();
             Task task = new Task(taskId, taskSpec);
             taskList.add(task);
@@ -57,6 +59,12 @@ public class JobService {
         LOGGER.debug(
             "Created job object of " + job.getLabel() + " with " + taskList.size() + " tasks.");
         return job;
+    }
+
+    private void validateTaskSpec(TaskSpec task) {
+        if(Objects.isNull(task.getCommands())) {
+            throw new IllegalArgumentException("Commands list may not be null");
+        }
     }
 
 }

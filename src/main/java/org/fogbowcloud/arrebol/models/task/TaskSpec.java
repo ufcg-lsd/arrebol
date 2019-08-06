@@ -4,14 +4,12 @@ import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
 import javax.persistence.CascadeType;
-import javax.persistence.Column;
 import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import org.fogbowcloud.arrebol.models.command.Command;
 import org.fogbowcloud.arrebol.models.specification.Specification;
@@ -28,7 +26,6 @@ public class TaskSpec implements Serializable {
 
     @Valid
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
-//    @NotNull(message = "Commands list may not be null")
     @Size(
             min = 1,
             max = 10000,
