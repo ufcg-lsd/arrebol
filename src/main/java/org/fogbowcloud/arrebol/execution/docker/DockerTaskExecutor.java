@@ -3,6 +3,7 @@ package org.fogbowcloud.arrebol.execution.docker;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import org.apache.log4j.Logger;
 import org.fogbowcloud.arrebol.execution.TaskExecutionResult;
 import org.fogbowcloud.arrebol.execution.TaskExecutionResult.RESULT;
@@ -13,6 +14,7 @@ import org.fogbowcloud.arrebol.execution.docker.tasklet.DefaultTasklet;
 import org.fogbowcloud.arrebol.execution.docker.tasklet.Tasklet;
 import org.fogbowcloud.arrebol.models.command.Command;
 import org.fogbowcloud.arrebol.models.command.CommandState;
+import org.fogbowcloud.arrebol.models.specification.Specification;
 import org.fogbowcloud.arrebol.models.task.Task;
 
 /**
@@ -66,11 +68,15 @@ public class DockerTaskExecutor implements TaskExecutor {
     }
 
     private ContainerSpecification createContainerSpecification(Task task) {
-        String imageId = task.getTaskSpec().getSpec().getImage();
-        Map<String, String> requirements = task.getTaskSpec().getSpec().getRequirements();
+        Specification specification = task.getTaskSpec().getSpec();
+        ContainerSpecification containerSpecification = new ContainerSpecification();
+        if( Objects.nonNull(specification)){
+            String imageId = task.getTaskSpec().getSpec().getImage();
+            Map<String, String> requirements = task.getTaskSpec().getSpec().getRequirements();
 
-        ContainerSpecification containerSpecification =
+            containerSpecification =
                 new ContainerSpecification(imageId, requirements);
+        }
         return containerSpecification;
     }
 

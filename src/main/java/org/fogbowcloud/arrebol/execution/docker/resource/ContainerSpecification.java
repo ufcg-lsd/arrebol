@@ -7,6 +7,8 @@ public class ContainerSpecification {
     private String imageId;
     private Map<String, String> requirements;
 
+    public ContainerSpecification(){}
+
     public ContainerSpecification(String imageId, Map<String, String> requirements) {
         this.imageId = imageId;
         this.requirements = requirements;

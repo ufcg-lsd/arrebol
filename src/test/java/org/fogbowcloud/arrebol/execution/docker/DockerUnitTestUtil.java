@@ -1,7 +1,5 @@
 package org.fogbowcloud.arrebol.execution.docker;
 
-import static org.mockito.Matchers.any;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collections;
