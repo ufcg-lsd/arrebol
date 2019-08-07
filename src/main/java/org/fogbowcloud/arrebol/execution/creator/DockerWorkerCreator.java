@@ -54,10 +54,11 @@ public class DockerWorkerCreator implements WorkerCreator {
     private Worker createDockerWorker(Integer poolId, int resourceId, String address) {
         String containerId = "docker-executor-" + UUID.randomUUID().toString();
         DockerContainerResource dockerContainerResource =
-                new DefaultDockerContainerResource(
-                        containerId, address, this.configuration.getImageId());
+                new DefaultDockerContainerResource(containerId, address);
         Tasklet tasklet = new DefaultTasklet(address, containerId, this.tsExecutorFileContent);
-        TaskExecutor executor = new DockerTaskExecutor(dockerContainerResource, tasklet);
+        TaskExecutor executor =
+                new DockerTaskExecutor(
+                        this.configuration.getImageId(), dockerContainerResource, tasklet);
         Specification resourceSpec = null;
         return new MatchAnyWorker(resourceSpec, "resourceId-" + resourceId, poolId, executor);
     }

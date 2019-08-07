@@ -10,7 +10,6 @@ import org.fogbowcloud.arrebol.execution.TaskExecutionResult.RESULT;
 import org.fogbowcloud.arrebol.execution.TaskExecutor;
 import org.fogbowcloud.arrebol.execution.docker.resource.ContainerSpecification;
 import org.fogbowcloud.arrebol.execution.docker.resource.DockerContainerResource;
-import org.fogbowcloud.arrebol.execution.docker.tasklet.DefaultTasklet;
 import org.fogbowcloud.arrebol.execution.docker.tasklet.Tasklet;
 import org.fogbowcloud.arrebol.models.command.Command;
 import org.fogbowcloud.arrebol.models.command.CommandState;
@@ -30,9 +29,14 @@ public class DockerTaskExecutor implements TaskExecutor {
     private final Logger LOGGER = Logger.getLogger(DockerTaskExecutor.class);
     private DockerContainerResource dockerContainerResource;
     private Tasklet tasklet;
+    private String defaultImageId;
 
-    public DockerTaskExecutor(
+    /**
+     * @param defaultImageId Image docker used as default if no one is specified in the task.
+     */
+    public DockerTaskExecutor(String defaultImageId,
             DockerContainerResource dockerContainerResource, Tasklet tasklet) {
+        this.defaultImageId = defaultImageId;
         this.dockerContainerResource = dockerContainerResource;
         this.tasklet = tasklet;
     }
@@ -68,6 +72,9 @@ public class DockerTaskExecutor implements TaskExecutor {
         ContainerSpecification containerSpecification = new ContainerSpecification();
         if( Objects.nonNull(specification)){
             String imageId = task.getTaskSpec().getSpec().getImage();
+            if(Objects.isNull(imageId)){
+                imageId = this.defaultImageId;
+            }
             Map<String, String> requirements = task.getTaskSpec().getSpec().getRequirements();
 
             containerSpecification =

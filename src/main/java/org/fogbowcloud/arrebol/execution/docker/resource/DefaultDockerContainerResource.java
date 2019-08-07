@@ -17,7 +17,6 @@ import org.fogbowcloud.arrebol.execution.docker.request.HttpWrapper;
 public class DefaultDockerContainerResource implements DockerContainerResource {
     private String containerId;
     private String apiAddress;
-    private String defaultImageId;
     private ContainerRequestHelper containerRequestHelper;
 
     private static final Logger LOGGER = Logger.getLogger(DefaultDockerContainerResource.class);
@@ -25,13 +24,10 @@ public class DefaultDockerContainerResource implements DockerContainerResource {
     /**
      * @param apiAddress Defines the address where requests for the Docker API should be made
      * @param containerId Sets the name of the container, is an identifier.
-     * @param defaultImageId Image docker used as default if no one is specified in the task.
      */
-    public DefaultDockerContainerResource(String containerId, String apiAddress,
-                                          String defaultImageId) {
+    public DefaultDockerContainerResource(String containerId, String apiAddress) {
         this.containerId = containerId;
         this.apiAddress = apiAddress;
-        this.defaultImageId = defaultImageId;
         this.containerRequestHelper = new ContainerRequestHelper(apiAddress, containerId);
     }
 
@@ -61,8 +57,7 @@ public class DefaultDockerContainerResource implements DockerContainerResource {
             if (image != null && !image.trim().isEmpty()) {
                 LOGGER.info("Using image [" + image + "] to start " + containerId);
             } else {
-                image = this.defaultImageId;
-                LOGGER.info("Using default image [" + image + "] to start " + containerId);
+                throw new IllegalArgumentException("Image ID may be not null or empty");
             }
             this.pullImage(image);
         } catch (Exception e) {

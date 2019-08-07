@@ -2,9 +2,9 @@ package org.fogbowcloud.arrebol.execution.docker;
 
 import static org.fogbowcloud.arrebol.execution.docker.DockerUnitTestUtil.MOCK_SUCCESS_TASK_EXECUTION_RESULT;
 import static org.fogbowcloud.arrebol.execution.docker.DockerUnitTestUtil.isAll;
-import static org.fogbowcloud.arrebol.execution.docker.DockerUnitTestUtil.loadTaskScriptExecutor;
 import static org.fogbowcloud.arrebol.execution.docker.DockerUnitTestUtil.mockDockerContainerResource;
 import static org.fogbowcloud.arrebol.execution.docker.DockerUnitTestUtil.mockTask;
+import static org.fogbowcloud.arrebol.execution.docker.DockerUnitTestUtil.MOCK_IMAGE_ID;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
@@ -41,7 +41,7 @@ public class DockerTaskExecutorTest {
         Tasklet tasklet = Mockito.mock(DefaultTasklet.class);
 
         DockerTaskExecutor dockerTaskExecutor =
-                new DockerTaskExecutor(dockerContainerResource, tasklet);
+                new DockerTaskExecutor(MOCK_IMAGE_ID, dockerContainerResource, tasklet);
 
         TaskExecutionResult taskExecutionResult = dockerTaskExecutor.execute(task);
         assertTrue(isAll(task.getTaskSpec().getCommands(), CommandState.FAILED));
@@ -57,7 +57,7 @@ public class DockerTaskExecutorTest {
         Tasklet tasklet = Mockito.mock(DefaultTasklet.class);
 
         DockerTaskExecutor dockerTaskExecutor =
-                new DockerTaskExecutor(dockerContainerResource, tasklet);
+                new DockerTaskExecutor(MOCK_IMAGE_ID, dockerContainerResource, tasklet);
         TaskExecutionResult taskExecutionResult = dockerTaskExecutor.execute(task);
         assertTrue(isAll(task.getTaskSpec().getCommands(), CommandState.FAILED));
         assertEquals(TaskExecutionResult.RESULT.FAILURE, taskExecutionResult.getResult());
@@ -72,7 +72,7 @@ public class DockerTaskExecutorTest {
 
         Tasklet tasklet = Mockito.mock(DefaultTasklet.class);
         DockerTaskExecutor dockerTaskExecutor =
-                new DockerTaskExecutor(dockerContainerResource, tasklet);
+                new DockerTaskExecutor(MOCK_IMAGE_ID, dockerContainerResource, tasklet);
         TaskExecutionResult taskExecutionResult = dockerTaskExecutor.execute(task);
         assertTrue(isAll(task.getTaskSpec().getCommands(), CommandState.FAILED));
         assertEquals(TaskExecutionResult.RESULT.FAILURE, taskExecutionResult.getResult());
@@ -86,7 +86,7 @@ public class DockerTaskExecutorTest {
                 .thenReturn(MOCK_SUCCESS_TASK_EXECUTION_RESULT);
 
         DockerTaskExecutor dockerTaskExecutor =
-            new DockerTaskExecutor(dockerContainerResource, tasklet);
+            new DockerTaskExecutor(MOCK_IMAGE_ID, dockerContainerResource, tasklet);
 
         TaskExecutionResult taskExecutionResult = dockerTaskExecutor.execute(task);
         assertEquals(RESULT.SUCCESS, taskExecutionResult.getResult());

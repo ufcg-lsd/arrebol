@@ -9,6 +9,7 @@ import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
 import java.util.Map;
 import org.fogbowcloud.arrebol.execution.docker.exceptions.DockerCreateContainerException;
+import org.fogbowcloud.arrebol.execution.docker.exceptions.DockerImageNotFoundException;
 import org.fogbowcloud.arrebol.execution.docker.exceptions.DockerRemoveContainerException;
 import org.fogbowcloud.arrebol.execution.docker.exceptions.DockerStartException;
 import org.fogbowcloud.arrebol.execution.docker.request.ContainerRequestHelper;
@@ -42,7 +43,7 @@ public class DefaultDockerContainerResourceTest {
 
         defaultDockerContainerResource =
             new DefaultDockerContainerResource(
-                MOCK_CONTAINER_NAME, MOCK_ADDRESS, MOCK_IMAGE_ID);
+                MOCK_CONTAINER_NAME, MOCK_ADDRESS);
     }
 
     @Test
@@ -52,7 +53,7 @@ public class DefaultDockerContainerResourceTest {
         defaultDockerContainerResource.start(containerSpecification);
     }
 
-    @Test
+    @Test(expected = DockerImageNotFoundException.class)
     public void testStartWithNullImageId() throws UnsupportedEncodingException {
         defaultDockerContainerResource.setContainerRequestHelper(containerRequestHelper);
         ContainerSpecification containerSpecification = new ContainerSpecification(null, new HashMap<>());
