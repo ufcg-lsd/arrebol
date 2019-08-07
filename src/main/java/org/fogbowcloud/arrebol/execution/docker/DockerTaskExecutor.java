@@ -55,7 +55,7 @@ public class DockerTaskExecutor implements TaskExecutor {
             taskExecutionResult = getFailResultInstance(task.getTaskSpec().getCommands().size());
             return taskExecutionResult;
         }
-        LOGGER.debug("Starting to execute task " + task.getId() + " in resource[" + this.dockerContainerResource.getId() + "]");
+        LOGGER.debug("Starting to execute task [" + task.getId() + "] in resource[" + this.dockerContainerResource.getId() + "]");
         taskExecutionResult = this.tasklet.execute(task);
         try {
             LOGGER.info("Stopping DockerTaskExecutor [" + this.dockerContainerResource.getId() + "]");

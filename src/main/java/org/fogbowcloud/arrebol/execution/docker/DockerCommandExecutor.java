@@ -28,7 +28,7 @@ public class DockerCommandExecutor {
      * exists then returns an {@link ExecInstanceResult}.
      */
     public ExecInstanceResult executeCommand(String apiAddress, String containerId, String command) throws Exception {
-        LOGGER.info("Sending command [" + command + "] to the [" + containerId + "].");
+        LOGGER.info("Executing command [" + command + "] to the [" + containerId + "].");
         String execId = this.createExecInstance(apiAddress, containerId, command, false, false);
         this.startExecInstance(apiAddress, execId);
 
