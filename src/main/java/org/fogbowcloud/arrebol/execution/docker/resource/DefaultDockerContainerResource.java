@@ -15,7 +15,7 @@ import org.fogbowcloud.arrebol.execution.docker.request.ContainerRequestHelper;
 import org.fogbowcloud.arrebol.execution.docker.request.HttpWrapper;
 
 public class DefaultDockerContainerResource implements DockerContainerResource {
-    private String containerName;
+    private String containerId;
     private String apiAddress;
     private String defaultImageId;
     private ContainerRequestHelper containerRequestHelper;
@@ -24,15 +24,15 @@ public class DefaultDockerContainerResource implements DockerContainerResource {
 
     /**
      * @param apiAddress Defines the address where requests for the Docker API should be made
-     * @param containerName Sets the name of the container, is an identifier.
+     * @param containerId Sets the name of the container, is an identifier.
      * @param defaultImageId Image docker used as default if no one is specified in the task.
      */
-    public DefaultDockerContainerResource(String containerName, String apiAddress,
+    public DefaultDockerContainerResource(String containerId, String apiAddress,
                                           String defaultImageId) {
-        this.containerName = containerName;
+        this.containerId = containerId;
         this.apiAddress = apiAddress;
         this.defaultImageId = defaultImageId;
-        this.containerRequestHelper = new ContainerRequestHelper(apiAddress, containerName);
+        this.containerRequestHelper = new ContainerRequestHelper(apiAddress, containerId);
     }
 
     @Override
@@ -46,23 +46,23 @@ public class DefaultDockerContainerResource implements DockerContainerResource {
                 "Container specification ["
                         + containerSpecification.toString()
                         + "] to container ["
-                        + this.containerName
+                        + this.containerId
                         + "]");
         String image = this.setUpImage(containerSpecification.getImageId());
         Map<String, String> containerRequirements =
                 this.getDockerContainerRequirements(containerSpecification.getRequirements());
         this.containerRequestHelper.createContainer(image, containerRequirements);
         this.containerRequestHelper.startContainer();
-        LOGGER.info("Started the container " + this.containerName);
+        LOGGER.info("Started the container " + this.containerId);
     }
 
     private String setUpImage(String image) {
         try {
             if (image != null && !image.trim().isEmpty()) {
-                LOGGER.info("Using image [" + image + "] to start " + containerName);
+                LOGGER.info("Using image [" + image + "] to start " + containerId);
             } else {
                 image = this.defaultImageId;
-                LOGGER.info("Using default image [" + image + "] to start " + containerName);
+                LOGGER.info("Using default image [" + image + "] to start " + containerId);
             }
             this.pullImage(image);
         } catch (Exception e) {
@@ -91,12 +91,12 @@ public class DefaultDockerContainerResource implements DockerContainerResource {
                         case DockerConstants.DOCKER_MEMORY:
                             mapRequirements.put(DockerConstants.JSON_KEY_MEMORY, value);
                             LOGGER.info("Added requirement [" + DockerConstants.JSON_KEY_MEMORY +
-                                "] with value [" + value + "] to container [" + this.containerName + "]");
+                                "] with value [" + value + "] to container [" + this.containerId + "]");
                             break;
                         case DockerConstants.DOCKER_CPU_WEIGHT:
                             mapRequirements.put(DockerConstants.JSON_KEY_CPU_SHARES, value);
                             LOGGER.info("Added requirement [" + DockerConstants.JSON_KEY_CPU_SHARES +
-                                "] with value [" + value + "] to container [" + this.containerName + "]");
+                                "] with value [" + value + "] to container [" + this.containerId + "]");
                             break;
                     }
                 }
@@ -112,7 +112,7 @@ public class DefaultDockerContainerResource implements DockerContainerResource {
 
     @Override
     public String getId() {
-        return this.containerName;
+        return this.containerId;
     }
 
     @Override
