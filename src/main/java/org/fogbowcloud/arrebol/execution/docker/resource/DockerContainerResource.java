@@ -15,4 +15,6 @@ public interface DockerContainerResource {
     String getId();
 
     String getApiAddress();
+
+    boolean isStarted();
 }

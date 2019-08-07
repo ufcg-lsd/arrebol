@@ -15,11 +15,11 @@ import org.fogbowcloud.arrebol.execution.docker.request.ContainerRequestHelper;
 import org.fogbowcloud.arrebol.execution.docker.request.HttpWrapper;
 
 public class DefaultDockerContainerResource implements DockerContainerResource {
+    private static final Logger LOGGER = Logger.getLogger(DefaultDockerContainerResource.class);
+    private boolean started;
     private String containerId;
     private String apiAddress;
     private ContainerRequestHelper containerRequestHelper;
-
-    private static final Logger LOGGER = Logger.getLogger(DefaultDockerContainerResource.class);
 
     /**
      * @param apiAddress Defines the address where requests for the Docker API should be made
@@ -29,13 +29,17 @@ public class DefaultDockerContainerResource implements DockerContainerResource {
         this.containerId = containerId;
         this.apiAddress = apiAddress;
         this.containerRequestHelper = new ContainerRequestHelper(apiAddress, containerId);
+        this.started = false;
     }
 
     @Override
     public void start(ContainerSpecification containerSpecification)
             throws DockerStartException, DockerCreateContainerException,
                     UnsupportedEncodingException {
-        if(Objects.isNull(containerSpecification)){
+        if (isStarted()) {
+            throw new DockerStartException("Container[" + this.containerId + "] was already started");
+        }
+        if (Objects.isNull(containerSpecification)) {
             throw new IllegalArgumentException("ContainerSpecification may be not null.");
         }
         LOGGER.info(
@@ -49,6 +53,7 @@ public class DefaultDockerContainerResource implements DockerContainerResource {
                 this.getDockerContainerRequirements(containerSpecification.getRequirements());
         this.containerRequestHelper.createContainer(image, containerRequirements);
         this.containerRequestHelper.startContainer();
+        this.started = true;
         LOGGER.info("Started the container " + this.containerId);
     }
 
@@ -61,21 +66,24 @@ public class DefaultDockerContainerResource implements DockerContainerResource {
             }
             this.pullImage(image);
         } catch (Exception e) {
-            throw new DockerImageNotFoundException("Error to pull docker image: " + image +
-                    " with error " + e.getMessage());
+            throw new DockerImageNotFoundException(
+                    "Error to pull docker image: " + image + " with error " + e.getMessage());
         }
         return image;
     }
 
     private void pullImage(String imageId) throws Exception {
-        final String endpoint = String.format("%s/images/create?fromImage=%s:latest", this.apiAddress, imageId);
+        final String endpoint =
+                String.format("%s/images/create?fromImage=%s:latest", this.apiAddress, imageId);
         HttpWrapper.doRequest(HttpPost.METHOD_NAME, endpoint);
     }
 
-    private Map<String, String> getDockerContainerRequirements(Map<String, String> taskRequirements) {
+    private Map<String, String> getDockerContainerRequirements(
+            Map<String, String> taskRequirements) {
         Map<String, String> mapRequirements = new HashMap<>();
-        if(Objects.nonNull(taskRequirements)){
-            String dockerRequirements = taskRequirements.get(DockerConstants.METADATA_DOCKER_REQUIREMENTS);
+        if (Objects.nonNull(taskRequirements)) {
+            String dockerRequirements =
+                    taskRequirements.get(DockerConstants.METADATA_DOCKER_REQUIREMENTS);
             if (dockerRequirements != null) {
                 String[] requirements = dockerRequirements.split("&&");
                 for (String requirement : requirements) {
@@ -102,7 +110,11 @@ public class DefaultDockerContainerResource implements DockerContainerResource {
 
     @Override
     public void stop() throws DockerRemoveContainerException {
+        if(!isStarted()){
+            throw new DockerRemoveContainerException("Container[" + this.containerId + "] was already stopped");
+        }
         this.containerRequestHelper.removeContainer();
+        this.started = false;
     }
 
     @Override
@@ -113,6 +125,11 @@ public class DefaultDockerContainerResource implements DockerContainerResource {
     @Override
     public String getApiAddress() {
         return this.apiAddress;
+    }
+
+    @Override
+    public boolean isStarted() {
+        return started;
     }
 
     protected void setContainerRequestHelper(ContainerRequestHelper containerRequestHelper) {

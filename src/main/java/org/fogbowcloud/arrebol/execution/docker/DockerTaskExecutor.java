@@ -1,7 +1,6 @@
 package org.fogbowcloud.arrebol.execution.docker;
 
 import java.util.Arrays;
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import org.apache.log4j.Logger;
