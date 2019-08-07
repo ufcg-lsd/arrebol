@@ -1,9 +1,9 @@
 package org.fogbowcloud.arrebol.execution.docker;
 
+import static org.fogbowcloud.arrebol.execution.docker.DockerUnitTestUtil.MOCK_SUCCESS_TASK_EXECUTION_RESULT;
 import static org.fogbowcloud.arrebol.execution.docker.DockerUnitTestUtil.isAll;
 import static org.fogbowcloud.arrebol.execution.docker.DockerUnitTestUtil.loadTaskScriptExecutor;
 import static org.fogbowcloud.arrebol.execution.docker.DockerUnitTestUtil.mockDockerContainerResource;
-import static org.fogbowcloud.arrebol.execution.docker.DockerUnitTestUtil.MOCK_SUCCESS_TASK_EXECUTION_RESULT;
 import static org.fogbowcloud.arrebol.execution.docker.DockerUnitTestUtil.mockTask;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -38,9 +38,10 @@ public class DockerTaskExecutorTest {
         Mockito.doThrow(new DockerImageNotFoundException("Error to pull docker image"))
                 .when(dockerContainerResource)
                 .start(Mockito.any(ContainerSpecification.class));
+        Tasklet tasklet = Mockito.mock(DefaultTasklet.class);
 
         DockerTaskExecutor dockerTaskExecutor =
-                new DockerTaskExecutor(dockerContainerResource, loadTaskScriptExecutor());
+                new DockerTaskExecutor(dockerContainerResource, tasklet);
 
         TaskExecutionResult taskExecutionResult = dockerTaskExecutor.execute(task);
         assertTrue(isAll(task.getTaskSpec().getCommands(), CommandState.FAILED));
@@ -53,9 +54,10 @@ public class DockerTaskExecutorTest {
         Mockito.doThrow(new DockerCreateContainerException("Could not create container"))
                 .when(dockerContainerResource)
                 .start(Mockito.any(ContainerSpecification.class));
+        Tasklet tasklet = Mockito.mock(DefaultTasklet.class);
 
         DockerTaskExecutor dockerTaskExecutor =
-                new DockerTaskExecutor(dockerContainerResource, loadTaskScriptExecutor());
+                new DockerTaskExecutor(dockerContainerResource, tasklet);
         TaskExecutionResult taskExecutionResult = dockerTaskExecutor.execute(task);
         assertTrue(isAll(task.getTaskSpec().getCommands(), CommandState.FAILED));
         assertEquals(TaskExecutionResult.RESULT.FAILURE, taskExecutionResult.getResult());
@@ -68,8 +70,9 @@ public class DockerTaskExecutorTest {
                 .when(dockerContainerResource)
                 .start(Mockito.any(ContainerSpecification.class));
 
+        Tasklet tasklet = Mockito.mock(DefaultTasklet.class);
         DockerTaskExecutor dockerTaskExecutor =
-                new DockerTaskExecutor(dockerContainerResource, loadTaskScriptExecutor());
+                new DockerTaskExecutor(dockerContainerResource, tasklet);
         TaskExecutionResult taskExecutionResult = dockerTaskExecutor.execute(task);
         assertTrue(isAll(task.getTaskSpec().getCommands(), CommandState.FAILED));
         assertEquals(TaskExecutionResult.RESULT.FAILURE, taskExecutionResult.getResult());
@@ -83,8 +86,7 @@ public class DockerTaskExecutorTest {
                 .thenReturn(MOCK_SUCCESS_TASK_EXECUTION_RESULT);
 
         DockerTaskExecutor dockerTaskExecutor =
-                new DockerTaskExecutor(dockerContainerResource, loadTaskScriptExecutor());
-        dockerTaskExecutor.setTasklet(tasklet);
+            new DockerTaskExecutor(dockerContainerResource, tasklet);
 
         TaskExecutionResult taskExecutionResult = dockerTaskExecutor.execute(task);
         assertEquals(RESULT.SUCCESS, taskExecutionResult.getResult());

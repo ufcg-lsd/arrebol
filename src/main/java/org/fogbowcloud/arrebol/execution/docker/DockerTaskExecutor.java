@@ -90,8 +90,4 @@ public class DockerTaskExecutor implements TaskExecutor {
                 new TaskExecutionResult(RESULT.FAILURE, exitCodes);
         return taskExecutionResult;
     }
-
-    protected void setTasklet(Tasklet tasklet) {
-        this.tasklet = tasklet;
-    }
 }
