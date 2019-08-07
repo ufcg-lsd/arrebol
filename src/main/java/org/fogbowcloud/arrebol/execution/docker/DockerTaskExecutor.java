@@ -32,13 +32,9 @@ public class DockerTaskExecutor implements TaskExecutor {
     private Tasklet tasklet;
 
     public DockerTaskExecutor(
-            DockerContainerResource dockerContainerResource, String taskScriptExecutor) {
+            DockerContainerResource dockerContainerResource, Tasklet tasklet) {
         this.dockerContainerResource = dockerContainerResource;
-        this.tasklet =
-                new DefaultTasklet(
-                        dockerContainerResource.getApiAddress(),
-                        dockerContainerResource.getId(),
-                        taskScriptExecutor);
+        this.tasklet = tasklet;
     }
 
     /** {@inheritDoc} */

@@ -1,28 +1,30 @@
 package org.fogbowcloud.arrebol.execution.creator;
 
-import org.apache.commons.io.IOUtils;
-import org.apache.log4j.Logger;
-import org.fogbowcloud.arrebol.ArrebolController;
-import org.fogbowcloud.arrebol.execution.docker.resource.DefaultDockerContainerResource;
-import org.fogbowcloud.arrebol.execution.docker.resource.DockerContainerResource;
-import org.fogbowcloud.arrebol.models.configuration.Configuration;
-import org.fogbowcloud.arrebol.execution.docker.DockerConfiguration;
-import org.fogbowcloud.arrebol.execution.docker.DockerTaskExecutor;
-import org.fogbowcloud.arrebol.execution.TaskExecutor;
-import org.fogbowcloud.arrebol.execution.Worker;
-import org.fogbowcloud.arrebol.models.specification.Specification;
-import org.fogbowcloud.arrebol.resource.MatchAnyWorker;
-import org.springframework.core.io.ClassPathResource;
-import org.springframework.core.io.Resource;
 import java.io.InputStream;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.UUID;
+import org.apache.commons.io.IOUtils;
+import org.apache.log4j.Logger;
+import org.fogbowcloud.arrebol.ArrebolController;
+import org.fogbowcloud.arrebol.execution.TaskExecutor;
+import org.fogbowcloud.arrebol.execution.Worker;
+import org.fogbowcloud.arrebol.execution.docker.DockerConfiguration;
+import org.fogbowcloud.arrebol.execution.docker.DockerTaskExecutor;
+import org.fogbowcloud.arrebol.execution.docker.resource.DefaultDockerContainerResource;
+import org.fogbowcloud.arrebol.execution.docker.resource.DockerContainerResource;
+import org.fogbowcloud.arrebol.execution.docker.tasklet.DefaultTasklet;
+import org.fogbowcloud.arrebol.execution.docker.tasklet.Tasklet;
+import org.fogbowcloud.arrebol.models.configuration.Configuration;
+import org.fogbowcloud.arrebol.models.specification.Specification;
+import org.fogbowcloud.arrebol.resource.MatchAnyWorker;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
 
 public class DockerWorkerCreator implements WorkerCreator {
 
-    private final Logger LOGGER = Logger.getLogger(ArrebolController.class);
     private static final String TASK_SCRIPT_EXECUTOR_NAME = "task-script-executor.sh";
+    private final Logger LOGGER = Logger.getLogger(ArrebolController.class);
     private final String tsExecutorFileContent;
     private final DockerConfiguration configuration;
 
@@ -50,9 +52,12 @@ public class DockerWorkerCreator implements WorkerCreator {
     }
 
     private Worker createDockerWorker(Integer poolId, int resourceId, String address) {
-        DockerContainerResource dockerContainerResource = new DefaultDockerContainerResource("docker-executor-" + UUID.randomUUID().toString(),
-            address, this.configuration.getImageId());
-        TaskExecutor executor = new DockerTaskExecutor(dockerContainerResource, this.tsExecutorFileContent);
+        String containerId = "docker-executor-" + UUID.randomUUID().toString();
+        DockerContainerResource dockerContainerResource =
+                new DefaultDockerContainerResource(
+                        containerId, address, this.configuration.getImageId());
+        Tasklet tasklet = new DefaultTasklet(address, containerId, this.tsExecutorFileContent);
+        TaskExecutor executor = new DockerTaskExecutor(dockerContainerResource, tasklet);
         Specification resourceSpec = null;
         return new MatchAnyWorker(resourceSpec, "resourceId-" + resourceId, poolId, executor);
     }
