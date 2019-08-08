@@ -104,4 +104,7 @@ public class DockerContainerRequestHelper {
         AppUtil.makeBodyField(jsonObject, "HostConfig", jsonRequirements);
     }
 
+    public String getAddress() {
+        return address;
+    }
 }

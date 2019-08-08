@@ -9,13 +9,17 @@ import org.apache.log4j.Logger;
 import org.fogbowcloud.arrebol.ArrebolController;
 import org.fogbowcloud.arrebol.execution.TaskExecutor;
 import org.fogbowcloud.arrebol.execution.Worker;
+import org.fogbowcloud.arrebol.execution.docker.DockerCommandExecutor;
 import org.fogbowcloud.arrebol.execution.docker.DockerConfiguration;
 import org.fogbowcloud.arrebol.execution.docker.DockerTaskExecutor;
 import org.fogbowcloud.arrebol.execution.docker.helpers.DockerContainerRequestHelper;
+import org.fogbowcloud.arrebol.execution.docker.helpers.DockerFileHandlerHelper;
+import org.fogbowcloud.arrebol.execution.docker.helpers.DockerImageRequestHelper;
 import org.fogbowcloud.arrebol.execution.docker.resource.DefaultDockerContainerResource;
 import org.fogbowcloud.arrebol.execution.docker.resource.DockerContainerResource;
 import org.fogbowcloud.arrebol.execution.docker.tasklet.DefaultTasklet;
 import org.fogbowcloud.arrebol.execution.docker.tasklet.Tasklet;
+import org.fogbowcloud.arrebol.execution.docker.tasklet.TaskletHelper;
 import org.fogbowcloud.arrebol.models.configuration.Configuration;
 import org.fogbowcloud.arrebol.models.specification.Specification;
 import org.fogbowcloud.arrebol.resource.MatchAnyWorker;
@@ -54,14 +58,34 @@ public class DockerWorkerCreator implements WorkerCreator {
 
     private Worker createDockerWorker(Integer poolId, int resourceId, String address) {
         String containerId = "docker-executor-" + UUID.randomUUID().toString();
-        DockerContainerRequestHelper containerRequestHelper = new DockerContainerRequestHelper(address, containerId);
         DockerContainerResource dockerContainerResource =
-                new DefaultDockerContainerResource(containerId, address, containerRequestHelper);
-        Tasklet tasklet = new DefaultTasklet(address, containerId, this.tsExecutorFileContent);
+                createDockerContainerResource(address, containerId);
+        Tasklet tasklet = createTasklet(address, containerId);
         TaskExecutor executor =
                 new DockerTaskExecutor(
                         this.configuration.getImageId(), dockerContainerResource, tasklet);
         Specification resourceSpec = null;
         return new MatchAnyWorker(resourceSpec, "resourceId-" + resourceId, poolId, executor);
+    }
+
+    private DockerContainerResource createDockerContainerResource(
+            String address, String containerId) {
+        DockerCommandExecutor dockerCommandExecutor = new DockerCommandExecutor();
+        DockerImageRequestHelper imageRequestHelper =
+                new DockerImageRequestHelper(address, dockerCommandExecutor);
+        DockerContainerRequestHelper containerRequestHelper =
+                new DockerContainerRequestHelper(address, containerId);
+        DockerContainerResource dockerContainerResource =
+                new DefaultDockerContainerResource(
+                        containerId, containerRequestHelper, imageRequestHelper);
+        return dockerContainerResource;
+    }
+
+    private Tasklet createTasklet(String address, String containerId){
+        DockerCommandExecutor dockerCommandExecutor = new DockerCommandExecutor();
+        DockerFileHandlerHelper dockerFileHandlerHelper = new DockerFileHandlerHelper(address, dockerCommandExecutor);
+        TaskletHelper taskletHelper = new TaskletHelper(address, containerId, dockerCommandExecutor, dockerFileHandlerHelper);
+        Tasklet tasklet = new DefaultTasklet(this.tsExecutorFileContent, taskletHelper);
+        return tasklet;
     }
 }

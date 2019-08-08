@@ -22,9 +22,9 @@ public class DefaultTasklet implements Tasklet {
     private static final long poolingPeriodTimeMs = 2000;
 
 
-    public DefaultTasklet(String apiAddress, String containerId, String taskScriptExecutor) {
+    public DefaultTasklet(String taskScriptExecutor, TaskletHelper taskletHelper) {
         this.taskScriptExecutor = taskScriptExecutor;
-        this.taskletHelper = new TaskletHelper(apiAddress, containerId);
+        this.taskletHelper = taskletHelper;
     }
 
     @Override

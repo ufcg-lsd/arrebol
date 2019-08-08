@@ -11,26 +11,23 @@ import org.fogbowcloud.arrebol.execution.docker.exceptions.DockerImageNotFoundEx
 import org.fogbowcloud.arrebol.execution.docker.exceptions.DockerRemoveContainerException;
 import org.fogbowcloud.arrebol.execution.docker.exceptions.DockerStartException;
 import org.fogbowcloud.arrebol.execution.docker.helpers.DockerContainerRequestHelper;
-import org.fogbowcloud.arrebol.execution.docker.helpers.DockerRequestHelper;
+import org.fogbowcloud.arrebol.execution.docker.helpers.DockerImageRequestHelper;
 
 public class DefaultDockerContainerResource implements DockerContainerResource {
     private static final Logger LOGGER = Logger.getLogger(DefaultDockerContainerResource.class);
     private boolean started;
     private String resourceId;
-    private String apiAddress;
     private DockerContainerRequestHelper dockerContainerRequestHelper;
-    private DockerRequestHelper dockerRequestHelper;
+    private DockerImageRequestHelper dockerImageRequestHelper;
 
     /**
-     * @param apiAddress Defines the address where requests for the Docker API should be made
      * @param resourceId Sets the name of the container, is an identifier.
      */
-    public DefaultDockerContainerResource(String resourceId, String apiAddress, DockerContainerRequestHelper dockerContainerRequestHelper,
-        DockerRequestHelper dockerRequestHelper) {
+    public DefaultDockerContainerResource(String resourceId, DockerContainerRequestHelper dockerContainerRequestHelper,
+        DockerImageRequestHelper dockerImageRequestHelper) {
         this.resourceId = resourceId;
-        this.apiAddress = apiAddress;
         this.dockerContainerRequestHelper = dockerContainerRequestHelper;
-        this.dockerRequestHelper = dockerRequestHelper;
+        this.dockerImageRequestHelper = dockerImageRequestHelper;
         this.started = false;
     }
 
@@ -66,7 +63,7 @@ public class DefaultDockerContainerResource implements DockerContainerResource {
             } else {
                 throw new IllegalArgumentException("Image ID may be not null or empty");
             }
-            dockerRequestHelper.pullImage(apiAddress, image);
+            dockerImageRequestHelper.pullImage(image);
         } catch (Exception e) {
             throw new DockerImageNotFoundException(
                     "Error to pull docker image: " + image + " with error " + e.getMessage());
@@ -120,7 +117,7 @@ public class DefaultDockerContainerResource implements DockerContainerResource {
 
     @Override
     public String getApiAddress() {
-        return this.apiAddress;
+        return this.dockerContainerRequestHelper.getAddress();
     }
 
     @Override
