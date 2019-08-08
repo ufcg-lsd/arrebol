@@ -42,6 +42,13 @@ public class DefaultDockerContainerResourceTest {
         defaultDockerContainerResource.start(containerSpecification);
     }
 
+    @Test(expected = DockerStartException.class)
+    public void testTwiceStart() throws UnsupportedEncodingException {
+        ContainerSpecification containerSpecification = new ContainerSpecification(MOCK_IMAGE_ID, new HashMap<>());
+        defaultDockerContainerResource.start(containerSpecification);
+        defaultDockerContainerResource.start(containerSpecification);
+    }
+
     @Test(expected = DockerImageNotFoundException.class)
     public void testStartWithNullImageId() throws UnsupportedEncodingException {
         ContainerSpecification containerSpecification = new ContainerSpecification(null, new HashMap<>());
@@ -84,6 +91,18 @@ public class DefaultDockerContainerResourceTest {
     @Test
     public void testSuccessStop() throws Exception {
         testSuccessStart();
+        defaultDockerContainerResource.stop();
+    }
+
+    @Test(expected = DockerRemoveContainerException.class)
+    public void testStopInNotStartedResource() {
+        defaultDockerContainerResource.stop();
+    }
+
+    @Test(expected = DockerRemoveContainerException.class)
+    public void testTwiceStop() throws Exception {
+        testSuccessStart();
+        defaultDockerContainerResource.stop();
         defaultDockerContainerResource.stop();
     }
 
