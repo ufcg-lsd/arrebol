@@ -1,16 +1,13 @@
 package org.fogbowcloud.arrebol.execution.docker.helpers;
 
 import org.apache.http.client.methods.HttpPost;
-import org.fogbowcloud.arrebol.execution.docker.DockerCommandExecutor;
 import org.fogbowcloud.arrebol.execution.docker.request.HttpWrapper;
 
 public class DockerImageRequestHelper {
     private String apiAddress;
-    private DockerCommandExecutor dockerCommandExecutor;
 
-    public DockerImageRequestHelper(String apiAddress, DockerCommandExecutor dockerCommandExecutor) {
+    public DockerImageRequestHelper(String apiAddress) {
         this.apiAddress = apiAddress;
-        this.dockerCommandExecutor = dockerCommandExecutor;
     }
 
     public void pullImage(String imageId) throws Exception {

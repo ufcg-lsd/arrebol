@@ -70,9 +70,8 @@ public class DockerWorkerCreator implements WorkerCreator {
 
     private DockerContainerResource createDockerContainerResource(
             String address, String containerId) {
-        DockerCommandExecutor dockerCommandExecutor = new DockerCommandExecutor();
         DockerImageRequestHelper imageRequestHelper =
-                new DockerImageRequestHelper(address, dockerCommandExecutor);
+                new DockerImageRequestHelper(address);
         DockerContainerRequestHelper containerRequestHelper =
                 new DockerContainerRequestHelper(address, containerId);
         DockerContainerResource dockerContainerResource =
