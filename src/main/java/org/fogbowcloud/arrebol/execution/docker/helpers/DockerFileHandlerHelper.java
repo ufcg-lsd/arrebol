@@ -1,4 +1,4 @@
-package org.fogbowcloud.arrebol.execution.docker.request;
+package org.fogbowcloud.arrebol.execution.docker.helpers;
 
 import org.fogbowcloud.arrebol.execution.docker.DockerCommandExecutor;
 

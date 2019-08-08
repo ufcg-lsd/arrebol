@@ -12,7 +12,7 @@ import org.fogbowcloud.arrebol.execution.docker.exceptions.DockerCreateContainer
 import org.fogbowcloud.arrebol.execution.docker.exceptions.DockerImageNotFoundException;
 import org.fogbowcloud.arrebol.execution.docker.exceptions.DockerRemoveContainerException;
 import org.fogbowcloud.arrebol.execution.docker.exceptions.DockerStartException;
-import org.fogbowcloud.arrebol.execution.docker.request.ContainerRequestHelper;
+import org.fogbowcloud.arrebol.execution.docker.helpers.DockerContainerRequestHelper;
 import org.fogbowcloud.arrebol.execution.docker.request.HttpWrapper;
 import org.junit.Before;
 import org.junit.Test;
@@ -27,12 +27,12 @@ import org.springframework.http.HttpMethod;
 @PrepareForTest({HttpWrapper.class})
 public class DefaultDockerContainerResourceTest {
 
-    private ContainerRequestHelper containerRequestHelper;
+    private DockerContainerRequestHelper containerRequestHelper;
     private DefaultDockerContainerResource defaultDockerContainerResource;
 
     @Before
     public void setUp() throws Exception {
-        containerRequestHelper = Mockito.mock(ContainerRequestHelper.class);
+        containerRequestHelper = Mockito.mock(DockerContainerRequestHelper.class);
         Mockito.when(containerRequestHelper.createContainer(eq(MOCK_IMAGE_ID), Mockito.any(Map.class)))
             .thenReturn(MOCK_CONTAINER_NAME);
 

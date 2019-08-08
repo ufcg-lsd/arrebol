@@ -4,31 +4,33 @@ import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
-import org.apache.http.client.methods.HttpPost;
 import org.apache.log4j.Logger;
 import org.fogbowcloud.arrebol.execution.docker.constants.DockerConstants;
 import org.fogbowcloud.arrebol.execution.docker.exceptions.DockerCreateContainerException;
 import org.fogbowcloud.arrebol.execution.docker.exceptions.DockerImageNotFoundException;
 import org.fogbowcloud.arrebol.execution.docker.exceptions.DockerRemoveContainerException;
 import org.fogbowcloud.arrebol.execution.docker.exceptions.DockerStartException;
-import org.fogbowcloud.arrebol.execution.docker.request.ContainerRequestHelper;
-import org.fogbowcloud.arrebol.execution.docker.request.HttpWrapper;
+import org.fogbowcloud.arrebol.execution.docker.helpers.DockerContainerRequestHelper;
+import org.fogbowcloud.arrebol.execution.docker.helpers.DockerRequestHelper;
 
 public class DefaultDockerContainerResource implements DockerContainerResource {
     private static final Logger LOGGER = Logger.getLogger(DefaultDockerContainerResource.class);
     private boolean started;
     private String resourceId;
     private String apiAddress;
-    private ContainerRequestHelper containerRequestHelper;
+    private DockerContainerRequestHelper dockerContainerRequestHelper;
+    private DockerRequestHelper dockerRequestHelper;
 
     /**
      * @param apiAddress Defines the address where requests for the Docker API should be made
      * @param resourceId Sets the name of the container, is an identifier.
      */
-    public DefaultDockerContainerResource(String resourceId, String apiAddress, ContainerRequestHelper containerRequestHelper) {
+    public DefaultDockerContainerResource(String resourceId, String apiAddress, DockerContainerRequestHelper dockerContainerRequestHelper,
+        DockerRequestHelper dockerRequestHelper) {
         this.resourceId = resourceId;
         this.apiAddress = apiAddress;
-        this.containerRequestHelper = containerRequestHelper;
+        this.dockerContainerRequestHelper = dockerContainerRequestHelper;
+        this.dockerRequestHelper = dockerRequestHelper;
         this.started = false;
     }
 
@@ -51,8 +53,8 @@ public class DefaultDockerContainerResource implements DockerContainerResource {
         String image = this.setUpImage(containerSpecification.getImageId());
         Map<String, String> containerRequirements =
                 this.getDockerContainerRequirements(containerSpecification.getRequirements());
-        this.containerRequestHelper.createContainer(image, containerRequirements);
-        this.containerRequestHelper.startContainer();
+        this.dockerContainerRequestHelper.createContainer(image, containerRequirements);
+        this.dockerContainerRequestHelper.startContainer();
         this.started = true;
         LOGGER.info("Started the container " + this.resourceId);
     }
@@ -64,18 +66,12 @@ public class DefaultDockerContainerResource implements DockerContainerResource {
             } else {
                 throw new IllegalArgumentException("Image ID may be not null or empty");
             }
-            this.pullImage(image);
+            dockerRequestHelper.pullImage(apiAddress, image);
         } catch (Exception e) {
             throw new DockerImageNotFoundException(
                     "Error to pull docker image: " + image + " with error " + e.getMessage());
         }
         return image;
-    }
-
-    private void pullImage(String imageId) throws Exception {
-        final String endpoint =
-                String.format("%s/images/create?fromImage=%s:latest", this.apiAddress, imageId);
-        HttpWrapper.doRequest(HttpPost.METHOD_NAME, endpoint);
     }
 
     private Map<String, String> getDockerContainerRequirements(
@@ -113,7 +109,7 @@ public class DefaultDockerContainerResource implements DockerContainerResource {
         if(!isStarted()){
             throw new DockerRemoveContainerException("Container[" + this.resourceId + "] was already stopped");
         }
-        this.containerRequestHelper.removeContainer();
+        this.dockerContainerRequestHelper.removeContainer();
         this.started = false;
     }
 

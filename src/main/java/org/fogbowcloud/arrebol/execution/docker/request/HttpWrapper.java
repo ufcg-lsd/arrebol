@@ -17,6 +17,7 @@ import org.apache.http.impl.client.HttpClients;
 import org.apache.http.message.BasicHeader;
 import org.apache.http.util.EntityUtils;
 import org.apache.log4j.Logger;
+import org.fogbowcloud.arrebol.execution.docker.helpers.DockerContainerRequestHelper;
 
 public class HttpWrapper {
 
@@ -29,7 +30,7 @@ public class HttpWrapper {
     public static final String HTTP_METHOD_GET = HttpGet.METHOD_NAME;
     public static final String HTTP_METHOD_DELETE = HttpDelete.METHOD_NAME;
 
-    private static final Logger LOGGER = Logger.getLogger(ContainerRequestHelper.class);
+    private static final Logger LOGGER = Logger.getLogger(DockerContainerRequestHelper.class);
 
     private static HttpClient createHttpClient() {
         return HttpClients.createMinimal();

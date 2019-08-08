@@ -1,4 +1,4 @@
-package org.fogbowcloud.arrebol.execution.docker.request;
+package org.fogbowcloud.arrebol.execution.docker.helpers;
 
 import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpPost;
@@ -7,6 +7,7 @@ import org.apache.log4j.Logger;
 import org.fogbowcloud.arrebol.execution.docker.exceptions.DockerCreateContainerException;
 import org.fogbowcloud.arrebol.execution.docker.exceptions.DockerRemoveContainerException;
 import org.fogbowcloud.arrebol.execution.docker.exceptions.DockerStartException;
+import org.fogbowcloud.arrebol.execution.docker.request.HttpWrapper;
 import org.fogbowcloud.arrebol.utils.AppUtil;
 import org.json.JSONObject;
 import org.fogbowcloud.arrebol.execution.docker.constants.DockerConstants;
@@ -14,13 +15,13 @@ import org.fogbowcloud.arrebol.execution.docker.constants.DockerConstants;
 import java.io.UnsupportedEncodingException;
 import java.util.Map;
 
-public class ContainerRequestHelper {
+public class DockerContainerRequestHelper {
     private String address;
     private String containerName;
 
-    private final Logger LOGGER = Logger.getLogger(ContainerRequestHelper.class);
+    private final Logger LOGGER = Logger.getLogger(DockerContainerRequestHelper.class);
 
-    public ContainerRequestHelper(String address, String containerName) {
+    public DockerContainerRequestHelper(String address, String containerName) {
         this.address = address;
         this.containerName = containerName;
     }

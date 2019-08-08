@@ -4,7 +4,7 @@ import java.util.List;
 import org.apache.log4j.Logger;
 import org.fogbowcloud.arrebol.execution.TaskExecutionResult;
 import org.fogbowcloud.arrebol.execution.docker.DockerCommandExecutor;
-import org.fogbowcloud.arrebol.execution.docker.request.DockerFileHandlerHelper;
+import org.fogbowcloud.arrebol.execution.docker.helpers.DockerFileHandlerHelper;
 import org.fogbowcloud.arrebol.models.command.Command;
 
 public class TaskletHelper {
@@ -19,12 +19,11 @@ public class TaskletHelper {
     private DockerCommandExecutor dockerCommandExecutor;
     private DockerFileHandlerHelper dockerFileHandlerHelper;
 
-    public TaskletHelper(String apiAddress, String containerId) {
+    public TaskletHelper(String apiAddress, String containerId, DockerCommandExecutor dockerCommandExecutor, DockerFileHandlerHelper dockerFileHandlerHelper) {
         this.apiAddress = apiAddress;
         this.containerId = containerId;
-        this.dockerCommandExecutor = new DockerCommandExecutor();
-        this.dockerFileHandlerHelper =
-                new DockerFileHandlerHelper(apiAddress, dockerCommandExecutor);
+        this.dockerCommandExecutor = dockerCommandExecutor;
+        this.dockerFileHandlerHelper = dockerFileHandlerHelper;
     }
 
     public void runTaskScriptExecutor(String taskId) throws Exception {
