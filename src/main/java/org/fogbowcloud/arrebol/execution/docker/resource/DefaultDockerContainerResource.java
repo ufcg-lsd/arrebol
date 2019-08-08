@@ -25,10 +25,10 @@ public class DefaultDockerContainerResource implements DockerContainerResource {
      * @param apiAddress Defines the address where requests for the Docker API should be made
      * @param containerId Sets the name of the container, is an identifier.
      */
-    public DefaultDockerContainerResource(String containerId, String apiAddress) {
+    public DefaultDockerContainerResource(String containerId, String apiAddress, ContainerRequestHelper containerRequestHelper) {
         this.containerId = containerId;
         this.apiAddress = apiAddress;
-        this.containerRequestHelper = new ContainerRequestHelper(apiAddress, containerId);
+        this.containerRequestHelper = containerRequestHelper;
         this.started = false;
     }
 
@@ -130,9 +130,5 @@ public class DefaultDockerContainerResource implements DockerContainerResource {
     @Override
     public boolean isStarted() {
         return started;
-    }
-
-    protected void setContainerRequestHelper(ContainerRequestHelper containerRequestHelper) {
-        this.containerRequestHelper = containerRequestHelper;
     }
 }

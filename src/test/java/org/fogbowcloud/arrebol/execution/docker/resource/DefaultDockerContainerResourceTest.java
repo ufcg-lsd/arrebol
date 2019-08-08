@@ -43,33 +43,29 @@ public class DefaultDockerContainerResourceTest {
 
         defaultDockerContainerResource =
             new DefaultDockerContainerResource(
-                MOCK_CONTAINER_NAME, MOCK_ADDRESS);
+                MOCK_CONTAINER_NAME, MOCK_ADDRESS, containerRequestHelper);
     }
 
     @Test
     public void testSuccessStart() throws Exception {
-        defaultDockerContainerResource.setContainerRequestHelper(containerRequestHelper);
         ContainerSpecification containerSpecification = new ContainerSpecification(MOCK_IMAGE_ID, new HashMap<>());
         defaultDockerContainerResource.start(containerSpecification);
     }
 
     @Test(expected = DockerImageNotFoundException.class)
     public void testStartWithNullImageId() throws UnsupportedEncodingException {
-        defaultDockerContainerResource.setContainerRequestHelper(containerRequestHelper);
         ContainerSpecification containerSpecification = new ContainerSpecification(null, new HashMap<>());
         defaultDockerContainerResource.start(containerSpecification);
     }
 
     @Test
     public void testStartWithNullRequirements() throws UnsupportedEncodingException {
-        defaultDockerContainerResource.setContainerRequestHelper(containerRequestHelper);
         ContainerSpecification containerSpecification = new ContainerSpecification(MOCK_IMAGE_ID, null);
         defaultDockerContainerResource.start(containerSpecification);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testStartWithNullContainerSpecification() throws UnsupportedEncodingException {
-        defaultDockerContainerResource.setContainerRequestHelper(containerRequestHelper);
         defaultDockerContainerResource.start(null);
     }
 
@@ -77,7 +73,9 @@ public class DefaultDockerContainerResourceTest {
     public void testFailCreateDockerContainer() throws UnsupportedEncodingException {
         Mockito.when(containerRequestHelper.createContainer(eq(MOCK_IMAGE_ID), Mockito.any(Map.class)))
             .thenThrow(new DockerCreateContainerException("Error while create docker container"));
-        defaultDockerContainerResource.setContainerRequestHelper(containerRequestHelper);
+        defaultDockerContainerResource =
+            new DefaultDockerContainerResource(
+                MOCK_CONTAINER_NAME, MOCK_ADDRESS, containerRequestHelper);
         ContainerSpecification containerSpecification = new ContainerSpecification(MOCK_IMAGE_ID, new HashMap<>());
         defaultDockerContainerResource.start(containerSpecification);
     }
@@ -86,7 +84,9 @@ public class DefaultDockerContainerResourceTest {
     public void testFailStartDockerContainer() throws UnsupportedEncodingException {
         Mockito.doThrow(new DockerStartException("Error while start docker container"))
             .when(containerRequestHelper).startContainer();
-        defaultDockerContainerResource.setContainerRequestHelper(containerRequestHelper);
+        defaultDockerContainerResource =
+            new DefaultDockerContainerResource(
+                MOCK_CONTAINER_NAME, MOCK_ADDRESS, containerRequestHelper);
         ContainerSpecification containerSpecification = new ContainerSpecification(MOCK_IMAGE_ID, new HashMap<>());
         defaultDockerContainerResource.start(containerSpecification);
     }

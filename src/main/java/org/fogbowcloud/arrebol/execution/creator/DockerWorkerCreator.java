@@ -11,6 +11,7 @@ import org.fogbowcloud.arrebol.execution.TaskExecutor;
 import org.fogbowcloud.arrebol.execution.Worker;
 import org.fogbowcloud.arrebol.execution.docker.DockerConfiguration;
 import org.fogbowcloud.arrebol.execution.docker.DockerTaskExecutor;
+import org.fogbowcloud.arrebol.execution.docker.request.ContainerRequestHelper;
 import org.fogbowcloud.arrebol.execution.docker.resource.DefaultDockerContainerResource;
 import org.fogbowcloud.arrebol.execution.docker.resource.DockerContainerResource;
 import org.fogbowcloud.arrebol.execution.docker.tasklet.DefaultTasklet;
@@ -53,8 +54,9 @@ public class DockerWorkerCreator implements WorkerCreator {
 
     private Worker createDockerWorker(Integer poolId, int resourceId, String address) {
         String containerId = "docker-executor-" + UUID.randomUUID().toString();
+        ContainerRequestHelper containerRequestHelper = new ContainerRequestHelper(address, containerId);
         DockerContainerResource dockerContainerResource =
-                new DefaultDockerContainerResource(containerId, address);
+                new DefaultDockerContainerResource(containerId, address, containerRequestHelper);
         Tasklet tasklet = new DefaultTasklet(address, containerId, this.tsExecutorFileContent);
         TaskExecutor executor =
                 new DockerTaskExecutor(
