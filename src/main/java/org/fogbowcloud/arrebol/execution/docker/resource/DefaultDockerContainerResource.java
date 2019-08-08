@@ -71,12 +71,15 @@ public class DefaultDockerContainerResource implements DockerContainerResource {
         return image;
     }
 
+    /**
+     * This method map Docker requirements from task to requirements keys from Docker API
+     */
     private Map<String, String> getDockerContainerRequirements(
             Map<String, String> taskRequirements) {
         Map<String, String> mapRequirements = new HashMap<>();
         if (Objects.nonNull(taskRequirements)) {
             String dockerRequirements =
-                    taskRequirements.get(DockerConstants.METADATA_DOCKER_REQUIREMENTS);
+                    taskRequirements.get(DockerConstants.DOCKER_REQUIREMENTS_KEY);
             if (dockerRequirements != null) {
                 String[] requirements = dockerRequirements.split("&&");
                 for (String requirement : requirements) {
@@ -84,12 +87,12 @@ public class DefaultDockerContainerResource implements DockerContainerResource {
                     String key = req[0].trim();
                     String value = req[1].trim();
                     switch (key) {
-                        case DockerConstants.DOCKER_MEMORY:
+                        case DockerConstants.DOCKER_MEMORY_KEY:
                             mapRequirements.put(DockerConstants.JSON_KEY_MEMORY, value);
                             LOGGER.info("Added requirement [" + DockerConstants.JSON_KEY_MEMORY +
                                 "] with value [" + value + "] to container [" + this.resourceId + "]");
                             break;
-                        case DockerConstants.DOCKER_CPU_WEIGHT:
+                        case DockerConstants.DOCKER_CPU_WEIGHT_KEY:
                             mapRequirements.put(DockerConstants.JSON_KEY_CPU_SHARES, value);
                             LOGGER.info("Added requirement [" + DockerConstants.JSON_KEY_CPU_SHARES +
                                 "] with value [" + value + "] to container [" + this.resourceId + "]");
