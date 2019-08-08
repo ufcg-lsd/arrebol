@@ -1,6 +1,5 @@
 package org.fogbowcloud.arrebol.execution.docker.resource;
 
-import static org.fogbowcloud.arrebol.execution.docker.DockerUnitTestUtil.MOCK_ADDRESS;
 import static org.fogbowcloud.arrebol.execution.docker.DockerUnitTestUtil.MOCK_CONTAINER_NAME;
 import static org.fogbowcloud.arrebol.execution.docker.DockerUnitTestUtil.MOCK_IMAGE_ID;
 import static org.mockito.Matchers.eq;
@@ -13,21 +12,15 @@ import org.fogbowcloud.arrebol.execution.docker.exceptions.DockerImageNotFoundEx
 import org.fogbowcloud.arrebol.execution.docker.exceptions.DockerRemoveContainerException;
 import org.fogbowcloud.arrebol.execution.docker.exceptions.DockerStartException;
 import org.fogbowcloud.arrebol.execution.docker.helpers.DockerContainerRequestHelper;
-import org.fogbowcloud.arrebol.execution.docker.request.HttpWrapper;
+import org.fogbowcloud.arrebol.execution.docker.helpers.DockerImageRequestHelper;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.mockito.Mockito;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
-import org.springframework.http.HttpMethod;
 
-@RunWith(PowerMockRunner.class)
-@PrepareForTest({HttpWrapper.class})
 public class DefaultDockerContainerResourceTest {
 
     private DockerContainerRequestHelper containerRequestHelper;
+    private DockerImageRequestHelper imageRequestHelper;
     private DefaultDockerContainerResource defaultDockerContainerResource;
 
     @Before
@@ -36,14 +29,11 @@ public class DefaultDockerContainerResourceTest {
         Mockito.when(containerRequestHelper.createContainer(eq(MOCK_IMAGE_ID), Mockito.any(Map.class)))
             .thenReturn(MOCK_CONTAINER_NAME);
 
-        PowerMockito.mockStatic(HttpWrapper.class);
-        String expectedEndpoint = "mockAddress/images/create?fromImage=mockImageId:latest";
-        Mockito.when(HttpWrapper.doRequest(HttpMethod.POST.name(), expectedEndpoint))
-            .thenReturn("Pulled");
+        imageRequestHelper = Mockito.mock(DockerImageRequestHelper.class);
 
         defaultDockerContainerResource =
             new DefaultDockerContainerResource(
-                MOCK_CONTAINER_NAME, MOCK_ADDRESS, containerRequestHelper);
+                MOCK_CONTAINER_NAME, containerRequestHelper, imageRequestHelper);
     }
 
     @Test
@@ -75,7 +65,7 @@ public class DefaultDockerContainerResourceTest {
             .thenThrow(new DockerCreateContainerException("Error while create docker container"));
         defaultDockerContainerResource =
             new DefaultDockerContainerResource(
-                MOCK_CONTAINER_NAME, MOCK_ADDRESS, containerRequestHelper);
+                MOCK_CONTAINER_NAME, containerRequestHelper, imageRequestHelper);
         ContainerSpecification containerSpecification = new ContainerSpecification(MOCK_IMAGE_ID, new HashMap<>());
         defaultDockerContainerResource.start(containerSpecification);
     }
@@ -86,7 +76,7 @@ public class DefaultDockerContainerResourceTest {
             .when(containerRequestHelper).startContainer();
         defaultDockerContainerResource =
             new DefaultDockerContainerResource(
-                MOCK_CONTAINER_NAME, MOCK_ADDRESS, containerRequestHelper);
+                MOCK_CONTAINER_NAME, containerRequestHelper, imageRequestHelper);
         ContainerSpecification containerSpecification = new ContainerSpecification(MOCK_IMAGE_ID, new HashMap<>());
         defaultDockerContainerResource.start(containerSpecification);
     }

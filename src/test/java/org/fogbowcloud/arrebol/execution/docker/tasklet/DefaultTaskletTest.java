@@ -30,8 +30,7 @@ public class DefaultTaskletTest {
         Mockito.when(taskletHelper.getExitCodes(task.getId(), task.getTaskSpec().getCommands().size())).thenReturn(
             MOCK_EC_ARRAY);
 
-        DefaultTasklet tasklet = new DefaultTasklet(MOCK_ADDRESS, MOCK_CONTAINER_NAME, loadTaskScriptExecutor());
-        tasklet.setTaskletHelper(taskletHelper);
+        DefaultTasklet tasklet = new DefaultTasklet(loadTaskScriptExecutor(), taskletHelper);
 
         TaskExecutionResult taskExecutionResult = tasklet.execute(task);
 
@@ -45,8 +44,7 @@ public class DefaultTaskletTest {
         Mockito.doThrow(new Exception("Cannot send task script executor to worker=" + MOCK_CONTAINER_NAME))
             .when(taskletHelper).sendTaskScriptExecutor(loadTaskScriptExecutor());
 
-        DefaultTasklet tasklet = new DefaultTasklet(MOCK_ADDRESS, MOCK_CONTAINER_NAME, loadTaskScriptExecutor());
-        tasklet.setTaskletHelper(taskletHelper);
+        DefaultTasklet tasklet = new DefaultTasklet(loadTaskScriptExecutor(), taskletHelper);
 
         TaskExecutionResult taskExecutionResult = tasklet.execute(task);
 
@@ -60,8 +58,7 @@ public class DefaultTaskletTest {
         Mockito.doThrow(new Exception("Error while trying to send command [echo Hello World] exit code=1"))
             .when(taskletHelper).sendTaskScriptExecutor(loadTaskScriptExecutor());
 
-        DefaultTasklet tasklet = new DefaultTasklet(MOCK_ADDRESS, MOCK_CONTAINER_NAME, loadTaskScriptExecutor());
-        tasklet.setTaskletHelper(taskletHelper);
+        DefaultTasklet tasklet = new DefaultTasklet(loadTaskScriptExecutor(), taskletHelper);
 
         TaskExecutionResult taskExecutionResult = tasklet.execute(task);
 
@@ -75,8 +72,7 @@ public class DefaultTaskletTest {
         Mockito.doThrow(new Exception("Error while get ec file content"))
             .when(taskletHelper).sendTaskScriptExecutor(loadTaskScriptExecutor());
 
-        DefaultTasklet tasklet = new DefaultTasklet(MOCK_ADDRESS, MOCK_CONTAINER_NAME, loadTaskScriptExecutor());
-        tasklet.setTaskletHelper(taskletHelper);
+        DefaultTasklet tasklet = new DefaultTasklet(loadTaskScriptExecutor(), taskletHelper);
 
         TaskExecutionResult taskExecutionResult = tasklet.execute(task);
 

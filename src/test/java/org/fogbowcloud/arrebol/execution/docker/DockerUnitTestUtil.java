@@ -26,6 +26,8 @@ public class DockerUnitTestUtil {
 
     public static final String TASK_SCRIPT_EXECUTOR_NAME = "task-script-executor.sh";
     public static final String MOCK_COMMAND = "echo Hello World";
+    public static final String MOCK_TASK_SCRIPT_CONTENT = MOCK_COMMAND + "\n" +
+        MOCK_COMMAND + "\n" + MOCK_COMMAND + "\n" + MOCK_COMMAND + "\n" + MOCK_COMMAND;
     public static final String MOCK_TASK_ID = "mockTaskId";
     public static final String MOCK_TS_FILE_PATH = "/tmp/" + MOCK_TASK_ID + ".ts";
     public static final String MOCK_EC_FILE_PATH = "/tmp/" + MOCK_TASK_ID + ".ts.ec";
