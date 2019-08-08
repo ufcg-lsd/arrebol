@@ -17,16 +17,16 @@ import org.fogbowcloud.arrebol.execution.docker.request.HttpWrapper;
 public class DefaultDockerContainerResource implements DockerContainerResource {
     private static final Logger LOGGER = Logger.getLogger(DefaultDockerContainerResource.class);
     private boolean started;
-    private String containerId;
+    private String resourceId;
     private String apiAddress;
     private ContainerRequestHelper containerRequestHelper;
 
     /**
      * @param apiAddress Defines the address where requests for the Docker API should be made
-     * @param containerId Sets the name of the container, is an identifier.
+     * @param resourceId Sets the name of the container, is an identifier.
      */
-    public DefaultDockerContainerResource(String containerId, String apiAddress, ContainerRequestHelper containerRequestHelper) {
-        this.containerId = containerId;
+    public DefaultDockerContainerResource(String resourceId, String apiAddress, ContainerRequestHelper containerRequestHelper) {
+        this.resourceId = resourceId;
         this.apiAddress = apiAddress;
         this.containerRequestHelper = containerRequestHelper;
         this.started = false;
@@ -37,7 +37,7 @@ public class DefaultDockerContainerResource implements DockerContainerResource {
             throws DockerStartException, DockerCreateContainerException,
                     UnsupportedEncodingException {
         if (isStarted()) {
-            throw new DockerStartException("Container[" + this.containerId + "] was already started");
+            throw new DockerStartException("Container[" + this.resourceId + "] was already started");
         }
         if (Objects.isNull(containerSpecification)) {
             throw new IllegalArgumentException("ContainerSpecification may be not null.");
@@ -46,7 +46,7 @@ public class DefaultDockerContainerResource implements DockerContainerResource {
                 "Container specification ["
                         + containerSpecification.toString()
                         + "] to container ["
-                        + this.containerId
+                        + this.resourceId
                         + "]");
         String image = this.setUpImage(containerSpecification.getImageId());
         Map<String, String> containerRequirements =
@@ -54,13 +54,13 @@ public class DefaultDockerContainerResource implements DockerContainerResource {
         this.containerRequestHelper.createContainer(image, containerRequirements);
         this.containerRequestHelper.startContainer();
         this.started = true;
-        LOGGER.info("Started the container " + this.containerId);
+        LOGGER.info("Started the container " + this.resourceId);
     }
 
     private String setUpImage(String image) {
         try {
             if (image != null && !image.trim().isEmpty()) {
-                LOGGER.info("Using image [" + image + "] to start " + containerId);
+                LOGGER.info("Using image [" + image + "] to start " + resourceId);
             } else {
                 throw new IllegalArgumentException("Image ID may be not null or empty");
             }
@@ -94,12 +94,12 @@ public class DefaultDockerContainerResource implements DockerContainerResource {
                         case DockerConstants.DOCKER_MEMORY:
                             mapRequirements.put(DockerConstants.JSON_KEY_MEMORY, value);
                             LOGGER.info("Added requirement [" + DockerConstants.JSON_KEY_MEMORY +
-                                "] with value [" + value + "] to container [" + this.containerId + "]");
+                                "] with value [" + value + "] to container [" + this.resourceId + "]");
                             break;
                         case DockerConstants.DOCKER_CPU_WEIGHT:
                             mapRequirements.put(DockerConstants.JSON_KEY_CPU_SHARES, value);
                             LOGGER.info("Added requirement [" + DockerConstants.JSON_KEY_CPU_SHARES +
-                                "] with value [" + value + "] to container [" + this.containerId + "]");
+                                "] with value [" + value + "] to container [" + this.resourceId + "]");
                             break;
                     }
                 }
@@ -111,7 +111,7 @@ public class DefaultDockerContainerResource implements DockerContainerResource {
     @Override
     public void stop() throws DockerRemoveContainerException {
         if(!isStarted()){
-            throw new DockerRemoveContainerException("Container[" + this.containerId + "] was already stopped");
+            throw new DockerRemoveContainerException("Container[" + this.resourceId + "] was already stopped");
         }
         this.containerRequestHelper.removeContainer();
         this.started = false;
@@ -119,7 +119,7 @@ public class DefaultDockerContainerResource implements DockerContainerResource {
 
     @Override
     public String getId() {
-        return this.containerId;
+        return this.resourceId;
     }
 
     @Override
