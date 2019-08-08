@@ -15,7 +15,6 @@ import org.fogbowcloud.arrebol.execution.docker.resource.DefaultDockerContainerR
 import org.fogbowcloud.arrebol.execution.docker.resource.DockerContainerResource;
 import org.fogbowcloud.arrebol.models.command.Command;
 import org.fogbowcloud.arrebol.models.command.CommandState;
-import org.fogbowcloud.arrebol.models.specification.Specification;
 import org.fogbowcloud.arrebol.models.task.Task;
 import org.fogbowcloud.arrebol.models.task.TaskSpec;
 import org.mockito.Mockito;
@@ -49,11 +48,10 @@ public class DockerUnitTestUtil {
         List<Command> commands = Collections.nCopies(5, command);
 
         Map<String, String> requirements = new HashMap<>();
-        Specification specification = new Specification(null, requirements);
         TaskSpec taskSpec = Mockito.mock(TaskSpec.class);
 
         Mockito.when(taskSpec.getCommands()).thenReturn(commands);
-        Mockito.when(taskSpec.getSpec()).thenReturn(specification);
+        Mockito.when(taskSpec.getRequirements()).thenReturn(requirements);
 
         Task task = new Task(MOCK_TASK_ID, taskSpec);
 

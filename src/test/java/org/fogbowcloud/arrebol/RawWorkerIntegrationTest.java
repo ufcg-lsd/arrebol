@@ -118,7 +118,7 @@ public class RawWorkerIntegrationTest {
         cmds.add(new Command((cmd)));
 
         String taskId = "taskId-"+ idCount++;
-        TaskSpec taskSpec = new TaskSpec(taskId+"spec", new DummySpec(), cmds, new HashMap<>());
+        TaskSpec taskSpec = new TaskSpec(taskId+"spec", new HashMap<>(), cmds, new HashMap<>());
         Task task = new Task(taskId, taskSpec);
 
         return task;
@@ -132,11 +132,5 @@ public class RawWorkerIntegrationTest {
             workers.add(new MatchAnyWorker(resourceSpec, "resourceId-"+i, poolId, taskExecutor));
         }
         return workers;
-    }
-
-    private class DummySpec extends Specification {
-        public DummySpec() {
-            super(null);
-        }
     }
 }
