@@ -1,5 +1,6 @@
 package org.fogbowcloud.arrebol.resource;
 
+import java.util.Map;
 import org.fogbowcloud.arrebol.execution.TaskExecutionResult;
 import org.fogbowcloud.arrebol.execution.TaskExecutor;
 import org.fogbowcloud.arrebol.execution.Worker;
@@ -29,7 +30,7 @@ public class MatchAnyWorker implements Worker {
     }
 
     @Override
-    public boolean match(Specification spec) {
+    public boolean match(Map<String, String> requirements) {
         return true;
     }
 

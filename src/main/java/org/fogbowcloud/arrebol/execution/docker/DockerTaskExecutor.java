@@ -12,7 +12,7 @@ import org.fogbowcloud.arrebol.execution.docker.resource.DockerContainerResource
 import org.fogbowcloud.arrebol.execution.docker.tasklet.Tasklet;
 import org.fogbowcloud.arrebol.models.command.Command;
 import org.fogbowcloud.arrebol.models.command.CommandState;
-import org.fogbowcloud.arrebol.models.specification.Specification;
+import org.fogbowcloud.arrebol.models.task.RequirementsContants;
 import org.fogbowcloud.arrebol.models.task.Task;
 
 /**
@@ -67,15 +67,13 @@ public class DockerTaskExecutor implements TaskExecutor {
     }
 
     private ContainerSpecification createContainerSpecification(Task task) {
-        Specification specification = task.getTaskSpec().getSpec();
+        Map<String, String> requirements = task.getTaskSpec().getRequirements();
         ContainerSpecification containerSpecification = new ContainerSpecification();
-        if( Objects.nonNull(specification)){
-            String imageId = task.getTaskSpec().getSpec().getImage();
+        if( Objects.nonNull(requirements)){
+            String imageId = requirements.get(RequirementsContants.IMAGE_KEY);
             if(Objects.isNull(imageId)){
                 imageId = this.defaultImageId;
             }
-            Map<String, String> requirements = task.getTaskSpec().getSpec().getRequirements();
-
             containerSpecification =
                 new ContainerSpecification(imageId, requirements);
         }

@@ -47,7 +47,7 @@ public class FifoSchedulerPolicy implements SchedulerPolicy {
     private AllocationPlan scheduleTask(Task task, Collection<Worker> availableWorkers) {
 
         for (Worker worker : availableWorkers) {
-            if (worker.match(task.getTaskSpec().getSpec())) {
+            if (worker.match(task.getTaskSpec().getRequirements())) {
                 logger.info("allocation made for task={" + task + "} using worker={" + worker + "}");
                 return new AllocationPlan(task, worker, AllocationPlan.Type.RUN);
             }

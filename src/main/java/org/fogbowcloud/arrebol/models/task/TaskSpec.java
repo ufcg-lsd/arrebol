@@ -8,11 +8,9 @@ import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
 import javax.validation.Valid;
 import javax.validation.constraints.Size;
 import org.fogbowcloud.arrebol.models.command.Command;
-import org.fogbowcloud.arrebol.models.specification.Specification;
 
 @Entity
 public class TaskSpec implements Serializable {
@@ -21,8 +19,8 @@ public class TaskSpec implements Serializable {
 
     @Id private String id;
 
-    @OneToOne(cascade = CascadeType.ALL)
-    private Specification spec;
+    @ElementCollection
+    private Map<String, String> requirements;
 
     @Valid
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
@@ -35,9 +33,9 @@ public class TaskSpec implements Serializable {
     @ElementCollection private Map<String, String> metadata;
 
     public TaskSpec(
-            String id, Specification spec, List<Command> commands, Map<String, String> metadata) {
+            String id, Map<String, String> requirements, List<Command> commands, Map<String, String> metadata) {
         this.id = id;
-        this.spec = spec;
+        this.requirements = requirements;
         this.commands = commands;
         this.metadata = metadata;
     }
@@ -54,8 +52,8 @@ public class TaskSpec implements Serializable {
         return this.commands;
     }
 
-    public Specification getSpec() {
-        return this.spec;
+    public Map<String, String> getRequirements() {
+        return requirements;
     }
 
     public Map<String, String> getMetadata() {
@@ -64,13 +62,7 @@ public class TaskSpec implements Serializable {
 
     @Override
     public String toString() {
-        return "TaskSpec{"
-                + "spec="
-                + spec
-                + ", commands="
-                + commands
-                + ", metadata="
-                + metadata
-                + '}';
+        return "TaskSpec{" + "id='" + id + '\'' + ", requirements=" + requirements + ", commands="
+            + commands + ", metadata=" + metadata + '}';
     }
 }
