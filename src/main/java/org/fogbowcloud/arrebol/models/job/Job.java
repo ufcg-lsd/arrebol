@@ -1,5 +1,6 @@
 package org.fogbowcloud.arrebol.models.job;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import org.fogbowcloud.arrebol.models.task.Task;
 
 import javax.persistence.*;
@@ -42,6 +43,7 @@ public class Job implements Serializable {
         return this.label;
     }
 
+    @JsonProperty("job_state")
     public JobState getJobState() {
         return this.jobState;
     }

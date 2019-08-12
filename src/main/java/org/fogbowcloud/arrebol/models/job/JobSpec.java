@@ -1,5 +1,6 @@
 package org.fogbowcloud.arrebol.models.job;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
@@ -34,6 +35,7 @@ public class JobSpec implements Serializable {
         return this.label;
     }
 
+    @JsonProperty("tasks_specs")
     public List<TaskSpec> getTasksSpecs() {
         return this.tasksSpecs;
     }
