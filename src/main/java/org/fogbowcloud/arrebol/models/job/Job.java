@@ -17,6 +17,7 @@ public class Job implements Serializable {
     private String label;
 
     @Enumerated(EnumType.STRING)
+    @JsonProperty("job_state")
     private JobState jobState;
 
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
@@ -43,7 +44,6 @@ public class Job implements Serializable {
         return this.label;
     }
 
-    @JsonProperty("job_state")
     public JobState getJobState() {
         return this.jobState;
     }

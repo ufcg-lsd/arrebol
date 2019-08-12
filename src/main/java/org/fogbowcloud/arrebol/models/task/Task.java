@@ -17,6 +17,7 @@ public class Task implements Serializable {
     private TaskState state;
 
     @OneToOne(cascade = CascadeType.ALL)
+    @JsonProperty("tasks_specs")
     private TaskSpec taskSpec;
 
     public Task(String id, TaskSpec taskSpec) {
@@ -42,7 +43,6 @@ public class Task implements Serializable {
         this.state = newState;
     }
 
-    @JsonProperty("tasks_specs")
     public TaskSpec getTaskSpec() {
         return taskSpec;
     }

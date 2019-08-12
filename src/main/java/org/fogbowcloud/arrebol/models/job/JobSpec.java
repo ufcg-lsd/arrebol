@@ -20,6 +20,7 @@ public class JobSpec implements Serializable {
     @Valid
     @NotNull(message = "TasksSpecs list may be not null.")
     @Size(min = 1, max = 10000, message = "TasksSpecs list may not be smaller than one and greater than 10000")
+    @JsonProperty("tasks_specs")
     private List<TaskSpec> tasksSpecs;
 
     JobSpec() {
@@ -35,7 +36,6 @@ public class JobSpec implements Serializable {
         return this.label;
     }
 
-    @JsonProperty("tasks_specs")
     public List<TaskSpec> getTasksSpecs() {
         return this.tasksSpecs;
     }
