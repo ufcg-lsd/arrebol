@@ -1,5 +1,6 @@
 package org.fogbowcloud.arrebol.models.job;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import org.fogbowcloud.arrebol.models.task.Task;
 
 import javax.persistence.*;
@@ -16,6 +17,7 @@ public class Job implements Serializable {
     private String label;
 
     @Enumerated(EnumType.STRING)
+    @JsonProperty("job_state")
     private JobState jobState;
 
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
