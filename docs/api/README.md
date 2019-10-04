@@ -62,7 +62,7 @@ GET /job/e7dbd27e-8747-488a-8124-75ad907e005d
 {
   "id": "e7dbd27e-8747-488a-8124-75ad907e005d",
   "label": "sleep",
-  "job_state": "READY",
+  "job_state": "RUNNING",
   "tasks": [
     {
       "id": "db14414e-5e0f-487a-970e-68396f97e33d",
@@ -84,7 +84,7 @@ GET /job/e7dbd27e-8747-488a-8124-75ad907e005d
           {
             "command": "sleep 20",
             "state": "RUNNING",
-            "exit_code": 0
+            "exit_code": -1
           }
         ]
       }
