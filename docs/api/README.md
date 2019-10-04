@@ -77,8 +77,13 @@ GET /job/e7dbd27e-8747-488a-8124-75ad907e005d
         },
         "commands": [
           {
-            "command": "mkdir test-dir && cd test-dir && touch test.file",
+            "command": "sleep 10",
             "state": "FINISHED",
+            "exit_code": 0
+          },
+          {
+            "command": "sleep 20",
+            "state": "RUNNING",
             "exit_code": 0
           }
         ]
