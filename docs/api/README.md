@@ -1,9 +1,21 @@
+## API Overview
+
+## Available endpoints
+Major resource endpoints supported by the Arrebol API are:
+
+| resource      | description                       |
+|:--------------|:----------------------------------|
+| `/jobs`      | manages job submission and tracking
+| `/queues`    | manages queue creation and status
+| `/workers` | manages worker addition and consultation |
 
 ### 1 - Jobs
-#### 1.1 - Submit a new job for execution
-**Endpoint**:
 
-`POST /jobs`
+#### 1.1 - Submit a new job for execution
+
+```http
+POST /jobs
+```
 
 **Request example**:
 
@@ -39,20 +51,11 @@
 }
 ```
 
-**Status codes**:
-- **201** – no error
-- **400** – bad parameter
-- **500** – server error
-
 #### 1.2 - Retrieves the execution status of a given job
 
-**Endpoint**:
-
-`GET /jobs/{id}/status`
-
-**Request example**:
-
-GET /job/e7dbd27e-8747-488a-8124-75ad907e005d/status
+```http
+GET /jobs/{id}/status
+```
 
 **Response example**:
 ```json
@@ -88,18 +91,14 @@ GET /job/e7dbd27e-8747-488a-8124-75ad907e005d/status
 }
 ```
 
-**Status codes**:
-- **200** – no error
-- **404** – no such job
-- **500** – server error
-
-#### 2 - Queues
+### 2 - Queues
 
 #### 2.1 - Create a new queue
 
 **Endpoint**:
-
-`POST /queues`
+```http
+POST /queues
+```
 
 **Request example**:
 
@@ -122,20 +121,14 @@ GET /job/e7dbd27e-8747-488a-8124-75ad907e005d/status
 	"id": "some_unique_id"
 }
 ```
-**Status codes**:
-- **201** – no error
-- **400** – bad parameter
-- **500** – server error
 
 #### 2.2 - Retrieves a list with the current queues
 
 **Endpoint**:
 
-`GET /queues`
-
-**Request example**:
-
+```http
 GET /queues
+```
 
 **Response example**:
 ```json
@@ -159,20 +152,13 @@ GET /queues
 ]
 ```
 
-**Status codes**:
-- **200** – no error
-- **404** – no such job
-- **500** – server error
-
 #### 2.3 - Retrieves the execution status of all jobs in a given queue
 
 **Endpoint**:
 
-`GET /queues/{id}/jobs`
-
-**Request example**:
-
-GET /queues/some_unique_id/jobs
+```http
+GET /queues/{id}/jobs
+```
 
 **Response example**:
 ```json
@@ -194,18 +180,12 @@ GET /queues/some_unique_id/jobs
     }
 ]
 ```
-**Status codes**:
-- **200** – no error
-- **404** – no such job
-- **500** – server error
 
 #### 2.4 - Adds a list of worker nodes to the queue pool
 
-`PUT /queues/{id}`
-
-**Request example**:
-
-PUT /queues/some_unique_id
+```http
+PUT /queues/{id}
+```
 
 *Body*
 ```json
@@ -224,7 +204,28 @@ PUT /queues/some_unique_id
 	}
 ]
 ```
-**Status codes**:
-- **201** – no error
-- **400** – bad parameter
-- **500** – server error
+
+## Responses
+
+Many API endpoints return the JSON representation of the resources created or edited. However, if an invalid request is submitted, or some other error occurs, Arrebol must returns a JSON response in the following format:
+
+```javascript
+{
+  "message" : string  
+}
+```
+
+The `message` attribute contains a message commonly used to indicate errors.
+
+
+## Status Codes
+
+Arrebol returns the following status codes in its API:
+
+| Status Code | Description |
+| :--- | :--- |
+| 200 | `OK` |
+| 201 | `CREATED` |
+| 400 | `BAD REQUEST` |
+| 404 | `NOT FOUND` |
+| 500 | `INTERNAL SERVER ERROR` |
