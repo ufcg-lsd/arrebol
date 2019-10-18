@@ -6,6 +6,8 @@ Major resource endpoints supported by the Arrebol API are:
 | resource      | description                       |
 |:--------------|:----------------------------------|
 | `/queues`    | manages queue creation and status
+| `/jobs`      | manages job execution and tracking
+| `/workers`   | manages the addition of workers |
 
 ### 1 - Queues
 
