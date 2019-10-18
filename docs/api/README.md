@@ -188,8 +188,7 @@ GET /queues/{id}/jobs/{job_id}/status
   "tasks": [
     {
       "id": "db14414e-5e0f-487a-970e-68396f97e33d",
-      "state": "FINISHED",      
-      },
+      "state": "FINISHED",            
       "commands": [
         {
           "command": "sleep 10",
