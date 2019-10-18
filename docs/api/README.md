@@ -7,11 +7,11 @@ Major resource endpoints supported by the Arrebol API are:
 |:--------------|:----------------------------------|
 | `/jobs`      | manages job submission and tracking
 | `/queues`    | manages queue creation and status
-| `/workers` | manages worker addition and consultation |
 
 ### 1 - Jobs
 
 #### 1.1 - Submit a new job for execution
+**URL**
 
 ```http
 POST /jobs
@@ -137,17 +137,19 @@ GET /queues
       "id": "some_unique_id",
       "jobs": 2,
       "worker_nodes": 5,
-      "workers_pool": 
+      "workers_pool": 25
     },
     {
       "id": "awesome_queue_id",
       "jobs": 10,
-      "worker_nodes": 2
+      "worker_nodes": 2,
+      "workers_pool": 10
     },
     {
       "id": "default_queue",
       "jobs": 0,
-      "worker_nodes": 0
+      "worker_nodes": 0,
+      "workers_pool": 25      
     },
 ]
 ```
@@ -192,15 +194,18 @@ PUT /queues/{id}
 [
    	{
    	    "address": "85.110.150.0",
-   	    "private_key": "path_to_the_key"
+   	    "private_key": "path_to_the_key",
+	    "workers_pool": 5
 	},
 	{
    	    "address": "85.110.150.1",
-   	    "private_key": "path_to_the_key"
+   	    "private_key": "path_to_the_key",
+	    "workers_pool": 2
 	},
 	{
    	    "address": "85.110.150.2",
-   	    "private_key": "path_to_the_key"
+   	    "private_key": "path_to_the_key",
+	    "workers_pool": 10
 	}
 ]
 ```
