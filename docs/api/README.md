@@ -79,7 +79,7 @@ GET /queues
 ]
 ```
 
-#### 1.3 - Adds a list of worker nodes to the queue pool
+#### 1.3 - Adds a new worker node to the pool of a given queue 
 
 ```http
 POST /queues/{id}/workers
@@ -91,18 +91,25 @@ POST /queues/{id}/workers
    	{
    	    "address": "85.110.150.0",   	    
 	    "worker_pool": 5
-	},
-	{
-   	    "address": "85.110.150.1",   	    
-	    "worker_pool": 2
-	},
-	{
-   	    "address": "85.110.150.2",   	    
-	    "worker_pool": 10
 	}
+	
 ]
 ```
-#### 1.4 - Retrieves the execution status of all jobs in a given queue
+**Response example**:
+
+```json
+{
+	"id": "unique_worker_id"
+}
+```
+
+#### 1.4 - Remove a worker
+
+```http
+DELETE /queues/{id}/workers/{worker_id}
+```
+
+#### 1.5 - Retrieves the execution status of all jobs in a given queue
 
 **URL**
 
