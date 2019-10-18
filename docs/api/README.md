@@ -17,7 +17,7 @@ Major resource endpoints supported by the Arrebol API are:
 POST /jobs
 ```
 
-**Request example**:
+**Request example**
 
 *Body*
 
@@ -53,6 +53,7 @@ POST /jobs
 
 #### 1.2 - Retrieves the execution status of a given job
 
+**URL**
 ```http
 GET /jobs/{id}/status
 ```
@@ -95,12 +96,12 @@ GET /jobs/{id}/status
 
 #### 2.1 - Create a new queue
 
-**Endpoint**:
+**URL**
 ```http
 POST /queues
 ```
 
-**Request example**:
+**Request example**
 
 *Body*
 ```json
@@ -115,7 +116,7 @@ POST /queues
 }
 ```
 
-**Response example**:
+**Response example**
 ```json
 {
 	"id": "some_unique_id"
@@ -124,13 +125,13 @@ POST /queues
 
 #### 2.2 - Retrieves a list with the current queues
 
-**Endpoint**:
+**URL**
 
 ```http
 GET /queues
 ```
 
-**Response example**:
+**Response example**
 ```json
 [
     {
@@ -156,13 +157,13 @@ GET /queues
 
 #### 2.3 - Retrieves the execution status of all jobs in a given queue
 
-**Endpoint**:
+**URL**
 
 ```http
 GET /queues/{id}/jobs
 ```
 
-**Response example**:
+**Response example**
 ```json
 [
     {
