@@ -88,15 +88,15 @@ POST /queues/{id}/workers
 [
    	{
    	    "address": "85.110.150.0",   	    
-	    "workers_pool": 5
+	    "worker_pool": 5
 	},
 	{
    	    "address": "85.110.150.1",   	    
-	    "workers_pool": 2
+	    "worker_pool": 2
 	},
 	{
    	    "address": "85.110.150.2",   	    
-	    "workers_pool": 10
+	    "worker_pool": 10
 	}
 ]
 ```
