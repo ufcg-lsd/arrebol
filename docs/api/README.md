@@ -2,9 +2,13 @@
 ### 1 - Jobs
 #### 1.1 - Submit a new job for execution
 **Endpoint**:
+
 `POST /jobs`
+
 **Request example**:
-*Body example*
+
+*Body*
+
 ```json
 {
    "label":"some_descriptive_label",
@@ -26,22 +30,30 @@
    ]
 }
 ```
+
 **Response example**:
+
 ```json
 {
 	"id": "e7dbd27e-8747-488a-8124-75ad907e005d"
 }
 ```
+
 **Status codes**:
 - **201** – no error
 - **400** – bad parameter
 - **500** – server error
 
 #### 1.2 - Retrieves the execution status of a given job
+
 **Endpoint**:
+
 `GET /jobs/{id}/status`
+
 **Request example**:
+
 GET /job/e7dbd27e-8747-488a-8124-75ad907e005d/status
+
 **Response example**:
 ```json
 {
@@ -75,16 +87,23 @@ GET /job/e7dbd27e-8747-488a-8124-75ad907e005d/status
   ]
 }
 ```
+
 **Status codes**:
 - **200** – no error
 - **404** – no such job
 - **500** – server error
 
 #### 2 - Queues
+
 #### 2.1 - Create a new queue
+
+**Endpoint**:
+
 `POST /queues`
+
 **Request example**:
-*Body example*
+
+*Body*
 ```json
 {
    "name":"long_jobs",
@@ -96,6 +115,7 @@ GET /job/e7dbd27e-8747-488a-8124-75ad907e005d/status
    ]
 }
 ```
+
 **Response example**:
 ```json
 {
@@ -108,10 +128,15 @@ GET /job/e7dbd27e-8747-488a-8124-75ad907e005d/status
 - **500** – server error
 
 #### 2.2 - Retrieves a list with the current queues
+
 **Endpoint**:
+
 `GET /queues`
+
 **Request example**:
+
 GET /queues
+
 **Response example**:
 ```json
 [
@@ -133,16 +158,22 @@ GET /queues
     },
 ]
 ```
+
 **Status codes**:
 - **200** – no error
 - **404** – no such job
 - **500** – server error
 
 #### 2.3 - Retrieves the execution status of all jobs in a given queue
+
 **Endpoint**:
+
 `GET /queues/{id}/jobs`
+
 **Request example**:
+
 GET /queues/some_unique_id/jobs
+
 **Response example**:
 ```json
 [
@@ -169,10 +200,14 @@ GET /queues/some_unique_id/jobs
 - **500** – server error
 
 #### 2.4 - Adds a list of worker nodes to the queue pool
+
 `PUT /queues/{id}`
+
 **Request example**:
+
 PUT /queues/some_unique_id
-*Body example*
+
+*Body*
 ```json
 [
    	{
