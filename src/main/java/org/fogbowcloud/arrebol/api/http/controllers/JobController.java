@@ -56,7 +56,7 @@ public class JobController {
         }
     }
 
-    public class JobResponse {
+    public static class JobResponse {
 
         private String id;
 
