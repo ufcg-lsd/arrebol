@@ -1,6 +1,7 @@
-package org.fogbowcloud.arrebol.queue;
+package org.fogbowcloud.arrebol.models.queue;
 
 import org.fogbowcloud.arrebol.models.task.Task;
+import org.fogbowcloud.arrebol.queue.TaskQueue;
 import org.fogbowcloud.arrebol.scheduler.DefaultScheduler;
 
 public class DefaultQueue implements Queue {

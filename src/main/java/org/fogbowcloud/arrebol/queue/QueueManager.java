@@ -2,6 +2,7 @@ package org.fogbowcloud.arrebol.queue;
 
 import java.util.Collection;
 import java.util.Map;
+import org.fogbowcloud.arrebol.models.queue.Queue;
 import org.fogbowcloud.arrebol.models.task.Task;
 
 public class QueueManager {

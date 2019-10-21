@@ -1,4 +1,4 @@
-package org.fogbowcloud.arrebol.queue;
+package org.fogbowcloud.arrebol.models.queue;
 
 import org.fogbowcloud.arrebol.models.task.Task;
 
