@@ -12,6 +12,9 @@ import org.fogbowcloud.arrebol.models.job.Job;
 import org.fogbowcloud.arrebol.models.job.JobState;
 import org.fogbowcloud.arrebol.models.task.Task;
 import org.fogbowcloud.arrebol.models.task.TaskState;
+import org.fogbowcloud.arrebol.queue.DefaultQueue;
+import org.fogbowcloud.arrebol.queue.Queue;
+import org.fogbowcloud.arrebol.queue.QueueManager;
 import org.fogbowcloud.arrebol.queue.TaskQueue;
 import org.fogbowcloud.arrebol.repositories.JobRepository;
 import org.fogbowcloud.arrebol.resource.StaticPool;
@@ -34,10 +37,11 @@ public class ArrebolController {
     private static final int COMMIT_PERIOD_MILLIS = 1000 * 20;
     private static final int UPDATE_PERIOD_MILLIS = 1000 * 10;
     private static final int FAIL_EXIT_CODE = 1;
+    private static final String defaultQueueId = "default";
+    private static final String defaultQueueName = "defaultQueue";
     private final Logger LOGGER = Logger.getLogger(ArrebolController.class);
-    private final DefaultScheduler scheduler;
     private final Map<String, Job> jobPool;
-    private final TaskQueue queue;
+    private final QueueManager queueManager;
     private final Timer jobDatabaseCommitter;
     private final Timer jobStateMonitor;
     private Configuration configuration;
@@ -62,21 +66,28 @@ public class ArrebolController {
             System.exit(FAIL_EXIT_CODE);
         }
 
-        String queueId = UUID.randomUUID().toString();
-        String queueName = "defaultQueue";
+        Queue defaultQueue = createDefaultQueue();
+        Map<String, Queue> queues = new HashMap<>();
+        queues.put(defaultQueue.getId(), defaultQueue);
 
-        this.queue = new TaskQueue(queueId, queueName);
+        this.queueManager = new QueueManager(queues);
+        this.jobPool = Collections.synchronizedMap(new HashMap<String, Job>());
+        this.jobDatabaseCommitter = new Timer(true);
+        this.jobStateMonitor = new Timer(true);
+    }
+
+    private Queue createDefaultQueue(){
+//        String queueId = UUID.randomUUID().toString();
+        TaskQueue tq = new TaskQueue(defaultQueueId, defaultQueueName);
 
         int poolId = 1;
         WorkerPool pool = createPool(poolId);
 
         //create the scheduler bind the pieces together
         FifoSchedulerPolicy policy = new FifoSchedulerPolicy();
-        this.scheduler = new DefaultScheduler(queue, pool, policy);
-
-        this.jobPool = Collections.synchronizedMap(new HashMap<String, Job>());
-        this.jobDatabaseCommitter = new Timer(true);
-        this.jobStateMonitor = new Timer(true);
+        DefaultScheduler scheduler = new DefaultScheduler(tq, pool, policy);
+        Queue defaultQueue = new DefaultQueue(defaultQueueId, tq, scheduler);
+        return defaultQueue;
     }
 
     private Configuration loadConfigurationFile(String path) throws FileNotFoundException {
@@ -101,9 +112,7 @@ public class ArrebolController {
     }
 
     public void start() {
-
-        Thread schedulerThread = new Thread(this.scheduler, "scheduler-thread");
-        schedulerThread.start();
+        this.queueManager.startQueue(defaultQueueId);
 
         //commit the job pool to DB using a COMMIT_PERIOD_MILLIS PERIOD between successive commits
         //(I also specified the delay to the start the fist commit to be COMMIT_PERIOD_MILLIS)
@@ -132,13 +141,24 @@ public class ArrebolController {
         // TODO: delete all resources?
     }
 
+    public String addJob(String queue, Job job){
+        job.setJobState(JobState.QUEUED);
+        this.jobPool.put(job.getId(), job);
+
+        for (Task task : job.getTasks()) {
+            this.queueManager.addTaskToQueue(queue, task);
+        }
+
+        return job.getId();
+    }
+
     public String addJob(Job job) {
 
         job.setJobState(JobState.QUEUED);
         this.jobPool.put(job.getId(), job);
 
         for (Task task : job.getTasks()) {
-            this.queue.addTask(task);
+//            this.queue.addTask(task);
         }
 
         return job.getId();
