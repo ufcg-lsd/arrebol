@@ -6,6 +6,7 @@ import org.fogbowcloud.arrebol.api.constants.ApiDocumentation.ApiEndpoints;
 import org.fogbowcloud.arrebol.api.constants.Messages;
 import org.fogbowcloud.arrebol.api.http.controllers.JobController.JobResponse;
 import org.fogbowcloud.arrebol.api.http.services.QueueService;
+import org.fogbowcloud.arrebol.models.job.Job;
 import org.fogbowcloud.arrebol.models.job.JobSpec;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -30,7 +31,7 @@ public class QueueController {
         this.queueService = queueService;
     }
 
-    @RequestMapping(value = ApiEndpoints.JOB_SUBMISSION_PATH, method = RequestMethod.POST)
+    @RequestMapping(value = ApiEndpoints.JOB_PATH, method = RequestMethod.POST)
     public ResponseEntity<String> addJobToQueue(@PathVariable String queue, @Valid @RequestBody JobSpec jobSpec) {
         LOGGER.info("Adding new Job: " + jobSpec + ".");
 
@@ -40,6 +41,19 @@ public class QueueController {
 
             LOGGER.info("Added " + jobSpec.getLabel() + " with id " + jobId + ".");
             return new ResponseEntity(jobResponse, HttpStatus.CREATED);
+        } catch (Throwable t) {
+            LOGGER.error(String.format(Messages.Exception.GENERIC_EXCEPTION, t.getMessage()), t);
+            throw t;
+        }
+    }
+
+    @RequestMapping(value = ApiEndpoints.JOB_BY_ID, method = RequestMethod.POST)
+    public ResponseEntity<String> getJobFromQueue(@PathVariable String queue, @PathVariable String id){
+        LOGGER.info("Getting an job with id: " + id);
+
+        try {
+            Job job = queueService.getJobByIdFromQueue(queue, id);
+            return new ResponseEntity(job, HttpStatus.CREATED);
         } catch (Throwable t) {
             LOGGER.error(String.format(Messages.Exception.GENERIC_EXCEPTION, t.getMessage()), t);
             throw t;

@@ -6,6 +6,7 @@ import java.util.Objects;
 import java.util.UUID;
 import org.apache.log4j.Logger;
 import org.fogbowcloud.arrebol.ArrebolFacade;
+import org.fogbowcloud.arrebol.api.exceptions.JobNotFoundException;
 import org.fogbowcloud.arrebol.api.http.dataaccessobject.JobDAO;
 import org.fogbowcloud.arrebol.models.job.Job;
 import org.fogbowcloud.arrebol.models.job.JobSpec;
@@ -58,5 +59,12 @@ public class QueueService {
         }
     }
 
-
+    public Job getJobByIdFromQueue(String queue, String id) {
+        Job job = this.jobDAO.getJobById(id);
+        if (job == null) {
+            String message = String.format("Job id not found : %s", id);
+            throw new JobNotFoundException(message);
+        }
+        return job;
+    }
 }
