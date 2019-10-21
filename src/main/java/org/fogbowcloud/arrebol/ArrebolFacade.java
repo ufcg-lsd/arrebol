@@ -23,6 +23,10 @@ public class ArrebolFacade {
         return arrebolController.addJob(job);
     }
 
+    public String addJob(String queue, Job job){
+        return null;
+    }
+
     public void stopJob(Job job){
         arrebolController.stopJob(job);
     }

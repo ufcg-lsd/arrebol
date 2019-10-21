@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping(value = ApiEndpoints.QUEUE_ENDPOINT)
 public class QueueController {
 
-    private final Logger LOGGER = Logger.getLogger(JobController.class);
+    private final Logger LOGGER = Logger.getLogger(QueueController.class);
 
     @Autowired
     private QueueService queueService;
@@ -35,7 +35,7 @@ public class QueueController {
         LOGGER.info("Adding new Job: " + jobSpec + ".");
 
         try {
-            String jobId = queueService.addJob(queue, jobSpec);
+            String jobId = queueService.addJobToQueue(queue, jobSpec);
             JobResponse jobResponse = new JobResponse(jobId);
 
             LOGGER.info("Added " + jobSpec.getLabel() + " with id " + jobId + ".");
