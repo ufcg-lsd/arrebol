@@ -27,11 +27,11 @@ POST /queues
    "worker_nodes": [
        	{
        	    "address": "200.100.050.0",
-	    "worker_pool": 5
+	    	"worker_pool": 5
     	},
-	{
+		{
        	    "address": "200.100.050.1",
-	    "worker_pool": 10
+	    	"worker_pool": 10
     	}
    ],   
 }
@@ -79,21 +79,37 @@ GET /queues
 ]
 ```
 
-#### 1.3 - Adds a new worker node to the pool of a given queue 
+#### 1.3 - Retrieves a queue by it id
+
+**URL**
 
 ```http
-POST /queues/{id}/workers
+GET /queues/{queue_id}
+```
+
+**Response example**
+```json
+{
+	"id": "some_unique_id",
+	"name": "awesome_name",
+	"jobs": 2,
+	"worker_nodes": 5,
+	"worker_pool": 25
+}
+```
+
+#### 1.4 - Adds a new worker node to the pool of a given queue 
+
+```http
+POST /queues/{queue_id}/workers
 ```
 
 *Body*
 ```json
-[
-   	{
-   	    "address": "85.110.150.0",   	    
-	    "worker_pool": 5
-	}
-	
-]
+{
+	"address": "85.110.150.0",   	    
+	"worker_pool": 5
+}
 ```
 **Response example**:
 
@@ -103,39 +119,10 @@ POST /queues/{id}/workers
 }
 ```
 
-#### 1.4 - Remove a worker
+#### 1.5 - Remove a worker
 
 ```http
 DELETE /queues/{id}/workers/{worker_id}
-```
-
-#### 1.5 - Retrieves the execution status of all jobs in a given queue
-
-**URL**
-
-```http
-GET /queues/{id}/jobs
-```
-
-**Response example**
-```json
-[
-    {
-      "id": "e7dbd27e-8747-488a-8124-75ad907e005d",
-      "label": "some_descriptive_label",
-      "state": "FINISHED"
-    },
-    {
-      "id": "e7dbd27e-8747-488a-8124-75ad907e005d",
-      "label": "awesome_job",
-      "state": "RUNNING"
-    },
-    {
-      "id": "e7dbd27e-8747-488a-8124-75ad907e005d",
-      "label": "sleep_job",
-      "state": "READY"
-    }
-]
 ```
 
 ### 2 - Jobs
@@ -144,7 +131,7 @@ GET /queues/{id}/jobs
 **URL**
 
 ```http
-POST /queues/{id}/jobs
+POST /queues/{queue_id}/jobs
 ```
 
 **Request example**
@@ -184,7 +171,7 @@ POST /queues/{id}/jobs
 
 **URL**
 ```http
-GET /queues/{id}/jobs/{job_id}/status
+GET /queues/{queue_id}/jobs/{job_id}/status
 ```
 
 **Response example**:
@@ -212,6 +199,36 @@ GET /queues/{id}/jobs/{job_id}/status
   ]
 }
 ```
+#### 2.3 - Retrieves the execution status of all jobs in a given queue
+
+**URL**
+
+```http
+GET /queues/{queue_id}/jobs
+```
+
+**Response example**
+```json
+[
+    {
+      "id": "e7dbd27e-8747-488a-8124-75ad907e005d",
+      "label": "some_descriptive_label",
+      "state": "FINISHED"
+    },
+    {
+      "id": "e7dbd27e-8747-488a-8124-75ad907e005d",
+      "label": "awesome_job",
+      "state": "RUNNING"
+    },
+    {
+      "id": "e7dbd27e-8747-488a-8124-75ad907e005d",
+      "label": "sleep_job",
+      "state": "READY"
+    }
+]
+```
+
+
 ## Responses
 
 Many API endpoints return the JSON representation of the resources created or edited. However, if an invalid request is submitted, or some other error occurs, Arrebol must returns a JSON response in the following format:
