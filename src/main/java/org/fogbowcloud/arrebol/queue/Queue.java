@@ -1,4 +1,4 @@
-package org.fogbowcloud.arrebol.models.queue;
+package org.fogbowcloud.arrebol.queue;
 
 import org.fogbowcloud.arrebol.models.job.Job;
 

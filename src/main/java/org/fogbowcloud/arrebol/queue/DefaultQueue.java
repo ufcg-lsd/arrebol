@@ -1,4 +1,4 @@
-package org.fogbowcloud.arrebol.models.queue;
+package org.fogbowcloud.arrebol.queue;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -10,7 +10,6 @@ import javax.persistence.Transient;
 import org.fogbowcloud.arrebol.datastore.managers.QueueDBManager;
 import org.fogbowcloud.arrebol.models.job.Job;
 import org.fogbowcloud.arrebol.models.task.Task;
-import org.fogbowcloud.arrebol.queue.TaskQueue;
 import org.fogbowcloud.arrebol.scheduler.DefaultScheduler;
 
 @Entity

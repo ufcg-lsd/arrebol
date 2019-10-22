@@ -1,7 +1,7 @@
 package org.fogbowcloud.arrebol.datastore.managers;
 
 import org.fogbowcloud.arrebol.datastore.repositories.DefaultQueueRepository;
-import org.fogbowcloud.arrebol.models.queue.DefaultQueue;
+import org.fogbowcloud.arrebol.queue.DefaultQueue;
 
 public class QueueDBManager {
 
