@@ -2,8 +2,8 @@ package org.fogbowcloud.arrebol.queue;
 
 import java.util.Collection;
 import java.util.Map;
+import org.fogbowcloud.arrebol.models.job.Job;
 import org.fogbowcloud.arrebol.models.queue.Queue;
-import org.fogbowcloud.arrebol.models.task.Task;
 
 public class QueueManager {
 
@@ -13,8 +13,8 @@ public class QueueManager {
         this.queues = queues;
     }
 
-    public void addTaskToQueue(String queue, Task task) {
-        queues.get(queue).addTaskToQueue(task);
+    public void addJob(String queue, Job job) {
+        queues.get(queue).addJob(job);
     }
 
     public void addQueue(Queue queue){
@@ -26,6 +26,6 @@ public class QueueManager {
     }
 
     public void startQueue(String queueId){
-        this.queues.get(queueId).startSchedulerThread();
+        this.queues.get(queueId).start();
     }
 }

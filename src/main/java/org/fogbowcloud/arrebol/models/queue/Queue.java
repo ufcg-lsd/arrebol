@@ -1,13 +1,13 @@
 package org.fogbowcloud.arrebol.models.queue;
 
-import org.fogbowcloud.arrebol.models.task.Task;
+import org.fogbowcloud.arrebol.models.job.Job;
 
 public interface Queue {
 
     String getId();
 
-    boolean addTaskToQueue(Task task);
+    void addJob(Job job);
 
-    void startSchedulerThread();
+    void start();
 
 }

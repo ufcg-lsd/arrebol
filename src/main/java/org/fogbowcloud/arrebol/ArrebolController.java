@@ -87,6 +87,7 @@ public class ArrebolController {
         FifoSchedulerPolicy policy = new FifoSchedulerPolicy();
         DefaultScheduler scheduler = new DefaultScheduler(tq, pool, policy);
         Queue defaultQueue = new DefaultQueue(defaultQueueId, tq, scheduler);
+
         return defaultQueue;
     }
 
@@ -144,10 +145,7 @@ public class ArrebolController {
     public String addJob(String queue, Job job){
         job.setJobState(JobState.QUEUED);
         this.jobPool.put(job.getId(), job);
-
-        for (Task task : job.getTasks()) {
-            this.queueManager.addTaskToQueue(queue, task);
-        }
+        this.queueManager.addJob(queue, job);
 
         return job.getId();
     }
