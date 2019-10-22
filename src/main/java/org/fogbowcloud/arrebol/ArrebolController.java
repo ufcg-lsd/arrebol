@@ -151,18 +151,6 @@ public class ArrebolController {
         return job.getId();
     }
 
-    public String addJob(Job job) {
-
-        job.setJobState(JobState.QUEUED);
-        this.jobPool.put(job.getId(), job);
-
-        for (Task task : job.getTasks()) {
-//            this.queue.addTask(task);
-        }
-
-        return job.getId();
-    }
-
     public String stopJob(Job job) {
 
         for (Task task : job.getTasks()) {

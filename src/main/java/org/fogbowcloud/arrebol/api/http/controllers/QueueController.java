@@ -4,7 +4,6 @@ import javax.validation.Valid;
 import org.apache.log4j.Logger;
 import org.fogbowcloud.arrebol.api.constants.ApiDocumentation.ApiEndpoints;
 import org.fogbowcloud.arrebol.api.constants.Messages;
-import org.fogbowcloud.arrebol.api.http.controllers.JobController.JobResponse;
 import org.fogbowcloud.arrebol.api.http.services.QueueService;
 import org.fogbowcloud.arrebol.models.job.Job;
 import org.fogbowcloud.arrebol.models.job.JobSpec;
@@ -32,7 +31,8 @@ public class QueueController {
     }
 
     @RequestMapping(value = ApiEndpoints.JOB_PATH, method = RequestMethod.POST)
-    public ResponseEntity<String> addJobToQueue(@PathVariable String queue, @Valid @RequestBody JobSpec jobSpec) {
+    public ResponseEntity<String> addJobToQueue(@PathVariable String queue,
+        @Valid @RequestBody JobSpec jobSpec) {
         LOGGER.info("Adding new Job: " + jobSpec + ".");
 
         try {
@@ -48,7 +48,8 @@ public class QueueController {
     }
 
     @RequestMapping(value = ApiEndpoints.JOB_BY_ID, method = RequestMethod.GET)
-    public ResponseEntity<String> getJobFromQueue(@PathVariable String queue, @PathVariable String id){
+    public ResponseEntity<String> getJobFromQueue(@PathVariable String queue,
+        @PathVariable String id) {
         LOGGER.info("Getting an job with id: " + id);
 
         try {
@@ -57,6 +58,23 @@ public class QueueController {
         } catch (Throwable t) {
             LOGGER.error(String.format(Messages.Exception.GENERIC_EXCEPTION, t.getMessage()), t);
             throw t;
+        }
+    }
+
+    private class JobResponse {
+
+        private String id;
+
+        public JobResponse(String id) {
+            this.id = id;
+        }
+
+        public String getId() {
+            return this.id;
+        }
+
+        public void setId(String id) {
+            this.id = id;
         }
     }
 

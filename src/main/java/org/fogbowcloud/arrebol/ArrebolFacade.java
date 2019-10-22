@@ -19,10 +19,6 @@ public class ArrebolFacade {
         arrebolController.stop();
     }
 
-    public String addJob(Job job){
-        return arrebolController.addJob(job);
-    }
-
     public String addJob(String queue, Job job){
         return arrebolController.addJob(queue, job);
     }
