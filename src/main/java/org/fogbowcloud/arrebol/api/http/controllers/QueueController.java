@@ -31,12 +31,12 @@ public class QueueController {
     }
 
     @RequestMapping(value = ApiEndpoints.JOB_PATH, method = RequestMethod.POST)
-    public ResponseEntity<String> addJobToQueue(@PathVariable String queue,
+    public ResponseEntity<String> addJobToQueue(@PathVariable String queueId,
         @Valid @RequestBody JobSpec jobSpec) {
         LOGGER.info("Adding new Job: " + jobSpec + ".");
 
         try {
-            String jobId = queueService.addJobToQueue(queue, jobSpec);
+            String jobId = queueService.addJobToQueue(queueId, jobSpec);
             JobResponse jobResponse = new JobResponse(jobId);
 
             LOGGER.info("Added " + jobSpec.getLabel() + " with id " + jobId + ".");
@@ -48,12 +48,12 @@ public class QueueController {
     }
 
     @RequestMapping(value = ApiEndpoints.JOB_BY_ID, method = RequestMethod.GET)
-    public ResponseEntity<String> getJobFromQueue(@PathVariable String queue,
-        @PathVariable String id) {
-        LOGGER.info("Getting an job with id: " + id);
+    public ResponseEntity<String> getJobFromQueue(@PathVariable String queueId,
+        @PathVariable String jobId) {
+        LOGGER.info("Getting an job with id: " + jobId);
 
         try {
-            Job job = queueService.getJobByIdFromQueue(queue, id);
+            Job job = queueService.getJobByIdFromQueue(queueId, jobId);
             return new ResponseEntity(job, HttpStatus.CREATED);
         } catch (Throwable t) {
             LOGGER.error(String.format(Messages.Exception.GENERIC_EXCEPTION, t.getMessage()), t);

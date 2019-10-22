@@ -7,7 +7,8 @@ import java.util.UUID;
 import org.apache.log4j.Logger;
 import org.fogbowcloud.arrebol.ArrebolFacade;
 import org.fogbowcloud.arrebol.api.exceptions.JobNotFoundException;
-import org.fogbowcloud.arrebol.api.http.dataaccessobject.JobDAO;
+import org.fogbowcloud.arrebol.datastore.managers.JobDBManager;
+import org.fogbowcloud.arrebol.datastore.managers.QueueDBManager;
 import org.fogbowcloud.arrebol.models.job.Job;
 import org.fogbowcloud.arrebol.models.job.JobSpec;
 import org.fogbowcloud.arrebol.models.task.Task;
@@ -25,15 +26,12 @@ public class QueueService {
     @Autowired
     private ArrebolFacade arrebolFacade;
 
-    @Autowired
-    private JobDAO jobDAO;
-
     public String addJobToQueue(String queue, JobSpec jobSpec) {
         LOGGER.debug("Create job object from job specification.");
         Job job = createJobFromSpec(jobSpec);
         LOGGER.info("Created job [ " + job.getId() + " ] from jobSpec");
         String id = this.arrebolFacade.addJob(queue, job);
-        this.jobDAO.addJob(job);
+        JobDBManager.getInstance().save(job);
         return id;
     }
 
@@ -59,12 +57,16 @@ public class QueueService {
         }
     }
 
-    public Job getJobByIdFromQueue(String queue, String id) {
-        Job job = this.jobDAO.getJobById(id);
+    public Job getJobByIdFromQueue(String queueId, String jobId) {
+        Job job = null;
+        if(QueueDBManager.getInstance().containsJob(queueId, jobId)){
+            job = JobDBManager.getInstance().findOne(jobId);
+        }
         if (job == null) {
-            String message = String.format("Job id not found : %s", id);
+            String message = String.format("Job [%s] not found in queue [%s]", jobId, queueId);
             throw new JobNotFoundException(message);
         }
+
         return job;
     }
 }

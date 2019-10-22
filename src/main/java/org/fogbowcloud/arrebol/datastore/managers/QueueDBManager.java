@@ -23,6 +23,15 @@ public class QueueDBManager {
         this.defaultQueueRepository.save(queue);
     }
 
+    public DefaultQueue findOne(String queueId){
+        return this.defaultQueueRepository.findOne(queueId);
+    }
+
+    public boolean containsJob(String queueId, String jobId){
+        DefaultQueue defaultQueue = this.defaultQueueRepository.findOne(queueId);
+        return defaultQueue.containsJob(jobId);
+    }
+
     public void setDefaultQueueRepository(DefaultQueueRepository defaultQueueRepository) {
         this.defaultQueueRepository = defaultQueueRepository;
     }

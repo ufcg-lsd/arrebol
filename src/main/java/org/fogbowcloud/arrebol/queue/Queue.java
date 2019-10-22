@@ -10,4 +10,6 @@ public interface Queue {
 
     void start();
 
+    boolean containsJob(String id);
+
 }

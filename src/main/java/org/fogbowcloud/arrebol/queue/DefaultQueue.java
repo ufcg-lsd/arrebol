@@ -56,4 +56,8 @@ public class DefaultQueue implements Queue {
         Thread schedulerThread = new Thread(this.defaultScheduler, "scheduler-thread-" + queueId);
         schedulerThread.start();
     }
+
+    public boolean containsJob(String id){
+        return jobs.contains(id);
+    }
 }
