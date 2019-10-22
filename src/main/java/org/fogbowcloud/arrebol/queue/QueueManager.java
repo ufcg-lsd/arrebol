@@ -28,4 +28,8 @@ public class QueueManager {
     public void startQueue(String queueId){
         this.queues.get(queueId).start();
     }
+
+    public Queue getQueue(String queueId){
+        return this.queues.get(queueId);
+    }
 }

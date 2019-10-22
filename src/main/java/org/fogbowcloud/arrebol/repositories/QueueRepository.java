@@ -1,8 +1,10 @@
 package org.fogbowcloud.arrebol.repositories;
 
-import org.fogbowcloud.arrebol.models.queue.Queue;
+import org.fogbowcloud.arrebol.models.queue.DefaultQueue;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
 
-public interface QueueRepository extends JpaRepository<Queue, String> {
+@Repository
+public interface QueueRepository extends JpaRepository<DefaultQueue, String> {
 
 }

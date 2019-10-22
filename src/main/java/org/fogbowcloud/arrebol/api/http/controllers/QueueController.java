@@ -47,7 +47,7 @@ public class QueueController {
         }
     }
 
-    @RequestMapping(value = ApiEndpoints.JOB_BY_ID, method = RequestMethod.POST)
+    @RequestMapping(value = ApiEndpoints.JOB_BY_ID, method = RequestMethod.GET)
     public ResponseEntity<String> getJobFromQueue(@PathVariable String queue, @PathVariable String id){
         LOGGER.info("Getting an job with id: " + id);
 

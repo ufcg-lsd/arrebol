@@ -17,6 +17,7 @@ import org.fogbowcloud.arrebol.models.queue.Queue;
 import org.fogbowcloud.arrebol.queue.QueueManager;
 import org.fogbowcloud.arrebol.queue.TaskQueue;
 import org.fogbowcloud.arrebol.repositories.JobRepository;
+import org.fogbowcloud.arrebol.repositories.QueueRepository;
 import org.fogbowcloud.arrebol.resource.StaticPool;
 import org.fogbowcloud.arrebol.resource.WorkerPool;
 import org.fogbowcloud.arrebol.scheduler.DefaultScheduler;
@@ -48,6 +49,9 @@ public class ArrebolController {
     private WorkerCreator workerCreator;
     @Autowired
     private JobRepository jobRepository;
+
+    @Autowired
+    private QueueRepository queueRepository;
 
     public ArrebolController() {
 
@@ -113,6 +117,8 @@ public class ArrebolController {
     }
 
     public void start() {
+        DefaultQueue defaultQueue = (DefaultQueue) this.queueManager.getQueue(defaultQueueId);
+        defaultQueue.setQueueRepository(queueRepository);
         this.queueManager.startQueue(defaultQueueId);
 
         //commit the job pool to DB using a COMMIT_PERIOD_MILLIS PERIOD between successive commits
