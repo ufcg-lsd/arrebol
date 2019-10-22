@@ -7,10 +7,10 @@ import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Transient;
+import org.fogbowcloud.arrebol.datastore.managers.QueueDBManager;
 import org.fogbowcloud.arrebol.models.job.Job;
 import org.fogbowcloud.arrebol.models.task.Task;
 import org.fogbowcloud.arrebol.queue.TaskQueue;
-import org.fogbowcloud.arrebol.repositories.QueueRepository;
 import org.fogbowcloud.arrebol.scheduler.DefaultScheduler;
 
 @Entity
@@ -24,13 +24,11 @@ public class DefaultQueue implements Queue {
     @Transient
     private DefaultScheduler defaultScheduler;
 
-    @Transient
-    private QueueRepository queueRepository;
-
-    @ElementCollection(targetClass=String.class)
+    @ElementCollection(targetClass = String.class)
     private List<String> jobs;
 
-    public DefaultQueue() {}
+    public DefaultQueue() {
+    }
 
     public DefaultQueue(final String queueId, final TaskQueue taskQueue,
         final DefaultScheduler defaultScheduler) {
@@ -48,19 +46,15 @@ public class DefaultQueue implements Queue {
     @Override
     public void addJob(Job job) {
         jobs.add(job.getId());
-        for(Task task : job.getTasks()){
+        for (Task task : job.getTasks()) {
             taskQueue.addTask(task);
         }
-        queueRepository.save(this);
+        QueueDBManager.getInstance().save(this);
     }
 
     @Override
-    public void start(){
+    public void start() {
         Thread schedulerThread = new Thread(this.defaultScheduler, "scheduler-thread-" + queueId);
         schedulerThread.start();
-    }
-
-    public void setQueueRepository(QueueRepository queueRepository) {
-        this.queueRepository = queueRepository;
     }
 }

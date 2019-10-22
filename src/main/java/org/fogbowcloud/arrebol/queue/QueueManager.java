@@ -29,7 +29,4 @@ public class QueueManager {
         this.queues.get(queueId).start();
     }
 
-    public Queue getQueue(String queueId){
-        return this.queues.get(queueId);
-    }
 }
