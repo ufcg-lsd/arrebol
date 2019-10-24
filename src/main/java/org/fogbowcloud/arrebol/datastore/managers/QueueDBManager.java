@@ -1,6 +1,7 @@
 package org.fogbowcloud.arrebol.datastore.managers;
 
 import org.fogbowcloud.arrebol.datastore.repositories.DefaultQueueRepository;
+import org.fogbowcloud.arrebol.models.job.Job;
 import org.fogbowcloud.arrebol.queue.DefaultQueue;
 
 public class QueueDBManager {
@@ -27,9 +28,12 @@ public class QueueDBManager {
         return this.defaultQueueRepository.findOne(queueId);
     }
 
+    public Job findOneJob(String queueId, String jobId) {
+        return this.defaultQueueRepository.findOne(queueId).getJob(jobId);
+    }
+
     public boolean containsJob(String queueId, String jobId){
-        DefaultQueue defaultQueue = this.defaultQueueRepository.findOne(queueId);
-        return defaultQueue.containsJob(jobId);
+        return this.defaultQueueRepository.findOne(queueId).containsJob(jobId);
     }
 
     public void setDefaultQueueRepository(DefaultQueueRepository defaultQueueRepository) {

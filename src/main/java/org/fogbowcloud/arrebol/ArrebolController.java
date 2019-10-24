@@ -2,6 +2,7 @@ package org.fogbowcloud.arrebol;
 
 import com.google.gson.Gson;
 import org.apache.log4j.Logger;
+import org.fogbowcloud.arrebol.datastore.managers.QueueDBManager;
 import org.fogbowcloud.arrebol.execution.Worker;
 import org.fogbowcloud.arrebol.execution.WorkerTypes;
 import org.fogbowcloud.arrebol.execution.creator.DockerWorkerCreator;
@@ -34,16 +35,12 @@ import java.util.*;
 @Component
 public class ArrebolController {
 
-    private static final int COMMIT_PERIOD_MILLIS = 1000 * 20;
-    private static final int UPDATE_PERIOD_MILLIS = 1000 * 10;
     private static final int FAIL_EXIT_CODE = 1;
     private static final String defaultQueueId = "default";
     private static final String defaultQueueName = "defaultQueue";
     private final Logger LOGGER = Logger.getLogger(ArrebolController.class);
     private final Map<String, Job> jobPool;
     private final QueueManager queueManager;
-    private final Timer jobDatabaseCommitter;
-    private final Timer jobStateMonitor;
     private Configuration configuration;
     private WorkerCreator workerCreator;
     @Autowired
@@ -66,14 +63,10 @@ public class ArrebolController {
             System.exit(FAIL_EXIT_CODE);
         }
 
-        Queue defaultQueue = createDefaultQueue();
-        Map<String, Queue> queues = new HashMap<>();
-        queues.put(defaultQueue.getId(), defaultQueue);
 
+        Map<String, Queue> queues = new HashMap<>();
         this.queueManager = new QueueManager(queues);
         this.jobPool = Collections.synchronizedMap(new HashMap<String, Job>());
-        this.jobDatabaseCommitter = new Timer(true);
-        this.jobStateMonitor = new Timer(true);
     }
 
     private Queue createDefaultQueue(){
@@ -86,8 +79,7 @@ public class ArrebolController {
         //create the scheduler bind the pieces together
         FifoSchedulerPolicy policy = new FifoSchedulerPolicy();
         DefaultScheduler scheduler = new DefaultScheduler(tq, pool, policy);
-        Queue defaultQueue = new DefaultQueue(defaultQueueId, tq, scheduler);
-
+        DefaultQueue defaultQueue = new DefaultQueue(defaultQueueId, tq, scheduler);
         return defaultQueue;
     }
 
@@ -113,27 +105,12 @@ public class ArrebolController {
     }
 
     public void start() {
+        Queue defaultQueue = createDefaultQueue();
+        this.queueManager.addQueue(defaultQueue);
         this.queueManager.startQueue(defaultQueueId);
 
         //commit the job pool to DB using a COMMIT_PERIOD_MILLIS PERIOD between successive commits
         //(I also specified the delay to the start the fist commit to be COMMIT_PERIOD_MILLIS)
-        this.jobDatabaseCommitter.schedule(new TimerTask() {
-                                               public void run() {
-                                                   LOGGER.info("Commit job pool to the database");
-                                                   jobRepository.save(jobPool.values());
-                                               }
-                                           }, COMMIT_PERIOD_MILLIS, COMMIT_PERIOD_MILLIS
-        );
-
-        this.jobStateMonitor.schedule(new TimerTask() {
-                                          public void run() {
-                                              LOGGER.info("Updating job states");
-                                              for (Job job : jobPool.values()) {
-                                                  updateJobState(job);
-                                              }
-                                          }
-                                      }, UPDATE_PERIOD_MILLIS, UPDATE_PERIOD_MILLIS
-        );
 
         // TODO: read from bd
     }
@@ -158,6 +135,10 @@ public class ArrebolController {
         return job.getId();
     }
 
+    public Job getJob(String queueId, String jobId){
+        return this.queueManager.getJob(queueId, jobId);
+    }
+
     public TaskState getTaskState(String taskId) {
         //FIXME:
         return null;
@@ -173,35 +154,6 @@ public class ArrebolController {
             String poolTypeMsg = "Worker Pool Type configuration property wrong or missing. Please, verify your configuration file.";
             throw new IllegalArgumentException(poolTypeMsg);
         }
-    }
-
-    //The arrebol does not change job state internally, so we need this workaround
-    private void updateJobState(Job job) {
-        JobState jobState = job.getJobState();
-        if (!(jobState.equals(JobState.FAILED) || jobState.equals(JobState.FINISHED))) {
-            if (all(job.getTasks(), TaskState.FAILED.getValue())) {
-                job.setJobState(JobState.FAILED);
-            } else if (all(job.getTasks(),
-                TaskState.FINISHED.getValue() + TaskState.FAILED.getValue())) {
-                job.setJobState(JobState.FINISHED);
-            } else if (all(job.getTasks(), TaskState.PENDING.getValue())) {
-                job.setJobState(JobState.QUEUED);
-            } else {
-                job.setJobState(JobState.RUNNING);
-            }
-        }
-    }
-
-    /**
-     * Checks whether all tasks in the collection have only states that the mask represents.
-     */
-    private boolean all(Collection<Task> tasks, int mask) {
-        for (Task t : tasks) {
-            if ((t.getState().getValue() & mask) == 0) {
-                return false;
-            }
-        }
-        return true;
     }
 
 }

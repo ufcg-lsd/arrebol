@@ -31,7 +31,6 @@ public class QueueService {
         Job job = createJobFromSpec(jobSpec);
         LOGGER.info("Created job [ " + job.getId() + " ] from jobSpec");
         String id = this.arrebolFacade.addJob(queue, job);
-        JobDBManager.getInstance().save(job);
         return id;
     }
 
@@ -58,15 +57,11 @@ public class QueueService {
     }
 
     public Job getJobByIdFromQueue(String queueId, String jobId) {
-        Job job = null;
-        if(QueueDBManager.getInstance().containsJob(queueId, jobId)){
-            job = JobDBManager.getInstance().findOne(jobId);
-        }
+        Job job = arrebolFacade.getJob(queueId, jobId);
         if (job == null) {
             String message = String.format("Job [%s] not found in queue [%s]", jobId, queueId);
             throw new JobNotFoundException(message);
         }
-
         return job;
     }
 }

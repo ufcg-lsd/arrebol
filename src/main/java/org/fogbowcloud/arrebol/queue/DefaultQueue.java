@@ -1,11 +1,16 @@
 package org.fogbowcloud.arrebol.queue;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
+import javax.persistence.CascadeType;
+import javax.persistence.CollectionTable;
 import javax.persistence.Column;
 import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import javax.persistence.MapKey;
+import javax.persistence.MapKeyColumn;
+import javax.persistence.OneToMany;
 import javax.persistence.Transient;
 import org.fogbowcloud.arrebol.datastore.managers.QueueDBManager;
 import org.fogbowcloud.arrebol.models.job.Job;
@@ -23,8 +28,8 @@ public class DefaultQueue implements Queue {
     @Transient
     private DefaultScheduler defaultScheduler;
 
-    @ElementCollection(targetClass = String.class)
-    private List<String> jobs;
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, targetEntity = Job.class)
+    private Map<String, Job> jobs;
 
     public DefaultQueue() {
     }
@@ -34,7 +39,7 @@ public class DefaultQueue implements Queue {
         this.queueId = queueId;
         this.taskQueue = taskQueue;
         this.defaultScheduler = defaultScheduler;
-        this.jobs = new ArrayList<>();
+        this.jobs = new HashMap<>();
     }
 
     @Override
@@ -44,11 +49,10 @@ public class DefaultQueue implements Queue {
 
     @Override
     public void addJob(Job job) {
-        jobs.add(job.getId());
+        jobs.put(job.getId(), job);
         for (Task task : job.getTasks()) {
             taskQueue.addTask(task);
         }
-        QueueDBManager.getInstance().save(this);
     }
 
     @Override
@@ -57,7 +61,17 @@ public class DefaultQueue implements Queue {
         schedulerThread.start();
     }
 
-    public boolean containsJob(String id){
-        return jobs.contains(id);
+    @Override
+    public Job getJob(String id) {
+        return this.jobs.get(id);
+    }
+
+    @Override
+    public Map<String, Job> getJobs() {
+        return this.jobs;
+    }
+
+    public boolean containsJob(String id) {
+        return jobs.containsKey(id);
     }
 }
