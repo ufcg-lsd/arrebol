@@ -7,6 +7,8 @@ public interface Queue {
 
     String getId();
 
+    String getName();
+
     void addJob(Job job);
 
     void start();

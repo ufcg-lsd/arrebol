@@ -187,4 +187,8 @@ public class ArrebolController {
 
         return pool;
     }
+
+    public Map<String, String> getQueues() {
+        return this.queueManager.getQueuesNames();
+    }
 }

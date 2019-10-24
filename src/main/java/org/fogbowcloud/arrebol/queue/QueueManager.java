@@ -1,7 +1,9 @@
 package org.fogbowcloud.arrebol.queue;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Timer;
 import java.util.TimerTask;
 import org.apache.log4j.Logger;
@@ -33,8 +35,12 @@ public class QueueManager {
         LOGGER.info("Added new queue [" + queue.getId() + "]");
     }
 
-    public Collection<String> getQueuesNames() {
-        return queues.keySet();
+    public Map<String, String> getQueuesNames() {
+        Map<String, String> queuesNames = new HashMap<>();
+        for(Entry<String, Queue> e : this.queues.entrySet()){
+            queuesNames.put(e.getKey(), e.getValue().getName());
+        }
+        return queuesNames;
     }
 
     public void startQueue(String queueId){

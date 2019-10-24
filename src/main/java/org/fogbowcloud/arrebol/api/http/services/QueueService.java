@@ -2,6 +2,7 @@ package org.fogbowcloud.arrebol.api.http.services;
 
 import java.util.Collection;
 import java.util.LinkedList;
+import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
 import org.apache.log4j.Logger;
@@ -73,5 +74,9 @@ public class QueueService {
     public String createQueue(QueueSpec queueSpec) {
         String queueId = arrebolFacade.createQueue(queueSpec);
         return queueId;
+    }
+
+    public Map<String, String> getQueues(){
+        return arrebolFacade.getQueues();
     }
 }

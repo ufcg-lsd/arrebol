@@ -48,6 +48,11 @@ public class DefaultQueue implements Queue {
     }
 
     @Override
+    public String getName() {
+        return taskQueue.getName();
+    }
+
+    @Override
     public void addJob(Job job) {
         jobs.put(job.getId(), job);
         for (Task task : job.getTasks()) {

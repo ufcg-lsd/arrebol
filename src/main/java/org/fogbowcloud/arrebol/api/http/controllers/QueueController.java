@@ -1,5 +1,6 @@
 package org.fogbowcloud.arrebol.api.http.controllers;
 
+import java.util.Map;
 import javax.validation.Valid;
 import org.apache.log4j.Logger;
 import org.fogbowcloud.arrebol.api.constants.ApiDocumentation.ApiEndpoints;
@@ -69,6 +70,19 @@ public class QueueController {
         try {
             String queueId = queueService.createQueue(queueSpec);
             return new ResponseEntity(queueId, HttpStatus.CREATED);
+        } catch (Throwable t) {
+            LOGGER.error(String.format(Messages.Exception.GENERIC_EXCEPTION, t.getMessage()), t);
+            throw t;
+        }
+    }
+
+    @RequestMapping(method = RequestMethod.GET)
+    public ResponseEntity<Map<String, String>> getQueues(){
+        LOGGER.info("Getting queues name");
+
+        try {
+            Map<String, String> queuesName = queueService.getQueues();
+            return new ResponseEntity(queuesName, HttpStatus.CREATED);
         } catch (Throwable t) {
             LOGGER.error(String.format(Messages.Exception.GENERIC_EXCEPTION, t.getMessage()), t);
             throw t;
