@@ -7,12 +7,17 @@ import java.util.UUID;
 import org.apache.log4j.Logger;
 import org.fogbowcloud.arrebol.ArrebolFacade;
 import org.fogbowcloud.arrebol.api.exceptions.JobNotFoundException;
-import org.fogbowcloud.arrebol.datastore.managers.JobDBManager;
-import org.fogbowcloud.arrebol.datastore.managers.QueueDBManager;
 import org.fogbowcloud.arrebol.models.job.Job;
 import org.fogbowcloud.arrebol.models.job.JobSpec;
 import org.fogbowcloud.arrebol.models.task.Task;
 import org.fogbowcloud.arrebol.models.task.TaskSpec;
+import org.fogbowcloud.arrebol.queue.DefaultQueue;
+import org.fogbowcloud.arrebol.queue.Queue;
+import org.fogbowcloud.arrebol.queue.TaskQueue;
+import org.fogbowcloud.arrebol.queue.spec.QueueSpec;
+import org.fogbowcloud.arrebol.resource.WorkerPool;
+import org.fogbowcloud.arrebol.scheduler.DefaultScheduler;
+import org.fogbowcloud.arrebol.scheduler.FifoSchedulerPolicy;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
@@ -63,5 +68,10 @@ public class QueueService {
             throw new JobNotFoundException(message);
         }
         return job;
+    }
+
+    public String createQueue(QueueSpec queueSpec) {
+        String queueId = arrebolFacade.createQueue(queueSpec);
+        return queueId;
     }
 }

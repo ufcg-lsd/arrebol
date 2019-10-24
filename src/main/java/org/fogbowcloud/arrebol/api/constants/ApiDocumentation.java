@@ -2,7 +2,7 @@ package org.fogbowcloud.arrebol.api.constants;
 
 public class ApiDocumentation {
 	public static class ApiEndpoints {
-		public static final String QUEUE_ENDPOINT = "queue";
+		public static final String QUEUE_ENDPOINT = "queues";
 		public static final String QUEUE_PATH = "/{queueId}";
 		public static final String JOB_ENDPOINT = "jobs";
 

@@ -8,6 +8,7 @@ import org.fogbowcloud.arrebol.execution.raw.RawTaskExecutor;
 import org.fogbowcloud.arrebol.execution.TaskExecutor;
 import org.fogbowcloud.arrebol.execution.Worker;
 import org.fogbowcloud.arrebol.models.specification.Specification;
+import org.fogbowcloud.arrebol.queue.spec.WorkerNode;
 import org.fogbowcloud.arrebol.resource.MatchAnyWorker;
 
 import java.util.Collection;
@@ -32,6 +33,11 @@ public class RawWorkerCreator implements WorkerCreator {
             workers.add(worker);
         }
         return workers;
+    }
+
+    @Override
+    public Collection<Worker> createWorkers(Integer poolId, WorkerNode workerNode) {
+        return null;
     }
 
     private Worker createRawWorker(Integer poolId, int resourceId) {

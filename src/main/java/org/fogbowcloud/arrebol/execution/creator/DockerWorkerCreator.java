@@ -22,6 +22,7 @@ import org.fogbowcloud.arrebol.execution.docker.tasklet.Tasklet;
 import org.fogbowcloud.arrebol.execution.docker.tasklet.TaskletHelper;
 import org.fogbowcloud.arrebol.models.configuration.Configuration;
 import org.fogbowcloud.arrebol.models.specification.Specification;
+import org.fogbowcloud.arrebol.queue.spec.WorkerNode;
 import org.fogbowcloud.arrebol.resource.MatchAnyWorker;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
@@ -52,6 +53,17 @@ public class DockerWorkerCreator implements WorkerCreator {
                 Worker worker = createDockerWorker(poolId, i, address);
                 workers.add(worker);
             }
+        }
+        return workers;
+    }
+
+    @Override
+    public Collection<Worker> createWorkers(Integer poolId, WorkerNode workerNode) {
+        Collection<Worker> workers = new LinkedList<>();
+        for(int i = 0; i < workerNode.getWorkerPool(); i++){
+            LOGGER.info("Creating docker worker with address=" + workerNode.getAddress());
+            Worker worker = createDockerWorker(poolId, i, workerNode.getAddress());
+            workers.add(worker);
         }
         return workers;
     }

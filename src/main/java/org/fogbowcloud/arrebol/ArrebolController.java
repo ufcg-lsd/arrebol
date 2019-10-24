@@ -18,6 +18,8 @@ import org.fogbowcloud.arrebol.queue.Queue;
 import org.fogbowcloud.arrebol.queue.QueueManager;
 import org.fogbowcloud.arrebol.queue.TaskQueue;
 import org.fogbowcloud.arrebol.datastore.repositories.JobRepository;
+import org.fogbowcloud.arrebol.queue.spec.QueueSpec;
+import org.fogbowcloud.arrebol.queue.spec.WorkerNode;
 import org.fogbowcloud.arrebol.resource.StaticPool;
 import org.fogbowcloud.arrebol.resource.WorkerPool;
 import org.fogbowcloud.arrebol.scheduler.DefaultScheduler;
@@ -43,11 +45,10 @@ public class ArrebolController {
     private final QueueManager queueManager;
     private Configuration configuration;
     private WorkerCreator workerCreator;
-    @Autowired
-    private JobRepository jobRepository;
+    private Integer poolId;
 
     public ArrebolController() {
-
+        poolId = 1;
         String path = null;
         try {
              path = Objects.requireNonNull(Thread.currentThread().getContextClassLoader()
@@ -63,7 +64,6 @@ public class ArrebolController {
             System.exit(FAIL_EXIT_CODE);
         }
 
-
         Map<String, Queue> queues = new HashMap<>();
         this.queueManager = new QueueManager(queues);
         this.jobPool = Collections.synchronizedMap(new HashMap<String, Job>());
@@ -73,7 +73,6 @@ public class ArrebolController {
 //        String queueId = UUID.randomUUID().toString();
         TaskQueue tq = new TaskQueue(defaultQueueId, defaultQueueName);
 
-        int poolId = 1;
         WorkerPool pool = createPool(poolId);
 
         //create the scheduler bind the pieces together
@@ -156,4 +155,36 @@ public class ArrebolController {
         }
     }
 
+    public String createQueue(QueueSpec queueSpec) {
+        Queue queue = createQueueFromSpec(queueSpec);
+        this.queueManager.addQueue(queue);
+        this.queueManager.startQueue(queue.getId());
+        return queue.getId();
+    }
+
+    private Queue createQueueFromSpec(QueueSpec queueSpec){
+        String queueId = UUID.randomUUID().toString();
+        TaskQueue tq = new TaskQueue(queueId, queueSpec.getName());
+
+        poolId++;
+        WorkerPool pool = createPool(poolId, queueSpec.getWorkerNodes());
+
+        //create the scheduler bind the pieces together
+        FifoSchedulerPolicy policy = new FifoSchedulerPolicy();
+        DefaultScheduler scheduler = new DefaultScheduler(tq, pool, policy);
+        DefaultQueue defaultQueue = new DefaultQueue(queueId, tq, scheduler);
+        return defaultQueue;
+    }
+
+    private WorkerPool createPool(int poolId, List<WorkerNode> workerNodes){
+        Collection<Worker> workers = new LinkedList<>();
+        for(WorkerNode workerNode : workerNodes){
+            workers.addAll(workerCreator.createWorkers(poolId, workerNode));
+        }
+
+        WorkerPool pool = new StaticPool(poolId, workers);
+        LOGGER.info("pool={" + pool + "} created with workers={" + workers + "}");
+
+        return pool;
+    }
 }

@@ -2,6 +2,8 @@ package org.fogbowcloud.arrebol;
 
 import org.fogbowcloud.arrebol.models.job.Job;
 import org.fogbowcloud.arrebol.models.task.TaskState;
+import org.fogbowcloud.arrebol.queue.Queue;
+import org.fogbowcloud.arrebol.queue.spec.QueueSpec;
 
 public class ArrebolFacade {
 
@@ -17,6 +19,10 @@ public class ArrebolFacade {
 
     public  void stop(){
         arrebolController.stop();
+    }
+
+    public String createQueue(QueueSpec queueSpec){
+        return arrebolController.createQueue(queueSpec);
     }
 
     public String addJob(String queue, Job job){
