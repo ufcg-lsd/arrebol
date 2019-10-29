@@ -4,7 +4,6 @@ import org.fogbowcloud.arrebol.execution.Worker;
 
 import java.util.Collection;
 import java.util.LinkedList;
-import org.fogbowcloud.arrebol.queue.spec.WorkerNode;
 
 public class StaticPool implements WorkerPool {
 

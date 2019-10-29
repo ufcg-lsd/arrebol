@@ -12,14 +12,8 @@ import org.fogbowcloud.arrebol.models.job.Job;
 import org.fogbowcloud.arrebol.models.job.JobSpec;
 import org.fogbowcloud.arrebol.models.task.Task;
 import org.fogbowcloud.arrebol.models.task.TaskSpec;
-import org.fogbowcloud.arrebol.queue.DefaultQueue;
-import org.fogbowcloud.arrebol.queue.Queue;
-import org.fogbowcloud.arrebol.queue.TaskQueue;
-import org.fogbowcloud.arrebol.queue.spec.QueueSpec;
-import org.fogbowcloud.arrebol.queue.spec.WorkerNode;
-import org.fogbowcloud.arrebol.resource.WorkerPool;
-import org.fogbowcloud.arrebol.scheduler.DefaultScheduler;
-import org.fogbowcloud.arrebol.scheduler.FifoSchedulerPolicy;
+import org.fogbowcloud.arrebol.processor.spec.JobProcessorSpec;
+import org.fogbowcloud.arrebol.processor.spec.WorkerNode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
@@ -72,8 +66,8 @@ public class QueueService {
         return job;
     }
 
-    public String createQueue(QueueSpec queueSpec) {
-        String queueId = arrebolFacade.createQueue(queueSpec);
+    public String createQueue(JobProcessorSpec jobProcessorSpec) {
+        String queueId = arrebolFacade.createQueue(jobProcessorSpec);
         return queueId;
     }
 

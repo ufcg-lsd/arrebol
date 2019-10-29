@@ -1,12 +1,11 @@
-package org.fogbowcloud.arrebol.queue;
+package org.fogbowcloud.arrebol.processor;
 
 import java.util.Collection;
 import java.util.Map;
 import org.fogbowcloud.arrebol.execution.Worker;
 import org.fogbowcloud.arrebol.models.job.Job;
-import org.fogbowcloud.arrebol.queue.spec.WorkerNode;
 
-public interface Queue {
+public interface JobProcessor {
 
     String getId();
 

@@ -8,8 +8,8 @@ import org.fogbowcloud.arrebol.api.constants.Messages;
 import org.fogbowcloud.arrebol.api.http.services.QueueService;
 import org.fogbowcloud.arrebol.models.job.Job;
 import org.fogbowcloud.arrebol.models.job.JobSpec;
-import org.fogbowcloud.arrebol.queue.spec.QueueSpec;
-import org.fogbowcloud.arrebol.queue.spec.WorkerNode;
+import org.fogbowcloud.arrebol.processor.spec.JobProcessorSpec;
+import org.fogbowcloud.arrebol.processor.spec.WorkerNode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -65,11 +65,11 @@ public class QueueController {
     }
 
     @RequestMapping(method = RequestMethod.POST)
-    public ResponseEntity<String> addQueue(@RequestBody QueueSpec queueSpec) {
-        LOGGER.info("Adding an new queue [" + queueSpec.getName() + "]");
+    public ResponseEntity<String> addQueue(@RequestBody JobProcessorSpec jobProcessorSpec) {
+        LOGGER.info("Adding an new queue [" + jobProcessorSpec.getName() + "]");
 
         try {
-            String queueId = queueService.createQueue(queueSpec);
+            String queueId = queueService.createQueue(jobProcessorSpec);
             return new ResponseEntity(queueId, HttpStatus.CREATED);
         } catch (Throwable t) {
             LOGGER.error(String.format(Messages.Exception.GENERIC_EXCEPTION, t.getMessage()), t);

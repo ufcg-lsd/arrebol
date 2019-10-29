@@ -3,9 +3,8 @@ package org.fogbowcloud.arrebol;
 import java.util.Map;
 import org.fogbowcloud.arrebol.models.job.Job;
 import org.fogbowcloud.arrebol.models.task.TaskState;
-import org.fogbowcloud.arrebol.queue.Queue;
-import org.fogbowcloud.arrebol.queue.spec.QueueSpec;
-import org.fogbowcloud.arrebol.queue.spec.WorkerNode;
+import org.fogbowcloud.arrebol.processor.spec.JobProcessorSpec;
+import org.fogbowcloud.arrebol.processor.spec.WorkerNode;
 
 public class ArrebolFacade {
 
@@ -23,8 +22,8 @@ public class ArrebolFacade {
         arrebolController.stop();
     }
 
-    public String createQueue(QueueSpec queueSpec){
-        return arrebolController.createQueue(queueSpec);
+    public String createQueue(JobProcessorSpec jobProcessorSpec){
+        return arrebolController.createQueue(jobProcessorSpec);
     }
 
     public Map<String, String> getQueues(){

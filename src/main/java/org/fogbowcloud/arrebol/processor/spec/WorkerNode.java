@@ -1,4 +1,4 @@
-package org.fogbowcloud.arrebol.queue.spec;
+package org.fogbowcloud.arrebol.processor.spec;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import javax.validation.constraints.NotEmpty;

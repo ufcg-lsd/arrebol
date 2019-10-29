@@ -2,7 +2,6 @@ package org.fogbowcloud.arrebol;
 
 import com.google.gson.Gson;
 import org.apache.log4j.Logger;
-import org.fogbowcloud.arrebol.datastore.managers.QueueDBManager;
 import org.fogbowcloud.arrebol.execution.Worker;
 import org.fogbowcloud.arrebol.execution.WorkerTypes;
 import org.fogbowcloud.arrebol.execution.creator.DockerWorkerCreator;
@@ -13,19 +12,17 @@ import org.fogbowcloud.arrebol.models.job.Job;
 import org.fogbowcloud.arrebol.models.job.JobState;
 import org.fogbowcloud.arrebol.models.task.Task;
 import org.fogbowcloud.arrebol.models.task.TaskState;
-import org.fogbowcloud.arrebol.queue.DefaultQueue;
-import org.fogbowcloud.arrebol.queue.Queue;
-import org.fogbowcloud.arrebol.queue.QueueManager;
-import org.fogbowcloud.arrebol.queue.TaskQueue;
-import org.fogbowcloud.arrebol.datastore.repositories.JobRepository;
-import org.fogbowcloud.arrebol.queue.spec.QueueSpec;
-import org.fogbowcloud.arrebol.queue.spec.WorkerNode;
+import org.fogbowcloud.arrebol.processor.DefaultJobProcessor;
+import org.fogbowcloud.arrebol.processor.JobProcessor;
+import org.fogbowcloud.arrebol.processor.JobProcessorManager;
+import org.fogbowcloud.arrebol.processor.TaskQueue;
+import org.fogbowcloud.arrebol.processor.spec.JobProcessorSpec;
+import org.fogbowcloud.arrebol.processor.spec.WorkerNode;
 import org.fogbowcloud.arrebol.resource.StaticPool;
 import org.fogbowcloud.arrebol.resource.WorkerPool;
 import org.fogbowcloud.arrebol.scheduler.DefaultScheduler;
 import org.fogbowcloud.arrebol.scheduler.FifoSchedulerPolicy;
 import org.fogbowcloud.arrebol.utils.ConfValidator;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.io.BufferedReader;
@@ -42,7 +39,7 @@ public class ArrebolController {
     private static final String defaultQueueName = "defaultQueue";
     private final Logger LOGGER = Logger.getLogger(ArrebolController.class);
     private final Map<String, Job> jobPool;
-    private final QueueManager queueManager;
+    private final JobProcessorManager jobProcessorManager;
     private Configuration configuration;
     private WorkerCreator workerCreator;
     private Integer poolId;
@@ -64,12 +61,12 @@ public class ArrebolController {
             System.exit(FAIL_EXIT_CODE);
         }
 
-        Map<String, Queue> queues = new HashMap<>();
-        this.queueManager = new QueueManager(queues);
-        this.jobPool = Collections.synchronizedMap(new HashMap<String, Job>());
+        Map<String, JobProcessor> queues = new HashMap<>();
+        this.jobProcessorManager = new JobProcessorManager(queues);
+        this.jobPool = Collections.synchronizedMap(new HashMap<>());
     }
 
-    private Queue createDefaultQueue(){
+    private JobProcessor createDefaultJobProcessor(){
 //        String queueId = UUID.randomUUID().toString();
         TaskQueue tq = new TaskQueue(defaultQueueId, defaultQueueName);
 
@@ -78,8 +75,8 @@ public class ArrebolController {
         //create the scheduler bind the pieces together
         FifoSchedulerPolicy policy = new FifoSchedulerPolicy();
         DefaultScheduler scheduler = new DefaultScheduler(tq, pool, policy);
-        DefaultQueue defaultQueue = new DefaultQueue(defaultQueueId, tq, scheduler, pool);
-        return defaultQueue;
+        DefaultJobProcessor defaultJobProcessor = new DefaultJobProcessor(defaultQueueId, tq, scheduler, pool);
+        return defaultJobProcessor;
     }
 
     private Configuration loadConfigurationFile(String path) throws FileNotFoundException {
@@ -104,9 +101,9 @@ public class ArrebolController {
     }
 
     public void start() {
-        Queue defaultQueue = createDefaultQueue();
-        this.queueManager.addQueue(defaultQueue);
-        this.queueManager.startQueue(defaultQueueId);
+        JobProcessor defaultJobProcessor = createDefaultJobProcessor();
+        this.jobProcessorManager.addJobProcessor(defaultJobProcessor);
+        this.jobProcessorManager.startJobProcessor(defaultQueueId);
 
         //commit the job pool to DB using a COMMIT_PERIOD_MILLIS PERIOD between successive commits
         //(I also specified the delay to the start the fist commit to be COMMIT_PERIOD_MILLIS)
@@ -121,7 +118,7 @@ public class ArrebolController {
     public String addJob(String queue, Job job){
         job.setJobState(JobState.QUEUED);
         this.jobPool.put(job.getId(), job);
-        this.queueManager.addJob(queue, job);
+        this.jobProcessorManager.addJob(queue, job);
 
         return job.getId();
     }
@@ -135,7 +132,7 @@ public class ArrebolController {
     }
 
     public Job getJob(String queueId, String jobId){
-        return this.queueManager.getJob(queueId, jobId);
+        return this.jobProcessorManager.getJob(queueId, jobId);
     }
 
     public TaskState getTaskState(String taskId) {
@@ -155,25 +152,25 @@ public class ArrebolController {
         }
     }
 
-    public String createQueue(QueueSpec queueSpec) {
-        Queue queue = createQueueFromSpec(queueSpec);
-        this.queueManager.addQueue(queue);
-        this.queueManager.startQueue(queue.getId());
-        return queue.getId();
+    public String createQueue(JobProcessorSpec jobProcessorSpec) {
+        JobProcessor jobProcessor = createQueueFromSpec(jobProcessorSpec);
+        this.jobProcessorManager.addJobProcessor(jobProcessor);
+        this.jobProcessorManager.startJobProcessor(jobProcessor.getId());
+        return jobProcessor.getId();
     }
 
-    private Queue createQueueFromSpec(QueueSpec queueSpec){
+    private JobProcessor createQueueFromSpec(JobProcessorSpec jobProcessorSpec){
         String queueId = UUID.randomUUID().toString();
-        TaskQueue tq = new TaskQueue(queueId, queueSpec.getName());
+        TaskQueue tq = new TaskQueue(queueId, jobProcessorSpec.getName());
 
         poolId++;
-        WorkerPool pool = createPool(poolId, queueSpec.getWorkerNodes());
+        WorkerPool pool = createPool(poolId, jobProcessorSpec.getWorkerNodes());
 
         //create the scheduler bind the pieces together
         FifoSchedulerPolicy policy = new FifoSchedulerPolicy();
         DefaultScheduler scheduler = new DefaultScheduler(tq, pool, policy);
-        DefaultQueue defaultQueue = new DefaultQueue(queueId, tq, scheduler, pool);
-        return defaultQueue;
+        DefaultJobProcessor defaultJobProcessor = new DefaultJobProcessor(queueId, tq, scheduler, pool);
+        return defaultJobProcessor;
     }
 
     private WorkerPool createPool(int poolId, List<WorkerNode> workerNodes){
@@ -189,13 +186,13 @@ public class ArrebolController {
     }
 
     public Map<String, String> getQueues() {
-        return this.queueManager.getQueuesNames();
+        return this.jobProcessorManager.getQueuesNames();
     }
 
     public void addWorkers(String queueId, WorkerNode workerNode) {
         //REVIEW POOL ID
         LOGGER.info("Adding WorkerNode [" + workerNode.getAddress() + "] to Queue [" + queueId + "]");
         Collection<Worker> workers = workerCreator.createWorkers(poolId, workerNode);
-        this.queueManager.addWorkers(queueId, workers);
+        this.jobProcessorManager.addWorkers(queueId, workers);
     }
 }

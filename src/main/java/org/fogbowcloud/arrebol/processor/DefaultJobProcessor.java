@@ -1,29 +1,22 @@
-package org.fogbowcloud.arrebol.queue;
+package org.fogbowcloud.arrebol.processor;
 
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import javax.persistence.CascadeType;
-import javax.persistence.CollectionTable;
 import javax.persistence.Column;
-import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.Id;
-import javax.persistence.MapKey;
-import javax.persistence.MapKeyColumn;
 import javax.persistence.OneToMany;
 import javax.persistence.Transient;
-import org.fogbowcloud.arrebol.datastore.managers.QueueDBManager;
 import org.fogbowcloud.arrebol.execution.Worker;
-import org.fogbowcloud.arrebol.execution.creator.DockerWorkerCreator;
 import org.fogbowcloud.arrebol.models.job.Job;
 import org.fogbowcloud.arrebol.models.task.Task;
-import org.fogbowcloud.arrebol.queue.spec.WorkerNode;
 import org.fogbowcloud.arrebol.resource.WorkerPool;
 import org.fogbowcloud.arrebol.scheduler.DefaultScheduler;
 
 @Entity
-public class DefaultQueue implements Queue {
+public class DefaultJobProcessor implements JobProcessor {
 
     @Id
     @Column(name = "ID")
@@ -38,10 +31,10 @@ public class DefaultQueue implements Queue {
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, targetEntity = Job.class)
     private Map<String, Job> jobs;
 
-    public DefaultQueue() {
+    public DefaultJobProcessor() {
     }
 
-    public DefaultQueue(final String queueId, final TaskQueue taskQueue,
+    public DefaultJobProcessor(final String queueId, final TaskQueue taskQueue,
         final DefaultScheduler defaultScheduler, final WorkerPool workerPool) {
         this.queueId = queueId;
         this.taskQueue = taskQueue;

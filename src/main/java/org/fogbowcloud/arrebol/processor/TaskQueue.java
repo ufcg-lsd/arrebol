@@ -1,11 +1,10 @@
-package org.fogbowcloud.arrebol.queue;
+package org.fogbowcloud.arrebol.processor;
 
 import org.fogbowcloud.arrebol.models.task.Task;
 
 import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedList;
-import java.util.Queue;
 
 public class TaskQueue {
 

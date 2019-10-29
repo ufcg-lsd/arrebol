@@ -3,7 +3,7 @@ package org.fogbowcloud.arrebol.execution.creator;
 import org.fogbowcloud.arrebol.execution.Worker;
 
 import java.util.Collection;
-import org.fogbowcloud.arrebol.queue.spec.WorkerNode;
+import org.fogbowcloud.arrebol.processor.spec.WorkerNode;
 
 public interface WorkerCreator {
 

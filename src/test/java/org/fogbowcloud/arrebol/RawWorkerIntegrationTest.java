@@ -10,7 +10,7 @@ import org.fogbowcloud.arrebol.models.specification.Specification;
 import org.fogbowcloud.arrebol.models.task.Task;
 import org.fogbowcloud.arrebol.models.task.TaskSpec;
 import org.fogbowcloud.arrebol.models.task.TaskState;
-import org.fogbowcloud.arrebol.queue.TaskQueue;
+import org.fogbowcloud.arrebol.processor.TaskQueue;
 import org.fogbowcloud.arrebol.resource.MatchAnyWorker;
 import org.fogbowcloud.arrebol.resource.StaticPool;
 import org.fogbowcloud.arrebol.resource.WorkerPool;

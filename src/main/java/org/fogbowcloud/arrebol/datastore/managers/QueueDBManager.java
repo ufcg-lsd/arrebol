@@ -2,7 +2,7 @@ package org.fogbowcloud.arrebol.datastore.managers;
 
 import org.fogbowcloud.arrebol.datastore.repositories.DefaultQueueRepository;
 import org.fogbowcloud.arrebol.models.job.Job;
-import org.fogbowcloud.arrebol.queue.DefaultQueue;
+import org.fogbowcloud.arrebol.processor.DefaultJobProcessor;
 
 public class QueueDBManager {
 
@@ -20,11 +20,11 @@ public class QueueDBManager {
         return instance;
     }
 
-    public void save(DefaultQueue queue) {
+    public void save(DefaultJobProcessor queue) {
         this.defaultQueueRepository.save(queue);
     }
 
-    public DefaultQueue findOne(String queueId){
+    public DefaultJobProcessor findOne(String queueId){
         return this.defaultQueueRepository.findOne(queueId);
     }
 

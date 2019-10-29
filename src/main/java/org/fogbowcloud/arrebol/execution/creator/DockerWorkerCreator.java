@@ -22,7 +22,7 @@ import org.fogbowcloud.arrebol.execution.docker.tasklet.Tasklet;
 import org.fogbowcloud.arrebol.execution.docker.tasklet.TaskletHelper;
 import org.fogbowcloud.arrebol.models.configuration.Configuration;
 import org.fogbowcloud.arrebol.models.specification.Specification;
-import org.fogbowcloud.arrebol.queue.spec.WorkerNode;
+import org.fogbowcloud.arrebol.processor.spec.WorkerNode;
 import org.fogbowcloud.arrebol.resource.MatchAnyWorker;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;

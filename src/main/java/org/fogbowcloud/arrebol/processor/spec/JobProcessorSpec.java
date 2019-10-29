@@ -1,10 +1,10 @@
-package org.fogbowcloud.arrebol.queue.spec;
+package org.fogbowcloud.arrebol.processor.spec;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.List;
 import javax.validation.constraints.NotNull;
 
-public class QueueSpec {
+public class JobProcessorSpec {
 
     @NotNull
     private String name;
@@ -13,7 +13,7 @@ public class QueueSpec {
     @JsonProperty("worker_nodes")
     private List<WorkerNode> workerNodes;
 
-    public QueueSpec() {
+    public JobProcessorSpec() {
     }
 
     public String getName() {

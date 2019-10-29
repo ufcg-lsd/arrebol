@@ -8,7 +8,7 @@ import org.fogbowcloud.arrebol.execution.raw.RawTaskExecutor;
 import org.fogbowcloud.arrebol.execution.TaskExecutor;
 import org.fogbowcloud.arrebol.execution.Worker;
 import org.fogbowcloud.arrebol.models.specification.Specification;
-import org.fogbowcloud.arrebol.queue.spec.WorkerNode;
+import org.fogbowcloud.arrebol.processor.spec.WorkerNode;
 import org.fogbowcloud.arrebol.resource.MatchAnyWorker;
 
 import java.util.Collection;
