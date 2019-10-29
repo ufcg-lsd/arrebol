@@ -78,7 +78,7 @@ public class ArrebolController {
         //create the scheduler bind the pieces together
         FifoSchedulerPolicy policy = new FifoSchedulerPolicy();
         DefaultScheduler scheduler = new DefaultScheduler(tq, pool, policy);
-        DefaultQueue defaultQueue = new DefaultQueue(defaultQueueId, tq, scheduler);
+        DefaultQueue defaultQueue = new DefaultQueue(defaultQueueId, tq, scheduler, pool);
         return defaultQueue;
     }
 
@@ -95,7 +95,7 @@ public class ArrebolController {
 
         //we need to deal with missing/wrong properties
 
-        Collection<Worker> workers = new LinkedList<>(workerCreator.createWorkers(poolId));
+        Collection<Worker> workers = Collections.synchronizedList(new LinkedList<>(workerCreator.createWorkers(poolId)));
 
         WorkerPool pool = new StaticPool(poolId, workers);
         LOGGER.info("pool={" + pool + "} created with workers={" + workers + "}");
@@ -172,12 +172,12 @@ public class ArrebolController {
         //create the scheduler bind the pieces together
         FifoSchedulerPolicy policy = new FifoSchedulerPolicy();
         DefaultScheduler scheduler = new DefaultScheduler(tq, pool, policy);
-        DefaultQueue defaultQueue = new DefaultQueue(queueId, tq, scheduler);
+        DefaultQueue defaultQueue = new DefaultQueue(queueId, tq, scheduler, pool);
         return defaultQueue;
     }
 
     private WorkerPool createPool(int poolId, List<WorkerNode> workerNodes){
-        Collection<Worker> workers = new LinkedList<>();
+        Collection<Worker> workers = Collections.synchronizedList(new LinkedList<>());
         for(WorkerNode workerNode : workerNodes){
             workers.addAll(workerCreator.createWorkers(poolId, workerNode));
         }
@@ -190,5 +190,12 @@ public class ArrebolController {
 
     public Map<String, String> getQueues() {
         return this.queueManager.getQueuesNames();
+    }
+
+    public void addWorkers(String queueId, WorkerNode workerNode) {
+        //REVIEW POOL ID
+        LOGGER.info("Adding WorkerNode [" + workerNode.getAddress() + "] to Queue [" + queueId + "]");
+        Collection<Worker> workers = workerCreator.createWorkers(poolId, workerNode);
+        this.queueManager.addWorkers(queueId, workers);
     }
 }

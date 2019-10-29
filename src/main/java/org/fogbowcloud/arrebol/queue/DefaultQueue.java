@@ -1,5 +1,6 @@
 package org.fogbowcloud.arrebol.queue;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import javax.persistence.CascadeType;
@@ -13,8 +14,12 @@ import javax.persistence.MapKeyColumn;
 import javax.persistence.OneToMany;
 import javax.persistence.Transient;
 import org.fogbowcloud.arrebol.datastore.managers.QueueDBManager;
+import org.fogbowcloud.arrebol.execution.Worker;
+import org.fogbowcloud.arrebol.execution.creator.DockerWorkerCreator;
 import org.fogbowcloud.arrebol.models.job.Job;
 import org.fogbowcloud.arrebol.models.task.Task;
+import org.fogbowcloud.arrebol.queue.spec.WorkerNode;
+import org.fogbowcloud.arrebol.resource.WorkerPool;
 import org.fogbowcloud.arrebol.scheduler.DefaultScheduler;
 
 @Entity
@@ -27,6 +32,8 @@ public class DefaultQueue implements Queue {
     private TaskQueue taskQueue;
     @Transient
     private DefaultScheduler defaultScheduler;
+    @Transient
+    private WorkerPool pool;
 
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, targetEntity = Job.class)
     private Map<String, Job> jobs;
@@ -35,10 +42,11 @@ public class DefaultQueue implements Queue {
     }
 
     public DefaultQueue(final String queueId, final TaskQueue taskQueue,
-        final DefaultScheduler defaultScheduler) {
+        final DefaultScheduler defaultScheduler, final WorkerPool workerPool) {
         this.queueId = queueId;
         this.taskQueue = taskQueue;
         this.defaultScheduler = defaultScheduler;
+        this.pool = workerPool;
         this.jobs = new HashMap<>();
     }
 
@@ -78,5 +86,10 @@ public class DefaultQueue implements Queue {
 
     public boolean containsJob(String id) {
         return jobs.containsKey(id);
+    }
+
+    @Override
+    public void addWorkers(Collection<Worker> workers) {
+        this.pool.addWorkers(workers);
     }
 }

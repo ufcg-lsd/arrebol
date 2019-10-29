@@ -2,13 +2,16 @@ package org.fogbowcloud.arrebol.api.constants;
 
 public class ApiDocumentation {
 	public static class ApiEndpoints {
+		public static final String VERSION_ENDPOINT = "version";
 		public static final String QUEUE_ENDPOINT = "queues";
-		public static final String QUEUE_PATH = "/{queueId}";
-		public static final String JOB_ENDPOINT = "jobs";
 
+		private static final String JOB_ENDPOINT = "jobs";
+		private static final String WORKERS_ENDPOINT = "workers";
+
+		private static final String QUEUE_PATH = "/{queueId}";
 		public static final String JOB_PATH = QUEUE_PATH + "/" + JOB_ENDPOINT;
 		public static final String JOB_BY_ID = JOB_PATH + "/{jobId}";
-		public static final String VERSION_ENDPOINT = "version";
+		public static final String ADD_WORKERS = QUEUE_PATH + "/" + WORKERS_ENDPOINT;
 	}
 
 	public static class ApiInfo {

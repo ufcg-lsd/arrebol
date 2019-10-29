@@ -9,6 +9,7 @@ import org.fogbowcloud.arrebol.api.http.services.QueueService;
 import org.fogbowcloud.arrebol.models.job.Job;
 import org.fogbowcloud.arrebol.models.job.JobSpec;
 import org.fogbowcloud.arrebol.queue.spec.QueueSpec;
+import org.fogbowcloud.arrebol.queue.spec.WorkerNode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -77,12 +78,25 @@ public class QueueController {
     }
 
     @RequestMapping(method = RequestMethod.GET)
-    public ResponseEntity<Map<String, String>> getQueues(){
+    public ResponseEntity<Map<String, String>> getQueues() {
         LOGGER.info("Getting queues name");
 
         try {
             Map<String, String> queuesName = queueService.getQueues();
             return new ResponseEntity(queuesName, HttpStatus.CREATED);
+        } catch (Throwable t) {
+            LOGGER.error(String.format(Messages.Exception.GENERIC_EXCEPTION, t.getMessage()), t);
+            throw t;
+        }
+    }
+
+    @RequestMapping(value = ApiEndpoints.ADD_WORKERS, method = RequestMethod.POST)
+    public ResponseEntity<?> addWorkers(@PathVariable String queueId, @RequestBody WorkerNode workerNode) {
+        LOGGER.info("Adding workers to queue [" + queueId + "]");
+
+        try {
+            queueService.addWorkers(queueId, workerNode);
+            return new ResponseEntity(HttpStatus.OK);
         } catch (Throwable t) {
             LOGGER.error(String.format(Messages.Exception.GENERIC_EXCEPTION, t.getMessage()), t);
             throw t;

@@ -16,6 +16,7 @@ import org.fogbowcloud.arrebol.queue.DefaultQueue;
 import org.fogbowcloud.arrebol.queue.Queue;
 import org.fogbowcloud.arrebol.queue.TaskQueue;
 import org.fogbowcloud.arrebol.queue.spec.QueueSpec;
+import org.fogbowcloud.arrebol.queue.spec.WorkerNode;
 import org.fogbowcloud.arrebol.resource.WorkerPool;
 import org.fogbowcloud.arrebol.scheduler.DefaultScheduler;
 import org.fogbowcloud.arrebol.scheduler.FifoSchedulerPolicy;
@@ -78,5 +79,9 @@ public class QueueService {
 
     public Map<String, String> getQueues(){
         return arrebolFacade.getQueues();
+    }
+
+    public void addWorkers(String queueId, WorkerNode workerNode) {
+        this.arrebolFacade.addWorkers(queueId, workerNode);
     }
 }

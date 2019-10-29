@@ -9,10 +9,12 @@ import java.util.TimerTask;
 import org.apache.log4j.Logger;
 import org.fogbowcloud.arrebol.ArrebolController;
 import org.fogbowcloud.arrebol.datastore.managers.QueueDBManager;
+import org.fogbowcloud.arrebol.execution.Worker;
 import org.fogbowcloud.arrebol.models.job.Job;
 import org.fogbowcloud.arrebol.models.job.JobState;
 import org.fogbowcloud.arrebol.models.task.Task;
 import org.fogbowcloud.arrebol.models.task.TaskState;
+import org.fogbowcloud.arrebol.queue.spec.WorkerNode;
 
 public class QueueManager {
 
@@ -63,6 +65,11 @@ public class QueueManager {
                                           }
                                       }, UPDATE_PERIOD_MILLIS, UPDATE_PERIOD_MILLIS
         );
+    }
+
+    public void addWorkers(String queueId, Collection<Worker> workers) {
+        LOGGER.info("Adding workers [" + workers.size() + "] to queue [" + queueId + "]");
+        this.queues.get(queueId).addWorkers(workers);
     }
 
     public void addJob(String queue, Job job) {

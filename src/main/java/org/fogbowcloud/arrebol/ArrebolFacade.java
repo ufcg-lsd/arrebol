@@ -5,6 +5,7 @@ import org.fogbowcloud.arrebol.models.job.Job;
 import org.fogbowcloud.arrebol.models.task.TaskState;
 import org.fogbowcloud.arrebol.queue.Queue;
 import org.fogbowcloud.arrebol.queue.spec.QueueSpec;
+import org.fogbowcloud.arrebol.queue.spec.WorkerNode;
 
 public class ArrebolFacade {
 
@@ -28,6 +29,10 @@ public class ArrebolFacade {
 
     public Map<String, String> getQueues(){
         return arrebolController.getQueues();
+    }
+
+    public void addWorkers(String queueId, WorkerNode workerNode) {
+        arrebolController.addWorkers(queueId, workerNode);
     }
 
     public String addJob(String queue, Job job){
