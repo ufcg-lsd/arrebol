@@ -1,8 +1,10 @@
 package org.fogbowcloud.arrebol;
 
+import java.util.List;
 import java.util.Map;
 import org.fogbowcloud.arrebol.models.job.Job;
 import org.fogbowcloud.arrebol.models.task.TaskState;
+import org.fogbowcloud.arrebol.processor.dto.DefaultJobProcessorDTO;
 import org.fogbowcloud.arrebol.processor.spec.JobProcessorSpec;
 import org.fogbowcloud.arrebol.processor.spec.WorkerNode;
 
@@ -26,7 +28,7 @@ public class ArrebolFacade {
         return arrebolController.createQueue(jobProcessorSpec);
     }
 
-    public Map<String, String> getQueues(){
+    public List<DefaultJobProcessorDTO> getQueues(){
         return arrebolController.getQueues();
     }
 

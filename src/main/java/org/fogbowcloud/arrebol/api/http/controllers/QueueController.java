@@ -1,5 +1,6 @@
 package org.fogbowcloud.arrebol.api.http.controllers;
 
+import java.util.List;
 import java.util.Map;
 import javax.validation.Valid;
 import org.apache.log4j.Logger;
@@ -8,6 +9,7 @@ import org.fogbowcloud.arrebol.api.constants.Messages;
 import org.fogbowcloud.arrebol.api.http.services.QueueService;
 import org.fogbowcloud.arrebol.models.job.Job;
 import org.fogbowcloud.arrebol.models.job.JobSpec;
+import org.fogbowcloud.arrebol.processor.dto.DefaultJobProcessorDTO;
 import org.fogbowcloud.arrebol.processor.spec.JobProcessorSpec;
 import org.fogbowcloud.arrebol.processor.spec.WorkerNode;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -78,12 +80,12 @@ public class QueueController {
     }
 
     @RequestMapping(method = RequestMethod.GET)
-    public ResponseEntity<Map<String, String>> getQueues() {
+    public ResponseEntity<List<DefaultJobProcessorDTO>> getQueues() {
         LOGGER.info("Getting queues name");
 
         try {
-            Map<String, String> queuesName = queueService.getQueues();
-            return new ResponseEntity(queuesName, HttpStatus.CREATED);
+            List<DefaultJobProcessorDTO> queuesName = queueService.getQueues();
+            return new ResponseEntity<>(queuesName, HttpStatus.OK);
         } catch (Throwable t) {
             LOGGER.error(String.format(Messages.Exception.GENERIC_EXCEPTION, t.getMessage()), t);
             throw t;

@@ -14,7 +14,8 @@ import org.fogbowcloud.arrebol.models.task.Task;
 import org.fogbowcloud.arrebol.models.task.TaskState;
 import org.fogbowcloud.arrebol.processor.DefaultJobProcessor;
 import org.fogbowcloud.arrebol.processor.JobProcessor;
-import org.fogbowcloud.arrebol.processor.JobProcessorManager;
+import org.fogbowcloud.arrebol.processor.dto.DefaultJobProcessorDTO;
+import org.fogbowcloud.arrebol.processor.manager.JobProcessorManager;
 import org.fogbowcloud.arrebol.processor.TaskQueue;
 import org.fogbowcloud.arrebol.processor.spec.JobProcessorSpec;
 import org.fogbowcloud.arrebol.processor.spec.WorkerNode;
@@ -185,8 +186,8 @@ public class ArrebolController {
         return pool;
     }
 
-    public Map<String, String> getQueues() {
-        return this.jobProcessorManager.getQueuesNames();
+    public List<DefaultJobProcessorDTO> getQueues() {
+        return this.jobProcessorManager.getQueues();
     }
 
     public void addWorkers(String queueId, WorkerNode workerNode) {

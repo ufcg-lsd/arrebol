@@ -1,7 +1,9 @@
-package org.fogbowcloud.arrebol.processor;
+package org.fogbowcloud.arrebol.processor.manager;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Timer;
@@ -13,6 +15,9 @@ import org.fogbowcloud.arrebol.models.job.Job;
 import org.fogbowcloud.arrebol.models.job.JobState;
 import org.fogbowcloud.arrebol.models.task.Task;
 import org.fogbowcloud.arrebol.models.task.TaskState;
+import org.fogbowcloud.arrebol.processor.DefaultJobProcessor;
+import org.fogbowcloud.arrebol.processor.JobProcessor;
+import org.fogbowcloud.arrebol.processor.dto.DefaultJobProcessorDTO;
 
 public class JobProcessorManager {
 
@@ -35,12 +40,13 @@ public class JobProcessorManager {
         LOGGER.info("Added new queue [" + jobProcessor.getId() + "]");
     }
 
-    public Map<String, String> getQueuesNames() {
-        Map<String, String> queuesNames = new HashMap<>();
-        for(Entry<String, JobProcessor> e : this.queues.entrySet()){
-            queuesNames.put(e.getKey(), e.getValue().getName());
+    public List<DefaultJobProcessorDTO> getQueues() {
+        List<DefaultJobProcessorDTO> list = new ArrayList<>();
+        for(JobProcessor jobProcessor : queues.values()) {
+            DefaultJobProcessorDTO defaultJobProcessorDTO = new DefaultJobProcessorDTO((DefaultJobProcessor) jobProcessor);
+            list.add(defaultJobProcessorDTO);
         }
-        return queuesNames;
+        return list;
     }
 
     public void startJobProcessor(String queueId){

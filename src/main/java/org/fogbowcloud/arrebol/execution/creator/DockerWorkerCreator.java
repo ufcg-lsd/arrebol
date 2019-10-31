@@ -78,7 +78,7 @@ public class DockerWorkerCreator implements WorkerCreator {
                 new DockerTaskExecutor(
                         this.configuration.getImageId(), dockerContainerResource, tasklet);
         Specification resourceSpec = null;
-        Worker worker = new MatchAnyWorker(resourceSpec, AppUtil.generateUniqueStringId(), poolId, executor);
+        Worker worker = new MatchAnyWorker(AppUtil.generateUniqueStringId(), resourceSpec, poolId, executor);
         LOGGER.info("Created Docker Worker [" + worker.getId() + "]");
         return worker;
     }

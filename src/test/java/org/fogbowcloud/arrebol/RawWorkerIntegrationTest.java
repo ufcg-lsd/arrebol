@@ -130,7 +130,7 @@ public class RawWorkerIntegrationTest {
         Specification resourceSpec = null;
         for (int i = 0; i < workerPoolSize; i++) {
             TaskExecutor taskExecutor = new RawTaskExecutor();
-            workers.add(new MatchAnyWorker(resourceSpec, AppUtil.generateUniqueStringId(), poolId, taskExecutor));
+            workers.add(new MatchAnyWorker(AppUtil.generateUniqueStringId(), resourceSpec, poolId, taskExecutor));
         }
         return workers;
     }

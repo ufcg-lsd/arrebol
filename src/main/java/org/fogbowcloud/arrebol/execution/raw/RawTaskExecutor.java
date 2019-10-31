@@ -1,5 +1,6 @@
 package org.fogbowcloud.arrebol.execution.raw;
 
+import java.util.Map;
 import org.apache.log4j.Logger;
 import org.fogbowcloud.arrebol.execution.TaskExecutionResult;
 import org.fogbowcloud.arrebol.execution.TaskExecutor;
@@ -43,6 +44,12 @@ public class RawTaskExecutor implements TaskExecutor {
         }
 
         return new TaskExecutionResult(result, getExitCodes(commandsList));
+    }
+
+    //TODO Implement this method
+    @Override
+    public Map<String, String> getMetadata() {
+        return null;
     }
 
     private int[] getExitCodes(List<Command> commands) {

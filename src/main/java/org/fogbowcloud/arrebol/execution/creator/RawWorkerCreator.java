@@ -43,8 +43,8 @@ public class RawWorkerCreator implements WorkerCreator {
     private Worker createRawWorker(Integer poolId) {
         TaskExecutor executor = new RawTaskExecutor();
         Specification resourceSpec = null;
-        Worker worker = new MatchAnyWorker(resourceSpec, AppUtil.generateUniqueStringId(), poolId,
-            executor);
+        Worker worker = new MatchAnyWorker(AppUtil.generateUniqueStringId(), resourceSpec, poolId,
+                    executor);
         LOGGER.info("Created raw worker [" + worker.getId() + "]");
         return worker;
     }

@@ -2,6 +2,7 @@ package org.fogbowcloud.arrebol.api.http.services;
 
 import java.util.Collection;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
@@ -12,6 +13,7 @@ import org.fogbowcloud.arrebol.models.job.Job;
 import org.fogbowcloud.arrebol.models.job.JobSpec;
 import org.fogbowcloud.arrebol.models.task.Task;
 import org.fogbowcloud.arrebol.models.task.TaskSpec;
+import org.fogbowcloud.arrebol.processor.dto.DefaultJobProcessorDTO;
 import org.fogbowcloud.arrebol.processor.spec.JobProcessorSpec;
 import org.fogbowcloud.arrebol.processor.spec.WorkerNode;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -71,7 +73,7 @@ public class QueueService {
         return queueId;
     }
 
-    public Map<String, String> getQueues(){
+    public List<DefaultJobProcessorDTO> getQueues(){
         return arrebolFacade.getQueues();
     }
 

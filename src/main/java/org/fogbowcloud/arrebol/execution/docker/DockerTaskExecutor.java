@@ -1,6 +1,9 @@
 package org.fogbowcloud.arrebol.execution.docker;
 
+import static org.fogbowcloud.arrebol.execution.docker.constants.DockerConstants.ADDRESS_METADATA_KEY;
+
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import org.apache.log4j.Logger;
@@ -64,6 +67,14 @@ public class DockerTaskExecutor implements TaskExecutor {
         }
 
         return taskExecutionResult;
+    }
+
+    @Override
+    public Map<String, String> getMetadata() {
+        Map<String, String> metadata = new HashMap<>();
+        String address = this.dockerContainerResource.getApiAddress();
+        metadata.put(ADDRESS_METADATA_KEY, address);
+        return metadata;
     }
 
     private ContainerSpecification createContainerSpecification(Task task) {

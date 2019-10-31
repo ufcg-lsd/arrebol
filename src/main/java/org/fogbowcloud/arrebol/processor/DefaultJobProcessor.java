@@ -2,7 +2,10 @@ package org.fogbowcloud.arrebol.processor;
 
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -11,6 +14,7 @@ import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Transient;
 import org.fogbowcloud.arrebol.execution.Worker;
+import org.fogbowcloud.arrebol.execution.docker.constants.DockerConstants;
 import org.fogbowcloud.arrebol.models.job.Job;
 import org.fogbowcloud.arrebol.models.task.Task;
 import org.fogbowcloud.arrebol.resource.StaticPool;
@@ -85,5 +89,20 @@ public class DefaultJobProcessor implements JobProcessor {
     @Override
     public void addWorkers(Collection<Worker> workers) {
         this.pool.addWorkers(workers);
+    }
+
+    @Override
+    public int getWorkerPoolSize() {
+        return this.pool.getWorkers().size();
+    }
+
+    @Override
+    public int getWorkerNodesSize() {
+        Set<String> addresses = new HashSet<>();
+        for(Worker w : this.pool.getWorkers()) {
+            String address = w.getMetadata().get(DockerConstants.ADDRESS_METADATA_KEY);
+            addresses.add(address);
+        }
+        return addresses.size();
     }
 }

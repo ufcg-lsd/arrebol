@@ -74,6 +74,11 @@ public class MatchAnyWorker implements Worker {
     }
 
     @Override
+    public Map<String, String> getMetadata() {
+        return this.executor.getMetadata();
+    }
+
+    @Override
     public String toString() {
         return "id={" + this.id + "} poolId={" + poolId + "} " +
                 "executor={" + this.executor + "}";
