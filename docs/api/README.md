@@ -171,7 +171,7 @@ POST /queues/{queue_id}/jobs
 
 **URL**
 ```http
-GET /queues/{queue_id}/jobs/{job_id}/status
+GET /queues/{queue_id}/jobs/{job_id}
 ```
 
 **Response example**:
@@ -228,6 +228,29 @@ GET /queues/{queue_id}/jobs
 ]
 ```
 
+#### 2.4 - Retrieves the execution status of all jobs in a given queue of a such label
+
+**URL**
+
+```http
+GET /queues/{queue_id}/jobs?label=awesome_job
+```
+
+**Response example**
+```json
+[
+    {
+      "id": "e7dbd27e-8747-488a-8124-75ad907e005d",
+      "label": "awesome_job",
+      "state": "FINISHED"
+    },
+    {
+      "id": "e7dbd27e-8747-488a-8124-75ad907e005d",
+      "label": "awesome_job",
+      "state": "RUNNING"
+    }    
+]
+```
 
 ## Responses
 
