@@ -2,10 +2,8 @@ package org.fogbowcloud.arrebol.processor.manager;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Timer;
 import java.util.TimerTask;
 import org.apache.log4j.Logger;
@@ -18,6 +16,8 @@ import org.fogbowcloud.arrebol.models.task.TaskState;
 import org.fogbowcloud.arrebol.processor.DefaultJobProcessor;
 import org.fogbowcloud.arrebol.processor.JobProcessor;
 import org.fogbowcloud.arrebol.processor.dto.DefaultJobProcessorDTO;
+import org.fogbowcloud.arrebol.utils.Messages.Exceptions;
+import org.fogbowcloud.arrebol.processor.exceptions.QueueNotFoundException;
 
 public class JobProcessorManager {
 
@@ -40,7 +40,7 @@ public class JobProcessorManager {
         LOGGER.info("Added new queue [" + jobProcessor.getId() + "]");
     }
 
-    public List<DefaultJobProcessorDTO> getQueues() {
+    public List<DefaultJobProcessorDTO> getJobProcessors() {
         List<DefaultJobProcessorDTO> list = new ArrayList<>();
         for(JobProcessor jobProcessor : queues.values()) {
             DefaultJobProcessorDTO defaultJobProcessorDTO = new DefaultJobProcessorDTO((DefaultJobProcessor) jobProcessor);
@@ -72,15 +72,24 @@ public class JobProcessorManager {
     }
 
     public void addWorkers(String queueId, Collection<Worker> workers) {
+        if(!queues.containsKey(queueId)) {
+            throw new QueueNotFoundException(String.format(Exceptions.QUEUE_NOT_FOUND_PATTERN, queueId));
+        }
         LOGGER.info("Adding workers [" + workers.size() + "] to queue [" + queueId + "]");
         this.queues.get(queueId).addWorkers(workers);
     }
 
-    public void addJob(String queue, Job job) {
-        queues.get(queue).addJob(job);
+    public void addJob(String queueId, Job job) {
+        if(!queues.containsKey(queueId)) {
+            throw new QueueNotFoundException(String.format(Exceptions.QUEUE_NOT_FOUND_PATTERN, queueId));
+        }
+        queues.get(queueId).addJob(job);
     }
 
     public Job getJob(String queueId, String jobId){
+        if(!queues.containsKey(queueId)) {
+            throw new QueueNotFoundException(String.format(Exceptions.QUEUE_NOT_FOUND_PATTERN, queueId));
+        }
         return QueueDBManager.getInstance().findOneJob(queueId, jobId);
     }
 

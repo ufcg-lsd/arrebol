@@ -39,7 +39,6 @@ public class ArrebolController {
     private static final String defaultQueueId = "default";
     private static final String defaultQueueName = "defaultQueue";
     private final Logger LOGGER = Logger.getLogger(ArrebolController.class);
-    private final Map<String, Job> jobPool;
     private final JobProcessorManager jobProcessorManager;
     private Configuration configuration;
     private WorkerCreator workerCreator;
@@ -64,7 +63,6 @@ public class ArrebolController {
 
         Map<String, JobProcessor> queues = new HashMap<>();
         this.jobProcessorManager = new JobProcessorManager(queues);
-        this.jobPool = Collections.synchronizedMap(new HashMap<>());
     }
 
     private JobProcessor createDefaultJobProcessor(){
@@ -118,7 +116,6 @@ public class ArrebolController {
 
     public String addJob(String queue, Job job){
         job.setJobState(JobState.QUEUED);
-        this.jobPool.put(job.getId(), job);
         this.jobProcessorManager.addJob(queue, job);
 
         return job.getId();
@@ -187,7 +184,7 @@ public class ArrebolController {
     }
 
     public List<DefaultJobProcessorDTO> getQueues() {
-        return this.jobProcessorManager.getQueues();
+        return this.jobProcessorManager.getJobProcessors();
     }
 
     public void addWorkers(String queueId, WorkerNode workerNode) {

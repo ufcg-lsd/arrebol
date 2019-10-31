@@ -1,6 +1,7 @@
 package org.fogbowcloud.arrebol.processor;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -45,7 +46,7 @@ public class DefaultJobProcessor implements JobProcessor {
         this.taskQueue = taskQueue;
         this.defaultScheduler = defaultScheduler;
         this.pool = workerPool;
-        this.jobs = new HashMap<>();
+        this.jobs = Collections.synchronizedMap(new HashMap<>());
     }
 
     @Override
