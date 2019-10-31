@@ -1,6 +1,11 @@
 package org.fogbowcloud.arrebol.resource;
 
 import java.util.Map;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.Transient;
 import org.fogbowcloud.arrebol.execution.TaskExecutionResult;
 import org.fogbowcloud.arrebol.execution.TaskExecutor;
 import org.fogbowcloud.arrebol.execution.Worker;
@@ -11,22 +16,31 @@ import org.fogbowcloud.arrebol.models.task.Task;
  * This @{link Worker} implementation matches any @{link Specification}.
  * It delegates @{link TaskExecutor} behaviour to received object.
  */
+@Entity
 public class MatchAnyWorker implements Worker {
 
     //simple resource that accepts any request
 
+    @Id
+    private String id;
+    @Transient
     private ResourceState state;
-    private final Specification spec;
-    private final String id;
-    private final int poolId;
-    private final TaskExecutor executor;
+    @Transient
+    private Specification spec;
+    @Transient
+    private int poolId;
+    @Transient
+    private TaskExecutor executor;
 
-    public MatchAnyWorker(Specification spec, String id, int poolId, TaskExecutor delegatedExecutor) {
-        this.spec = spec;
+    public MatchAnyWorker(String id, Specification spec, int poolId, TaskExecutor delegatedExecutor) {
         this.id = id;
+        this.spec = spec;
         this.poolId = poolId;
         this.state = ResourceState.IDLE;
         this.executor = delegatedExecutor;
+    }
+
+    public MatchAnyWorker() {
     }
 
     @Override

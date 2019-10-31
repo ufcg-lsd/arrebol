@@ -8,10 +8,12 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 import javax.persistence.Transient;
 import org.fogbowcloud.arrebol.execution.Worker;
 import org.fogbowcloud.arrebol.models.job.Job;
 import org.fogbowcloud.arrebol.models.task.Task;
+import org.fogbowcloud.arrebol.resource.StaticPool;
 import org.fogbowcloud.arrebol.resource.WorkerPool;
 import org.fogbowcloud.arrebol.scheduler.DefaultScheduler;
 
@@ -25,9 +27,8 @@ public class DefaultJobProcessor implements JobProcessor {
     private TaskQueue taskQueue;
     @Transient
     private DefaultScheduler defaultScheduler;
-    @Transient
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true, targetEntity = StaticPool.class)
     private WorkerPool pool;
-
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, targetEntity = Job.class)
     private Map<String, Job> jobs;
 

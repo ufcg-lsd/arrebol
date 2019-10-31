@@ -13,6 +13,7 @@ import org.fogbowcloud.arrebol.resource.MatchAnyWorker;
 
 import java.util.Collection;
 import java.util.LinkedList;
+import org.fogbowcloud.arrebol.utils.AppUtil;
 
 public class RawWorkerCreator implements WorkerCreator {
 
@@ -28,8 +29,7 @@ public class RawWorkerCreator implements WorkerCreator {
         Collection<Worker> workers = new LinkedList<>();
         int poolSize = new Integer(configuration.getWorkerPoolSize());
         for (int i = 0; i < poolSize; i++) {
-            LOGGER.info("Creating raw worker[" + i + "]");
-            Worker worker = createRawWorker(poolId, i);
+            Worker worker = createRawWorker(poolId);
             workers.add(worker);
         }
         return workers;
@@ -40,11 +40,12 @@ public class RawWorkerCreator implements WorkerCreator {
         return null;
     }
 
-    private Worker createRawWorker(Integer poolId, int resourceId) {
+    private Worker createRawWorker(Integer poolId) {
         TaskExecutor executor = new RawTaskExecutor();
         Specification resourceSpec = null;
-        Worker worker = new MatchAnyWorker(resourceSpec, "resourceId-" + resourceId, poolId,
+        Worker worker = new MatchAnyWorker(resourceSpec, AppUtil.generateUniqueStringId(), poolId,
             executor);
+        LOGGER.info("Created raw worker [" + worker.getId() + "]");
         return worker;
     }
 }

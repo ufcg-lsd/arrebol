@@ -1,5 +1,6 @@
 package org.fogbowcloud.arrebol.utils;
 
+import java.util.UUID;
 import org.json.JSONObject;
 
 import java.util.Collection;
@@ -41,5 +42,10 @@ public class AppUtil {
         JSONObject json = new JSONObject(jsonStr);
         String value = json.getString(key);
         return value;
+    }
+
+    public static String generateUniqueStringId() {
+        String uniqueID = UUID.randomUUID().toString();
+        return uniqueID;
     }
 }

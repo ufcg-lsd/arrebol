@@ -16,6 +16,7 @@ import org.fogbowcloud.arrebol.resource.StaticPool;
 import org.fogbowcloud.arrebol.resource.WorkerPool;
 import org.fogbowcloud.arrebol.scheduler.DefaultScheduler;
 import org.fogbowcloud.arrebol.scheduler.FifoSchedulerPolicy;
+import org.fogbowcloud.arrebol.utils.AppUtil;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -129,7 +130,7 @@ public class RawWorkerIntegrationTest {
         Specification resourceSpec = null;
         for (int i = 0; i < workerPoolSize; i++) {
             TaskExecutor taskExecutor = new RawTaskExecutor();
-            workers.add(new MatchAnyWorker(resourceSpec, "resourceId-"+i, poolId, taskExecutor));
+            workers.add(new MatchAnyWorker(resourceSpec, AppUtil.generateUniqueStringId(), poolId, taskExecutor));
         }
         return workers;
     }
