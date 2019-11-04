@@ -24,15 +24,15 @@ POST /queues
 ```json
 {
    "name":"some_awesome_name",
-   "worker_nodes": [
-      {
-       	"address": "200.100.050.0",
-	    	"worker_pool": 5
-    	},
-		  {
-       	"address": "200.100.050.1",
-	    	"worker_pool": 10
-    	}
+   "worker_pools": [
+        {
+           	"address": "200.100.050.0",
+    	    "pool_size": 5
+        },
+    	{
+           	"address": "200.100.050.1",
+    	    "pool_size": 10
+        }
    ],   
 }
 ```
@@ -56,25 +56,25 @@ GET /queues
 ```json
 [
     {
-      "id": "some_unique_id",
-      "name": "awesome_name",
-      "waiting_jobs": 2,
-      "worker_nodes": 5,
-      "worker_pool": 25
+        "id": "some_unique_id",
+        "name": "awesome_name",
+        "waiting_jobs": 2,
+        "worker_pools": 5,
+        "pools_size": 25
     },
     {
-      "id": "awesome_queue_id",
-      "name": "awesome_name_bff",
-      "waiting_jobs": 10,
-      "worker_nodes": 2,
-      "worker_pool": 10
+        "id": "awesome_queue_id",
+        "name": "awesome_name_bff",
+        "waiting_jobs": 10,
+        "worker_pools": 2,
+        "pools_size": 20
     },
     {
-      "id": "default_queue",
-      "name": "awesome_name_dot",
-      "waiting_jobs": 0,
-      "worker_nodes": 0,
-      "worker_pool": 25      
+        "id": "default_queue",
+        "name": "awesome_name_dot",
+        "waiting_jobs": 100,
+        "worker_pools": 5,
+        "pools_size": 50    
     },
 ]
 ```
@@ -93,8 +93,8 @@ GET /queues/{queue_id}
 	"id": "some_unique_id",
 	"name": "awesome_name",
 	"waiting_jobs": 2,
-	"worker_nodes": 5,
-	"worker_pool": 25
+	"worker_pools": 5,
+	"pools_size": 25
 }
 ```
 
@@ -108,7 +108,7 @@ POST /queues/{queue_id}/workers
 ```json
 {
 	"address": "85.110.150.0",   	    
-	"worker_pool": 5
+	"pool_size": 5
 }
 ```
 **Response example**:
@@ -122,7 +122,7 @@ POST /queues/{queue_id}/workers
 #### 1.5 - Remove a worker
 
 ```http
-DELETE /queues/{id}/workers/{worker_id}
+DELETE /queues/{queue_id}/workers/{worker_id}
 ```
 
 ### 2 - Jobs
@@ -141,7 +141,6 @@ POST /queues/{queue_id}/jobs
 ```json
 {
    "label":"some_descriptive_label",
-   "queue_id": "some_unique_id",
    "tasks":[
       {
          "id":"TaskNumber-0-36b8d41a-8611-4468-93ee-40f4140c7555",
@@ -240,24 +239,32 @@ GET /queues/{queue_id}/jobs?label=awesome_job
 ```json
 [
     {
-      "id": "e7dbd27e-8747-488a-8124-75ad907e005d",
-      "label": "awesome_job",
-      "state": "FINISHED"
+        "id": "e7dbd27e-8747-488a-8124-75ad907e005d",
+        "label": "awesome_job",
+        "state": "FINISHED"
     },
     {
-      "id": "e7dbd27e-8747-488a-8124-75ad907e005d",
-      "label": "awesome_job",
-      "state": "RUNNING"
+        "id": "475b122e-447-4388a-3124-743ad4040sad",
+        "label": "awesome_job",
+        "state": "RUNNING"
     }    
 ]
 ```
 
 #### 2.5 - Filter the jobs of a given state
 
+A job can assume the following states
+```java
+  SUBMITTED,
+  QUEUED,
+  RUNNING,
+  FINISHED,
+  FAILED
+```
 **URL**
 
 ```http
-GET /queues/{queue_id}/jobs?state=pending
+GET /queues/{queue_id}/jobs?state=queued
 ```
 
 **Response example**
@@ -266,12 +273,12 @@ GET /queues/{queue_id}/jobs?state=pending
     {
       "id": "e7dbd27e-8747-488a-8124-75ad907e005d",
       "label": "awesome_job",
-      "state": "PENDING"
+      "state": "QUEUED"
     },
     {
-      "id": "e7dbd27e-8747-488a-8124-75ad907e005d",
-      "label": "awesome_job",
-      "state": "PENDING"
+      "id": "475b122e-447-4388a-3124-743ad4040sad",
+      "label": "more_awesome_job",
+      "state": "QUEUED"
     }    
 ]
 ```
