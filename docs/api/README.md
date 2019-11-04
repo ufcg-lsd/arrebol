@@ -25,12 +25,12 @@ POST /queues
 {
    "name":"some_awesome_name",
    "worker_nodes": [
-       	{
-       	    "address": "200.100.050.0",
+      {
+       	"address": "200.100.050.0",
 	    	"worker_pool": 5
     	},
-		{
-       	    "address": "200.100.050.1",
+		  {
+       	"address": "200.100.050.1",
 	    	"worker_pool": 10
     	}
    ],   
@@ -58,21 +58,21 @@ GET /queues
     {
       "id": "some_unique_id",
       "name": "awesome_name",
-      "jobs": 2,
+      "queued_jobs": 2,
       "worker_nodes": 5,
       "worker_pool": 25
     },
     {
       "id": "awesome_queue_id",
       "name": "awesome_name_bff",
-      "jobs": 10,
+      "queued_jobs": 10,
       "worker_nodes": 2,
       "worker_pool": 10
     },
     {
       "id": "default_queue",
       "name": "awesome_name_dot",
-      "jobs": 0,
+      "queued_jobs": 0,
       "worker_nodes": 0,
       "worker_pool": 25      
     },
@@ -92,7 +92,7 @@ GET /queues/{queue_id}
 {
 	"id": "some_unique_id",
 	"name": "awesome_name",
-	"jobs": 2,
+	"queued_jobs": 2,
 	"worker_nodes": 5,
 	"worker_pool": 25
 }
@@ -248,6 +248,30 @@ GET /queues/{queue_id}/jobs?label=awesome_job
       "id": "e7dbd27e-8747-488a-8124-75ad907e005d",
       "label": "awesome_job",
       "state": "RUNNING"
+    }    
+]
+```
+
+#### 2.5 - Filter the jobs of a given state
+
+**URL**
+
+```http
+GET /queues/{queue_id}/jobs?state=pending
+```
+
+**Response example**
+```json
+[
+    {
+      "id": "e7dbd27e-8747-488a-8124-75ad907e005d",
+      "label": "awesome_job",
+      "state": "PENDING"
+    },
+    {
+      "id": "e7dbd27e-8747-488a-8124-75ad907e005d",
+      "label": "awesome_job",
+      "state": "PENDING"
     }    
 ]
 ```
