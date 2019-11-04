@@ -1,5 +1,6 @@
 package org.fogbowcloud.arrebol.api.http.controllers;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javax.validation.Valid;
@@ -67,12 +68,15 @@ public class QueueController {
     }
 
     @RequestMapping(method = RequestMethod.POST)
-    public ResponseEntity<String> addQueue(@RequestBody JobProcessorSpec jobProcessorSpec) {
+    public ResponseEntity<Map<String, String>> addQueue(@RequestBody JobProcessorSpec jobProcessorSpec) {
         LOGGER.info("Adding an new queue [" + jobProcessorSpec.getName() + "]");
 
         try {
+            final String queueIdKey = "id";
             String queueId = queueService.createQueue(jobProcessorSpec);
-            return new ResponseEntity(queueId, HttpStatus.CREATED);
+            Map<String, String> queueResponse = new HashMap<>();
+            queueResponse.put(queueIdKey, queueId);
+            return new ResponseEntity<>(queueResponse, HttpStatus.CREATED);
         } catch (Throwable t) {
             LOGGER.error(String.format(Messages.Exception.GENERIC_EXCEPTION, t.getMessage()), t);
             throw t;
