@@ -26,13 +26,13 @@ POST /queues
    "name":"some_awesome_name",
    "worker_nodes": [
       {
-       	"address": "200.100.050.0",
-	    	"worker_pool": 5
-    	},
-		  {
+      	"address": "200.100.050.0",
+	 	"worker_pool": 5
+      },
+	  {
        	"address": "200.100.050.1",
-	    	"worker_pool": 10
-    	}
+		"worker_pool": 10
+      }
    ],   
 }
 ```
