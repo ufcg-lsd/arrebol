@@ -23,17 +23,17 @@ POST /queues
 *Body*
 ```json
 {
-   "name":"some_awesome_name",
-   "worker_pools": [
+    "name": "some_awesome_name",
+    "worker_pools": [
         {
-           	"address": "200.100.050.0",
-    	    "pool_size": 5
+            "address": "200.100.050.0",
+            "pool_size": 5
         },
-    	{
-           	"address": "200.100.050.1",
-    	    "pool_size": 10
+        {
+            "address": "200.100.050.1",
+            "pool_size": 10
         }
-   ],   
+    ]
 }
 ```
 
@@ -74,8 +74,8 @@ GET /queues
         "name": "awesome_name_dot",
         "waiting_jobs": 100,
         "worker_pools": 5,
-        "pools_size": 50    
-    },
+        "pools_size": 50
+    }
 ]
 ```
 
@@ -90,15 +90,15 @@ GET /queues/{queue_id}
 **Response example**
 ```json
 {
-	"id": "some_unique_id",
-	"name": "awesome_name",
-	"waiting_jobs": 2,
-	"worker_pools": 5,
-	"pools_size": 25
+    "id": "some_unique_id",
+    "name": "awesome_name",
+    "waiting_jobs": 2,
+    "worker_pools": 5,
+    "pools_size": 25
 }
 ```
 
-#### 1.4 - Adds a new worker node to the pool of a given queue 
+#### 1.4 - Adds a new worker pool to a given queue 
 
 ```http
 POST /queues/{queue_id}/workers
@@ -107,8 +107,8 @@ POST /queues/{queue_id}/workers
 *Body*
 ```json
 {
-	"address": "85.110.150.0",   	    
-	"pool_size": 5
+    "address": "85.110.150.0",
+    "pool_size": 5
 }
 ```
 **Response example**:
@@ -140,22 +140,22 @@ POST /queues/{queue_id}/jobs
 
 ```json
 {
-   "label":"some_descriptive_label",
-   "tasks":[
-      {
-         "id":"TaskNumber-0-36b8d41a-8611-4468-93ee-40f4140c7555",
-         "spec":{
-            "image":"ubuntu",
-            "requirements":{
-               "DockerRequirements":"DockerMemory == 1024 && DockerCPUWeight == 512"
-            }
-         },
-         "commands":[
-            "sleep 10",
-            "sleep 20"
-         ]         
-      }
-   ]
+    "label": "some_descriptive_label",
+    "tasks": [
+        {
+            "id": "TaskNumber-0-36b8d41a-8611-4468-93ee-40f4140c7555",
+            "spec": {
+                "image": "ubuntu",
+                "requirements": {
+                    "DockerRequirements": "DockerMemory == 1024 && DockerCPUWeight == 512"
+                }
+            },
+            "commands": [
+                "sleep 10",
+                "sleep 20"
+            ]
+        }
+    ]
 }
 ```
 
@@ -163,7 +163,7 @@ POST /queues/{queue_id}/jobs
 
 ```json
 {
-	"id": "e7dbd27e-8747-488a-8124-75ad907e005d"
+    "id": "e7dbd27e-8747-488a-8124-75ad907e005d"
 }
 ```
 #### 2.2 - Retrieves the execution status of a given job
@@ -176,26 +176,26 @@ GET /queues/{queue_id}/jobs/{job_id}
 **Response example**:
 ```json
 {
-  "id": "e7dbd27e-8747-488a-8124-75ad907e005d",  
-  "state": "RUNNING",  
-  "tasks": [
-    {
-      "id": "db14414e-5e0f-487a-970e-68396f97e33d",
-      "state": "FINISHED",            
-      "commands": [
+    "id": "e7dbd27e-8747-488a-8124-75ad907e005d",
+    "state": "RUNNING",
+    "tasks": [
         {
-          "command": "sleep 10",
-          "state": "FINISHED",
-          "exit_code": 0
-        },
-        {
-          "command": "sleep 20",
-          "state": "RUNNING",
-          "exit_code": -1
+            "id": "db14414e-5e0f-487a-970e-68396f97e33d",
+            "state": "FINISHED",
+            "commands": [
+                {
+                    "command": "sleep 10",
+                    "state": "FINISHED",
+                    "exit_code": 0
+                },
+                {
+                    "command": "sleep 20",
+                    "state": "RUNNING",
+                    "exit_code": -1
+                }
+            ]
         }
-      ]
-    }
-  ]
+    ]
 }
 ```
 #### 2.3 - Retrieves the execution status of all jobs in a given queue
@@ -210,19 +210,19 @@ GET /queues/{queue_id}/jobs
 ```json
 [
     {
-      "id": "e7dbd27e-8747-488a-8124-75ad907e005d",
-      "label": "some_descriptive_label",
-      "state": "FINISHED"
+        "id": "e7dbd27e-8747-488a-8124-75ad907e005d",
+        "label": "some_descriptive_label",
+        "state": "FINISHED"
     },
     {
-      "id": "e7dbd27e-8747-488a-8124-75ad907e005d",
-      "label": "awesome_job",
-      "state": "RUNNING"
+        "id": "e7dbd27e-8747-488a-8124-75ad907e005d",
+        "label": "awesome_job",
+        "state": "RUNNING"
     },
     {
-      "id": "e7dbd27e-8747-488a-8124-75ad907e005d",
-      "label": "sleep_job",
-      "state": "READY"
+        "id": "e7dbd27e-8747-488a-8124-75ad907e005d",
+        "label": "sleep_job",
+        "state": "READY"
     }
 ]
 ```
@@ -247,7 +247,7 @@ GET /queues/{queue_id}/jobs?label=awesome_job
         "id": "475b122e-447-4388a-3124-743ad4040sad",
         "label": "awesome_job",
         "state": "RUNNING"
-    }    
+    }
 ]
 ```
 
@@ -271,15 +271,15 @@ GET /queues/{queue_id}/jobs?state=queued
 ```json
 [
     {
-      "id": "e7dbd27e-8747-488a-8124-75ad907e005d",
-      "label": "awesome_job",
-      "state": "QUEUED"
+        "id": "e7dbd27e-8747-488a-8124-75ad907e005d",
+        "label": "awesome_job",
+        "state": "QUEUED"
     },
     {
-      "id": "475b122e-447-4388a-3124-743ad4040sad",
-      "label": "more_awesome_job",
-      "state": "QUEUED"
-    }    
+        "id": "475b122e-447-4388a-3124-743ad4040sad",
+        "label": "more_awesome_job",
+        "state": "QUEUED"
+    }
 ]
 ```
 
