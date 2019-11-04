@@ -23,24 +23,14 @@ POST /queues
 *Body*
 ```json
 {
-    "name": "some_awesome_name",
-    "worker_pools": [
-        {
-            "address": "200.100.050.0",
-            "pool_size": 5
-        },
-        {
-            "address": "200.100.050.1",
-            "pool_size": 10
-        }
-    ]
+    "name": "some_awesome_name",    
 }
 ```
 
 **Response example**
 ```json
 {
-	"id": "some_unique_id"
+	"id": "a3f77cca-96bb-4e7a-b746-e8960f779747"
 }
 ```
 
@@ -56,22 +46,15 @@ GET /queues
 ```json
 [
     {
-        "id": "some_unique_id",
-        "name": "awesome_name",
-        "waiting_jobs": 2,
-        "worker_pools": 5,
-        "pools_size": 25
-    },
-    {
-        "id": "awesome_queue_id",
-        "name": "awesome_name_bff",
-        "waiting_jobs": 10,
-        "worker_pools": 2,
-        "pools_size": 20
-    },
+        "id": "a3f77cca-96bb-4e7a-b746-e8960f779747",
+        "name": "some_awesome_name",
+        "waiting_jobs": 0,
+        "worker_pools": 0,
+        "pools_size": 0
+    },    
     {
         "id": "default_queue",
-        "name": "awesome_name_dot",
+        "name": "awesome_name_dot_com",
         "waiting_jobs": 100,
         "worker_pools": 5,
         "pools_size": 50
@@ -87,21 +70,33 @@ GET /queues
 GET /queues/{queue_id}
 ```
 
+**Resquest example**
+```http
+GET /queues/a3f77cca-96bb-4e7a-b746-e8960f779747
+```
+
 **Response example**
 ```json
 {
-    "id": "some_unique_id",
+    "id": "a3f77cca-96bb-4e7a-b746-e8960f779747",
     "name": "awesome_name",
-    "waiting_jobs": 2,
-    "worker_pools": 5,
-    "pools_size": 25
+    "waiting_jobs": 0,
+    "worker_pools": 0,
+    "pools_size": 0
 }
 ```
 
-#### 1.4 - Adds a new worker pool to a given queue 
+### 3 - Workers
+
+#### 3.1 - Adds a new worker pool to a given queue 
 
 ```http
 POST /queues/{queue_id}/workers
+```
+
+**Request example**:
+```http
+POST /queues/a3f77cca-96bb-4e7a-b746-e8960f779747/workers
 ```
 
 *Body*
@@ -115,19 +110,45 @@ POST /queues/{queue_id}/workers
 
 ```json
 {
-	"id": "unique_worker_id"
+	"id": "40aa431e-a30b-4650-ad37-fc29e632ade1"
 }
 ```
 
-#### 1.5 - Remove a worker
+#### 3.2 - Retrieves all workers of a given queue
+
+```http
+GET /queues/{queue_id}/workers
+```
+**Response example**:
+```json
+[
+    {   
+        "id": "40aa431e-a30b-4650-ad37-fc29e632ade1",
+        "address": "85.110.150.0",
+        "pool_size": 5
+    },
+    {   
+        "id": "56b8e729-6bdb-4387-a33e-00bcebf43857",
+        "address": "200.100.050.1",
+        "pool_size": 5
+    },
+    {   
+        "id": "efc6380e-d00b-45e2-99b7-f1167fc06ed5",
+        "address": "200.100.050.2",
+        "pool_size": 5
+    }
+]
+```
+
+#### 3.3 - Remove a worker
 
 ```http
 DELETE /queues/{queue_id}/workers/{worker_id}
 ```
 
-### 2 - Jobs
+### 3 - Jobs
 
-#### 2.1 - Submit a new job for execution
+#### 3.1 - Submit a new job for execution
 **URL**
 
 ```http
@@ -166,7 +187,7 @@ POST /queues/{queue_id}/jobs
     "id": "e7dbd27e-8747-488a-8124-75ad907e005d"
 }
 ```
-#### 2.2 - Retrieves the execution status of a given job
+#### 3.2 - Retrieves the execution status of a given job
 
 **URL**
 ```http
@@ -198,7 +219,7 @@ GET /queues/{queue_id}/jobs/{job_id}
     ]
 }
 ```
-#### 2.3 - Retrieves the execution status of all jobs in a given queue
+#### 3.3 - Retrieves the execution status of all jobs in a given queue
 
 **URL**
 
@@ -227,7 +248,7 @@ GET /queues/{queue_id}/jobs
 ]
 ```
 
-#### 2.4 - Retrieves the execution status of all jobs in a given queue of a such label
+#### 3.4 - Retrieves the execution status of all jobs in a given queue of a such label
 
 **URL**
 
@@ -251,7 +272,7 @@ GET /queues/{queue_id}/jobs?label=awesome_job
 ]
 ```
 
-#### 2.5 - Filter the jobs of a given state
+#### 3.5 - Filter the jobs of a given state
 
 A job can assume the following states
 ```java
