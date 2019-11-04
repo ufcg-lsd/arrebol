@@ -58,21 +58,21 @@ GET /queues
     {
       "id": "some_unique_id",
       "name": "awesome_name",
-      "queued_jobs": 2,
+      "waiting_jobs": 2,
       "worker_nodes": 5,
       "worker_pool": 25
     },
     {
       "id": "awesome_queue_id",
       "name": "awesome_name_bff",
-      "queued_jobs": 10,
+      "waiting_jobs": 10,
       "worker_nodes": 2,
       "worker_pool": 10
     },
     {
       "id": "default_queue",
       "name": "awesome_name_dot",
-      "queued_jobs": 0,
+      "waiting_jobs": 0,
       "worker_nodes": 0,
       "worker_pool": 25      
     },
@@ -92,7 +92,7 @@ GET /queues/{queue_id}
 {
 	"id": "some_unique_id",
 	"name": "awesome_name",
-	"queued_jobs": 2,
+	"waiting_jobs": 2,
 	"worker_nodes": 5,
 	"worker_pool": 25
 }
