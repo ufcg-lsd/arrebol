@@ -1,19 +1,26 @@
 package org.fogbowcloud.arrebol.processor.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+import org.fogbowcloud.arrebol.models.job.JobState;
 import org.fogbowcloud.arrebol.processor.DefaultJobProcessor;
 
 public class DefaultJobProcessorDTO {
 
     public String id;
     public String name;
-    public Integer jobs;
+    @JsonProperty("waiting_jobs")
+    public long waitingJobs;
+    @JsonProperty("workers_nodes")
     public Integer workersNodes;
+    @JsonProperty("worker_pool")
     public Integer workerPool;
 
     public DefaultJobProcessorDTO(DefaultJobProcessor defaultJobProcessor) {
         this.id = defaultJobProcessor.getId();
         this.name = defaultJobProcessor.getName();
-        this.jobs = defaultJobProcessor.getJobs().size();
+        this.waitingJobs = defaultJobProcessor.getJobs().values().stream().filter(
+            job -> !(job.getJobState().equals(JobState.FINISHED) || job.getJobState()
+                .equals(JobState.FAILED))).count();
         this.workersNodes = defaultJobProcessor.getWorkerNodesSize();
         this.workerPool = defaultJobProcessor.getWorkerPoolSize();
     }
@@ -26,8 +33,8 @@ public class DefaultJobProcessorDTO {
         return name;
     }
 
-    public Integer getJobs() {
-        return jobs;
+    public long getWaitingJobs() {
+        return waitingJobs;
     }
 
     public Integer getWorkersNodes() {
