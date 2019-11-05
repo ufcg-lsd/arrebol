@@ -23,8 +23,8 @@ public interface JobProcessor {
 
     void addWorkers(Collection<Worker> workers);
 
-    int getWorkerPoolSize();
+    int getPoolsSize();
 
-    int getWorkerNodesSize();
+    int getWorkerPoolsSize();
 
 }

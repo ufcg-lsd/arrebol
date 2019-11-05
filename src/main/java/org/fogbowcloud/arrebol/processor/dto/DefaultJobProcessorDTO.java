@@ -10,10 +10,10 @@ public class DefaultJobProcessorDTO {
     public String name;
     @JsonProperty("waiting_jobs")
     public long waitingJobs;
-    @JsonProperty("workers_nodes")
-    public Integer workersNodes;
-    @JsonProperty("worker_pool")
-    public Integer workerPool;
+    @JsonProperty("worker_pools")
+    public Integer workerPools;
+    @JsonProperty("pools_size")
+    public Integer poolsSize;
 
     public DefaultJobProcessorDTO(DefaultJobProcessor defaultJobProcessor) {
         this.id = defaultJobProcessor.getId();
@@ -21,8 +21,8 @@ public class DefaultJobProcessorDTO {
         this.waitingJobs = defaultJobProcessor.getJobs().values().stream().filter(
             job -> !(job.getJobState().equals(JobState.FINISHED) || job.getJobState()
                 .equals(JobState.FAILED))).count();
-        this.workersNodes = defaultJobProcessor.getWorkerNodesSize();
-        this.workerPool = defaultJobProcessor.getWorkerPoolSize();
+        this.workerPools = defaultJobProcessor.getWorkerPoolsSize();
+        this.poolsSize = defaultJobProcessor.getPoolsSize();
     }
 
     public String getId() {
@@ -37,11 +37,11 @@ public class DefaultJobProcessorDTO {
         return waitingJobs;
     }
 
-    public Integer getWorkersNodes() {
-        return workersNodes;
+    public Integer getWorkerPools() {
+        return workerPools;
     }
 
-    public Integer getWorkerPool() {
-        return workerPool;
+    public Integer getPoolsSize() {
+        return poolsSize;
     }
 }

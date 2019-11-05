@@ -93,12 +93,12 @@ public class DefaultJobProcessor implements JobProcessor {
     }
 
     @Override
-    public int getWorkerPoolSize() {
+    public int getPoolsSize() {
         return this.pool.getWorkers().size();
     }
 
     @Override
-    public int getWorkerNodesSize() {
+    public int getWorkerPoolsSize() {
         Set<String> addresses = new HashSet<>();
         for(Worker w : this.pool.getWorkers()) {
             String address = w.getMetadata().get(DockerConstants.ADDRESS_METADATA_KEY);
