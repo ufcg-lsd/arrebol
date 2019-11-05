@@ -1,29 +1,16 @@
 ## API Overview
-
-## Available endpoints
-Major resource endpoints supported by the Arrebol API are:
-
-| resource      | description                       |
-|:--------------|:----------------------------------|
-| `/queues`    | manages queue creation and status
-| `/jobs`      | manages job execution and tracking
-| `/workers`   | manages the addition of workers |
-
+--------------
 ### 1 - Queues
-
 #### 1.1 - Create a new queue
 
-**URL**
-```http
-POST /queues
-```
+| Method | URI |
+| :--- | :--- |
+| `POST` | `/api/queues` |
 
-**Request example**
-
-*Body*
+**Request body**
 ```json
 {
-    "name": "some_awesome_name",    
+    "name": "awesome_name",    
 }
 ```
 
@@ -33,21 +20,18 @@ POST /queues
 	"id": "a3f77cca-96bb-4e7a-b746-e8960f779747"
 }
 ```
-
 #### 1.2 - Retrieves a list with the current queues
 
-**URL**
-
-```http
-GET /queues
-```
+| Method | URI |
+| :--- | :--- |
+| `GET` | `/api/queues` |
 
 **Response example**
 ```json
 [
     {
         "id": "a3f77cca-96bb-4e7a-b746-e8960f779747",
-        "name": "some_awesome_name",
+        "name": "awesome_name",
         "waiting_jobs": 0,
         "worker_pools": 0,
         "pools_size": 0
@@ -64,16 +48,9 @@ GET /queues
 
 #### 1.3 - Retrieves a queue by it id
 
-**URL**
-
-```http
-GET /queues/{queue_id}
-```
-
-**Resquest example**
-```http
-GET /queues/a3f77cca-96bb-4e7a-b746-e8960f779747
-```
+| Method | URI |
+| :--- | :--- |
+| `GET` | `/api/queues/{queue_id}` |
 
 **Response example**
 ```json
@@ -85,51 +62,36 @@ GET /queues/a3f77cca-96bb-4e7a-b746-e8960f779747
     "pools_size": 0
 }
 ```
+#### 1.4 - Adds a new worker pool to a given queue [Deprecated]
+| Method | URI |
+| :--- | :--- |
+| `POST` | `/api/queues/{queue_id}/workers` |
 
-### 3 - Workers
-
-#### 3.1 - Adds a new worker pool to a given queue 
-
-```http
-POST /queues/{queue_id}/workers
-```
-
-**Request example**:
-```http
-POST /queues/a3f77cca-96bb-4e7a-b746-e8960f779747/workers
-```
-
-*Body*
+**Request Body**
 ```json
 {
     "address": "85.110.150.0",
     "pool_size": 5
 }
 ```
-**Response example**:
-
+**Response example**
 ```json
 {
 	"id": "40aa431e-a30b-4650-ad37-fc29e632ade1"
 }
 ```
 
-#### 3.2 - Retrieves all workers of a given queue
+#### 1.5 - Retrieves all workers of a given queue [Deprecated]
+| Method | URI |
+| :--- | :--- |
+| `GET` | `/api/queues/{queue_id}/workers` |
 
-```http
-GET /queues/{queue_id}/workers
-```
 **Response example**:
 ```json
 [
     {   
         "id": "40aa431e-a30b-4650-ad37-fc29e632ade1",
         "address": "85.110.150.0",
-        "pool_size": 5
-    },
-    {   
-        "id": "56b8e729-6bdb-4387-a33e-00bcebf43857",
-        "address": "200.100.050.1",
         "pool_size": 5
     },
     {   
@@ -140,25 +102,19 @@ GET /queues/{queue_id}/workers
 ]
 ```
 
-#### 3.3 - Remove a worker
+#### 1.6 - Remove a worker
+| Method | URI |
+| :--- | :--- |
+| `DELETE` | `/api/queues/{queue_id}/workers{worker_id}` |
 
-```http
-DELETE /queues/{queue_id}/workers/{worker_id}
-```
+### 2 - Jobs
 
-### 3 - Jobs
+#### 2.1 - Submit a new job for execution
+| Method | URI |
+| :--- | :--- |
+| `POST` | `/api/queues/{queue_id}/jobs` |
 
-#### 3.1 - Submit a new job for execution
-**URL**
-
-```http
-POST /queues/{queue_id}/jobs
-```
-
-**Request example**
-
-*Body*
-
+**Request body**
 ```json
 {
     "label": "some_descriptive_label",
@@ -179,20 +135,16 @@ POST /queues/{queue_id}/jobs
     ]
 }
 ```
-
 **Response example**:
-
 ```json
 {
     "id": "e7dbd27e-8747-488a-8124-75ad907e005d"
 }
 ```
-#### 3.2 - Retrieves the execution status of a given job
-
-**URL**
-```http
-GET /queues/{queue_id}/jobs/{job_id}
-```
+#### 2.2 - Retrieves the execution status of a given job
+| Method | URI |
+| :--- | :--- |
+| `GET` | `/api/queues/{queue_id}/jobs/{job_id}` |
 
 **Response example**:
 ```json
@@ -219,13 +171,11 @@ GET /queues/{queue_id}/jobs/{job_id}
     ]
 }
 ```
-#### 3.3 - Retrieves the execution status of all jobs in a given queue
+#### 2.3 - Retrieves the execution status of all jobs in a given queue
 
-**URL**
-
-```http
-GET /queues/{queue_id}/jobs
-```
+| Method | URI |
+| :--- | :--- |
+| `GET` | `/api/queues/{queue_id}/jobs` |
 
 **Response example**
 ```json
@@ -248,13 +198,10 @@ GET /queues/{queue_id}/jobs
 ]
 ```
 
-#### 3.4 - Retrieves the execution status of all jobs in a given queue of a such label
-
-**URL**
-
-```http
-GET /queues/{queue_id}/jobs?label=awesome_job
-```
+#### 2.4 - Retrieves the execution status of all jobs in a given queue of a such label
+| Method | URI |
+| :--- | :--- |
+| `GET` | `/api/queues/{queue_id}/jobs?label=awesome_job` |
 
 **Response example**
 ```json
@@ -272,7 +219,7 @@ GET /queues/{queue_id}/jobs?label=awesome_job
 ]
 ```
 
-#### 3.5 - Filter the jobs of a given state
+#### 2.5 - Filter the jobs of a given state
 
 A job can assume the following states
 ```java
@@ -282,11 +229,9 @@ A job can assume the following states
   FINISHED,
   FAILED
 ```
-**URL**
-
-```http
-GET /queues/{queue_id}/jobs?state=queued
-```
+| Method | URI |
+| :--- | :--- |
+| `GET` | `/api/queues/{queue_id}/jobs?state=queued` |
 
 **Response example**
 ```json
