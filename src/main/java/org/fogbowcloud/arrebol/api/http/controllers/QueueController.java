@@ -23,7 +23,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping(value = ApiEndpoints.QUEUE_ENDPOINT)
+@RequestMapping(value = ApiEndpoints.QUEUES)
 public class QueueController {
 
     private final Logger LOGGER = Logger.getLogger(QueueController.class);
@@ -89,6 +89,19 @@ public class QueueController {
 
         try {
             List<DefaultJobProcessorDTO> queuesName = queueService.getQueues();
+            return new ResponseEntity<>(queuesName, HttpStatus.OK);
+        } catch (Throwable t) {
+            LOGGER.error(String.format(Messages.Exception.GENERIC_EXCEPTION, t.getMessage()), t);
+            throw t;
+        }
+    }
+
+    @RequestMapping(value = ApiEndpoints.QUEUE, method = RequestMethod.GET)
+    public ResponseEntity<DefaultJobProcessorDTO> getQueue(@PathVariable String queueId) {
+        LOGGER.info("Getting queues [" + queueId + "]");
+
+        try {
+            DefaultJobProcessorDTO queuesName = queueService.getQueue(queueId);
             return new ResponseEntity<>(queuesName, HttpStatus.OK);
         } catch (Throwable t) {
             LOGGER.error(String.format(Messages.Exception.GENERIC_EXCEPTION, t.getMessage()), t);

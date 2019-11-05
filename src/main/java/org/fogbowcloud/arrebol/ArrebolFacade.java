@@ -32,6 +32,10 @@ public class ArrebolFacade {
         return arrebolController.getQueues();
     }
 
+    public DefaultJobProcessorDTO getQueue(String queueId) {
+        return arrebolController.getQueue(queueId);
+    }
+
     public void addWorkers(String queueId, WorkerNode workerNode) {
         arrebolController.addWorkers(queueId, workerNode);
     }
@@ -52,5 +56,4 @@ public class ArrebolFacade {
     public TaskState getTaskState(String taskId){
         return arrebolController.getTaskState(taskId);
     }
-
 }

@@ -184,6 +184,7 @@ public class ArrebolController {
     }
 
     public List<DefaultJobProcessorDTO> getQueues() {
+        LOGGER.info("Getting all queues");
         return this.jobProcessorManager.getJobProcessors();
     }
 
@@ -192,5 +193,11 @@ public class ArrebolController {
         LOGGER.info("Adding WorkerNode [" + workerNode.getAddress() + "] to Queue [" + queueId + "]");
         Collection<Worker> workers = workerCreator.createWorkers(poolId, workerNode);
         this.jobProcessorManager.addWorkers(queueId, workers);
+    }
+
+    public DefaultJobProcessorDTO getQueue(String queueId) {
+        LOGGER.info("Getting queue [" + queueId + "]");
+        DefaultJobProcessorDTO defaultJobProcessorDTO = this.jobProcessorManager.getJobProcessor(queueId);
+        return defaultJobProcessorDTO;
     }
 }

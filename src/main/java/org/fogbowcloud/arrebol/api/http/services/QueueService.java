@@ -73,8 +73,12 @@ public class QueueService {
         return queueId;
     }
 
-    public List<DefaultJobProcessorDTO> getQueues(){
+    public List<DefaultJobProcessorDTO> getQueues() {
         return arrebolFacade.getQueues();
+    }
+
+    public DefaultJobProcessorDTO getQueue(String queueId) {
+        return arrebolFacade.getQueue(queueId);
     }
 
     public void addWorkers(String queueId, WorkerNode workerNode) {

@@ -49,6 +49,14 @@ public class JobProcessorManager {
         return list;
     }
 
+    public DefaultJobProcessorDTO getJobProcessor(String queueId) {
+        if(!queues.containsKey(queueId)) {
+            throw new QueueNotFoundException(String.format(Exceptions.QUEUE_NOT_FOUND_PATTERN, queueId));
+        }
+        DefaultJobProcessorDTO defaultJobProcessorDTO = new DefaultJobProcessorDTO((DefaultJobProcessor) this.queues.get(queueId));
+        return defaultJobProcessorDTO;
+    }
+
     public void startJobProcessor(String queueId){
         LOGGER.info("Starting queue [" + queueId + "]...");
         this.queues.get(queueId).start();
