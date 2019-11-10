@@ -222,8 +222,7 @@
 #### 2.5 - Filter the jobs of a given state
 
 A job can assume the following states
-```java
-  SUBMITTED,
+```java  
   QUEUED,
   RUNNING,
   FINISHED,
