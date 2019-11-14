@@ -1,6 +1,8 @@
 package org.fogbowcloud.arrebol;
 
 import com.google.gson.Gson;
+import java.io.FileInputStream;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import org.apache.log4j.Logger;
@@ -76,12 +78,24 @@ public class ArrebolController {
     }
 
     private Configuration loadConfigurationFile() {
-        Reader targetReader = new InputStreamReader(Objects.requireNonNull(
-            ArrebolApplication.class.getClassLoader().getResourceAsStream("arrebol.json")));
-        BufferedReader bufferedReader = new BufferedReader(targetReader);
-        Configuration configuration;
-        Gson gson = new Gson();
-        configuration = gson.fromJson(bufferedReader, Configuration.class);
+        Configuration configuration = null;
+        Reader targetReader;
+        String confFilePath = System.getProperty(ArrebolApplication.CONF_FILE_PROPERTY);
+        try {
+            if (Objects.isNull(confFilePath)) {
+                confFilePath = "arrebol.json";
+                targetReader = new InputStreamReader(Objects.requireNonNull(
+                    ArrebolApplication.class.getClassLoader().getResourceAsStream(confFilePath)));
+            } else {
+                InputStream fileInputStream  = new FileInputStream(confFilePath);
+                targetReader = new InputStreamReader(fileInputStream);
+            }
+            BufferedReader bufferedReader = new BufferedReader(targetReader);
+            Gson gson = new Gson();
+            configuration = gson.fromJson(bufferedReader, Configuration.class);
+        } catch (Exception e) {
+            System.exit(1);
+        }
         return configuration;
     }
 
