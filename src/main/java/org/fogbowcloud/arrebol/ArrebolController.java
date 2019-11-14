@@ -1,6 +1,8 @@
 package org.fogbowcloud.arrebol;
 
 import com.google.gson.Gson;
+import java.io.InputStreamReader;
+import java.io.Reader;
 import org.apache.log4j.Logger;
 import org.fogbowcloud.arrebol.execution.Worker;
 import org.fogbowcloud.arrebol.execution.WorkerTypes;
@@ -48,14 +50,9 @@ public class ArrebolController {
         poolId = 1;
         String path = null;
         try {
-             path = Objects.requireNonNull(Thread.currentThread().getContextClassLoader()
-                .getResource("")).getPath();
-            this.configuration = loadConfigurationFile(path);
+            this.configuration = loadConfigurationFile();
             ConfValidator.validate(configuration);
             buildWorkerCreator(configuration);
-        } catch (FileNotFoundException f) {
-            LOGGER.error("Error on loading properties file path=" + path, f);
-            System.exit(FAIL_EXIT_CODE);
         } catch (Throwable e) {
             LOGGER.error(e.getMessage(), e);
             System.exit(FAIL_EXIT_CODE);
@@ -78,11 +75,12 @@ public class ArrebolController {
         return defaultJobProcessor;
     }
 
-    private Configuration loadConfigurationFile(String path) throws FileNotFoundException {
+    private Configuration loadConfigurationFile() {
+        Reader targetReader = new InputStreamReader(Objects.requireNonNull(
+            ArrebolApplication.class.getClassLoader().getResourceAsStream("arrebol.json")));
+        BufferedReader bufferedReader = new BufferedReader(targetReader);
         Configuration configuration;
         Gson gson = new Gson();
-        BufferedReader bufferedReader = new BufferedReader(
-            new FileReader(path + File.separator + "arrebol.json"));
         configuration = gson.fromJson(bufferedReader, Configuration.class);
         return configuration;
     }
