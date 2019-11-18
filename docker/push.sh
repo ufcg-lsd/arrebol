@@ -5,4 +5,7 @@ if [ "$#" -ne 1 ]; then
     exit 1
 fi
 
-sudo docker push $1
+readonly IMAGE=ufcglsd/arrebol
+tag=$1
+
+sudo docker push $IMAGE:"$TAG"
