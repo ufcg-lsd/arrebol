@@ -6,6 +6,6 @@ if [ "$#" -ne 1 ]; then
 fi
 
 readonly IMAGE=ufcglsd/arrebol
-tag=$1
+TAG=$1
 
 sudo docker push $IMAGE:"$TAG"
