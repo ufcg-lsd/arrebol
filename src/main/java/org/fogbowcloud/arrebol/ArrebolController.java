@@ -61,8 +61,7 @@ public class ArrebolController {
         this.jobProcessorManager = new JobProcessorManager(queues);
     }
 
-    private JobProcessor createDefaultJobProcessor(){
-//        String queueId = UUID.randomUUID().toString();
+    private JobProcessor createDefaultJobProcessor() {
         TaskQueue tq = new TaskQueue(defaultQueueId, defaultQueueName);
 
         WorkerPool pool = createPool(poolId);
@@ -72,7 +71,7 @@ public class ArrebolController {
         DefaultScheduler scheduler = new DefaultScheduler(tq, pool, policy);
         return new DefaultJobProcessor(defaultQueueId, tq, scheduler, pool);
     }
-
+    
     private Configuration loadConfigurationFile() {
         Configuration configuration = null;
         Reader targetReader;
@@ -122,7 +121,7 @@ public class ArrebolController {
         // TODO: delete all resources?
     }
 
-    String addJob(String queue, Job job){
+    String addJob(String queue, Job job) {
         job.setJobState(JobState.QUEUED);
         this.jobProcessorManager.addJob(queue, job);
 
@@ -133,7 +132,7 @@ public class ArrebolController {
         ////still unsupported
     }
 
-    Job getJob(String queueId, String jobId){
+    Job getJob(String queueId, String jobId) {
         return this.jobProcessorManager.getJob(queueId, jobId);
     }
 
@@ -161,7 +160,7 @@ public class ArrebolController {
         return jobProcessor.getId();
     }
 
-    private JobProcessor createQueueFromSpec(JobProcessorSpec jobProcessorSpec){
+    private JobProcessor createQueueFromSpec(JobProcessorSpec jobProcessorSpec) {
         String queueId = UUID.randomUUID().toString();
         TaskQueue tq = new TaskQueue(queueId, jobProcessorSpec.getName());
 
@@ -174,9 +173,9 @@ public class ArrebolController {
         return new DefaultJobProcessor(queueId, tq, scheduler, pool);
     }
 
-    private WorkerPool createPool(int poolId, List<WorkerNode> workerNodes){
+    private WorkerPool createPool(int poolId, List<WorkerNode> workerNodes) {
         Collection<Worker> workers = Collections.synchronizedList(new LinkedList<>());
-        for(WorkerNode workerNode : workerNodes){
+        for (WorkerNode workerNode : workerNodes) {
             workers.addAll(workerCreator.createWorkers(poolId, workerNode));
         }
 

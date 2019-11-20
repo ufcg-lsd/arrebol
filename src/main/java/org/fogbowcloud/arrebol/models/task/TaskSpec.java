@@ -44,6 +44,10 @@ public class TaskSpec implements Serializable {
         // Default constructor.
     }
 
+    public void setId(String uuid) {
+        this.id = uuid;
+    }
+
     public String getId() {
         return this.id;
     }
