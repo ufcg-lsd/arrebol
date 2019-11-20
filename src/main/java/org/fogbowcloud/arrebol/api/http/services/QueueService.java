@@ -44,6 +44,7 @@ public class QueueService {
         for (TaskSpec taskSpec : jobSpec.getTasksSpecs()) {
             validateTaskSpec(taskSpec);
             String taskId = UUID.randomUUID().toString();
+            taskSpec.setId(taskId);
             Task task = new Task(taskId, taskSpec);
             taskList.add(task);
         }

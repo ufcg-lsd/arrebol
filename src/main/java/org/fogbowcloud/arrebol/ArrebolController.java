@@ -64,7 +64,6 @@ public class ArrebolController {
     }
 
     private JobProcessor createDefaultJobProcessor(){
-//        String queueId = UUID.randomUUID().toString();
         TaskQueue tq = new TaskQueue(defaultQueueId, defaultQueueName);
 
         WorkerPool pool = createPool(poolId);
