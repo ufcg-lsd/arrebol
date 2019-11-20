@@ -46,8 +46,8 @@ public class ArrebolController {
         poolId = 1;
         String path = null;
         try {
-             path = Objects.requireNonNull(Thread.currentThread().getContextClassLoader()
-                .getResource("")).getPath();
+            path = Objects.requireNonNull(Thread.currentThread().getContextClassLoader()
+                    .getResource("")).getPath();
             Configuration configuration = loadConfigurationFile(path);
             ConfValidator.validate(configuration);
             buildWorkerCreator(configuration);
@@ -63,7 +63,7 @@ public class ArrebolController {
         this.jobProcessorManager = new JobProcessorManager(queues);
     }
 
-    private JobProcessor createDefaultJobProcessor(){
+    private JobProcessor createDefaultJobProcessor() {
         TaskQueue tq = new TaskQueue(defaultQueueId, defaultQueueName);
 
         WorkerPool pool = createPool(poolId);
@@ -78,7 +78,7 @@ public class ArrebolController {
         Configuration configuration;
         Gson gson = new Gson();
         BufferedReader bufferedReader = new BufferedReader(
-            new FileReader(path + File.separator + "arrebol.json"));
+                new FileReader(path + File.separator + "arrebol.json"));
         configuration = gson.fromJson(bufferedReader, Configuration.class);
         return configuration;
     }
@@ -110,7 +110,7 @@ public class ArrebolController {
         // TODO: delete all resources?
     }
 
-    String addJob(String queue, Job job){
+    String addJob(String queue, Job job) {
         job.setJobState(JobState.QUEUED);
         this.jobProcessorManager.addJob(queue, job);
 
@@ -121,7 +121,7 @@ public class ArrebolController {
         ////still unsupported
     }
 
-    Job getJob(String queueId, String jobId){
+    Job getJob(String queueId, String jobId) {
         return this.jobProcessorManager.getJob(queueId, jobId);
     }
 
@@ -149,7 +149,7 @@ public class ArrebolController {
         return jobProcessor.getId();
     }
 
-    private JobProcessor createQueueFromSpec(JobProcessorSpec jobProcessorSpec){
+    private JobProcessor createQueueFromSpec(JobProcessorSpec jobProcessorSpec) {
         String queueId = UUID.randomUUID().toString();
         TaskQueue tq = new TaskQueue(queueId, jobProcessorSpec.getName());
 
@@ -162,9 +162,9 @@ public class ArrebolController {
         return new DefaultJobProcessor(queueId, tq, scheduler, pool);
     }
 
-    private WorkerPool createPool(int poolId, List<WorkerNode> workerNodes){
+    private WorkerPool createPool(int poolId, List<WorkerNode> workerNodes) {
         Collection<Worker> workers = Collections.synchronizedList(new LinkedList<>());
-        for(WorkerNode workerNode : workerNodes){
+        for (WorkerNode workerNode : workerNodes) {
             workers.addAll(workerCreator.createWorkers(poolId, workerNode));
         }
 
