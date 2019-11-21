@@ -6,9 +6,10 @@ import javax.validation.constraints.NotEmpty;
 public class WorkerNode {
 
     @NotEmpty
+    @JsonProperty("resource_address")
     private String address;
 
-    @JsonProperty("worker_pool")
+    @JsonProperty("pool_size")
     private Integer workerPool;
 
     public WorkerNode(){}
