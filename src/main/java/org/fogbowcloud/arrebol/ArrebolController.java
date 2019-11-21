@@ -1,6 +1,10 @@
 package org.fogbowcloud.arrebol;
 
 import com.google.gson.Gson;
+import java.io.FileInputStream;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
 import org.apache.log4j.Logger;
 import org.fogbowcloud.arrebol.execution.Worker;
 import org.fogbowcloud.arrebol.execution.WorkerTypes;
@@ -44,16 +48,10 @@ public class ArrebolController {
 
     public ArrebolController() {
         poolId = 1;
-        String path = null;
         try {
-            path = Objects.requireNonNull(Thread.currentThread().getContextClassLoader()
-                    .getResource("")).getPath();
-            Configuration configuration = loadConfigurationFile(path);
+            Configuration configuration = loadConfigurationFile();
             ConfValidator.validate(configuration);
             buildWorkerCreator(configuration);
-        } catch (FileNotFoundException f) {
-            LOGGER.error("Error on loading properties file path=" + path, f);
-            System.exit(FAIL_EXIT_CODE);
         } catch (Throwable e) {
             LOGGER.error(e.getMessage(), e);
             System.exit(FAIL_EXIT_CODE);
@@ -73,13 +71,26 @@ public class ArrebolController {
         DefaultScheduler scheduler = new DefaultScheduler(tq, pool, policy);
         return new DefaultJobProcessor(defaultQueueId, tq, scheduler, pool);
     }
-
-    private Configuration loadConfigurationFile(String path) throws FileNotFoundException {
-        Configuration configuration;
-        Gson gson = new Gson();
-        BufferedReader bufferedReader = new BufferedReader(
-                new FileReader(path + File.separator + "arrebol.json"));
-        configuration = gson.fromJson(bufferedReader, Configuration.class);
+    
+    private Configuration loadConfigurationFile() {
+        Configuration configuration = null;
+        Reader targetReader;
+        String confFilePath = System.getProperty(ArrebolApplication.CONF_FILE_PROPERTY);
+        try {
+            if (Objects.isNull(confFilePath)) {
+                confFilePath = "arrebol.json";
+                targetReader = new InputStreamReader(Objects.requireNonNull(
+                    ArrebolApplication.class.getClassLoader().getResourceAsStream(confFilePath)));
+            } else {
+                InputStream fileInputStream  = new FileInputStream(confFilePath);
+                targetReader = new InputStreamReader(fileInputStream);
+            }
+            BufferedReader bufferedReader = new BufferedReader(targetReader);
+            Gson gson = new Gson();
+            configuration = gson.fromJson(bufferedReader, Configuration.class);
+        } catch (Exception e) {
+            System.exit(1);
+        }
         return configuration;
     }
 

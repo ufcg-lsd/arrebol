@@ -6,3 +6,5 @@ nohup.out
 bin/shutdown.pid
 
 logs/*
+bin/lib
+bin/arrebol-service-1.0.jar
