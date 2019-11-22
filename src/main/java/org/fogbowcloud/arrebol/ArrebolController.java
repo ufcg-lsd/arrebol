@@ -37,7 +37,7 @@ public class ArrebolController {
 
     private static final int FAIL_EXIT_CODE = 1;
     private static final String defaultQueueId = "default";
-    private static final String defaultQueueName = "defaultQueue";
+    private static final String defaultQueueName = "Default Queue";
     private final Logger LOGGER = Logger.getLogger(ArrebolController.class);
     private final JobProcessorManager jobProcessorManager;
     private Configuration configuration;
