@@ -61,7 +61,7 @@ public class DockerWorkerCreator implements WorkerCreator {
     @Override
     public Collection<Worker> createWorkers(Integer poolId, WorkerNode workerNode) {
         Collection<Worker> workers = new LinkedList<>();
-        for(int i = 0; i < workerNode.getWorkerPool(); i++){
+        for(int i = 0; i < workerNode.getPoolSize(); i++){
             LOGGER.info("Creating docker worker with address=" + workerNode.getAddress());
             Worker worker = createDockerWorker(poolId, workerNode.getAddress());
             workers.add(worker);
