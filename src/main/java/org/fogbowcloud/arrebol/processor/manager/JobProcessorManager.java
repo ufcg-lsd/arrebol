@@ -91,6 +91,11 @@ public class JobProcessorManager {
         if(!queues.containsKey(queueId)) {
             throw new QueueNotFoundException(String.format(Exceptions.QUEUE_NOT_FOUND_PATTERN, queueId));
         }
+
+        DefaultJobProcessor defaultJobProcessor = QueueDBManager.getInstance().findOne(queueId);
+        defaultJobProcessor.getJobs().put(job.getId(), job);
+
+        QueueDBManager.getInstance().save(defaultJobProcessor);
         queues.get(queueId).addJob(job);
     }
 

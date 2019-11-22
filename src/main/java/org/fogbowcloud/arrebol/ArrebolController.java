@@ -1,6 +1,10 @@
 package org.fogbowcloud.arrebol;
 
 import com.google.gson.Gson;
+import java.io.FileInputStream;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
 import org.apache.log4j.Logger;
 import org.fogbowcloud.arrebol.execution.Worker;
 import org.fogbowcloud.arrebol.execution.WorkerTypes;
@@ -10,13 +14,12 @@ import org.fogbowcloud.arrebol.execution.creator.WorkerCreator;
 import org.fogbowcloud.arrebol.models.configuration.Configuration;
 import org.fogbowcloud.arrebol.models.job.Job;
 import org.fogbowcloud.arrebol.models.job.JobState;
-import org.fogbowcloud.arrebol.models.task.Task;
 import org.fogbowcloud.arrebol.models.task.TaskState;
 import org.fogbowcloud.arrebol.processor.DefaultJobProcessor;
 import org.fogbowcloud.arrebol.processor.JobProcessor;
+import org.fogbowcloud.arrebol.processor.TaskQueue;
 import org.fogbowcloud.arrebol.processor.dto.DefaultJobProcessorDTO;
 import org.fogbowcloud.arrebol.processor.manager.JobProcessorManager;
-import org.fogbowcloud.arrebol.processor.TaskQueue;
 import org.fogbowcloud.arrebol.processor.spec.JobProcessorSpec;
 import org.fogbowcloud.arrebol.processor.spec.WorkerNode;
 import org.fogbowcloud.arrebol.resource.StaticPool;
@@ -40,22 +43,15 @@ public class ArrebolController {
     private static final String defaultQueueName = "Default Queue";
     private final Logger LOGGER = Logger.getLogger(ArrebolController.class);
     private final JobProcessorManager jobProcessorManager;
-    private Configuration configuration;
     private WorkerCreator workerCreator;
     private Integer poolId;
 
     public ArrebolController() {
         poolId = 1;
-        String path = null;
         try {
-             path = Objects.requireNonNull(Thread.currentThread().getContextClassLoader()
-                .getResource("")).getPath();
-            this.configuration = loadConfigurationFile(path);
+            Configuration configuration = loadConfigurationFile();
             ConfValidator.validate(configuration);
             buildWorkerCreator(configuration);
-        } catch (FileNotFoundException f) {
-            LOGGER.error("Error on loading properties file path=" + path, f);
-            System.exit(FAIL_EXIT_CODE);
         } catch (Throwable e) {
             LOGGER.error(e.getMessage(), e);
             System.exit(FAIL_EXIT_CODE);
@@ -65,8 +61,7 @@ public class ArrebolController {
         this.jobProcessorManager = new JobProcessorManager(queues);
     }
 
-    private JobProcessor createDefaultJobProcessor(){
-//        String queueId = UUID.randomUUID().toString();
+    private JobProcessor createDefaultJobProcessor() {
         TaskQueue tq = new TaskQueue(defaultQueueId, defaultQueueName);
 
         WorkerPool pool = createPool(poolId);
@@ -74,16 +69,28 @@ public class ArrebolController {
         //create the scheduler bind the pieces together
         FifoSchedulerPolicy policy = new FifoSchedulerPolicy();
         DefaultScheduler scheduler = new DefaultScheduler(tq, pool, policy);
-        DefaultJobProcessor defaultJobProcessor = new DefaultJobProcessor(defaultQueueId, tq, scheduler, pool);
-        return defaultJobProcessor;
+        return new DefaultJobProcessor(defaultQueueId, tq, scheduler, pool);
     }
-
-    private Configuration loadConfigurationFile(String path) throws FileNotFoundException {
-        Configuration configuration;
-        Gson gson = new Gson();
-        BufferedReader bufferedReader = new BufferedReader(
-            new FileReader(path + File.separator + "arrebol.json"));
-        configuration = gson.fromJson(bufferedReader, Configuration.class);
+    
+    private Configuration loadConfigurationFile() {
+        Configuration configuration = null;
+        Reader targetReader;
+        String confFilePath = System.getProperty(ArrebolApplication.CONF_FILE_PROPERTY);
+        try {
+            if (Objects.isNull(confFilePath)) {
+                confFilePath = "arrebol.json";
+                targetReader = new InputStreamReader(Objects.requireNonNull(
+                    ArrebolApplication.class.getClassLoader().getResourceAsStream(confFilePath)));
+            } else {
+                InputStream fileInputStream  = new FileInputStream(confFilePath);
+                targetReader = new InputStreamReader(fileInputStream);
+            }
+            BufferedReader bufferedReader = new BufferedReader(targetReader);
+            Gson gson = new Gson();
+            configuration = gson.fromJson(bufferedReader, Configuration.class);
+        } catch (Exception e) {
+            System.exit(1);
+        }
         return configuration;
     }
 
@@ -114,26 +121,22 @@ public class ArrebolController {
         // TODO: delete all resources?
     }
 
-    public String addJob(String queue, Job job){
+    String addJob(String queue, Job job) {
         job.setJobState(JobState.QUEUED);
         this.jobProcessorManager.addJob(queue, job);
 
         return job.getId();
     }
 
-    public String stopJob(Job job) {
-
-        for (Task task : job.getTasks()) {
-            ////still unsuportted
-        }
-        return job.getId();
+    void stopJob(Job job) {
+        ////still unsupported
     }
 
-    public Job getJob(String queueId, String jobId){
+    Job getJob(String queueId, String jobId) {
         return this.jobProcessorManager.getJob(queueId, jobId);
     }
 
-    public TaskState getTaskState(String taskId) {
+    TaskState getTaskState(String taskId) {
         //FIXME:
         return null;
     }
@@ -150,14 +153,14 @@ public class ArrebolController {
         }
     }
 
-    public String createQueue(JobProcessorSpec jobProcessorSpec) {
+    String createQueue(JobProcessorSpec jobProcessorSpec) {
         JobProcessor jobProcessor = createQueueFromSpec(jobProcessorSpec);
         this.jobProcessorManager.addJobProcessor(jobProcessor);
         this.jobProcessorManager.startJobProcessor(jobProcessor.getId());
         return jobProcessor.getId();
     }
 
-    private JobProcessor createQueueFromSpec(JobProcessorSpec jobProcessorSpec){
+    private JobProcessor createQueueFromSpec(JobProcessorSpec jobProcessorSpec) {
         String queueId = UUID.randomUUID().toString();
         TaskQueue tq = new TaskQueue(queueId, jobProcessorSpec.getName());
 
@@ -167,13 +170,12 @@ public class ArrebolController {
         //create the scheduler bind the pieces together
         FifoSchedulerPolicy policy = new FifoSchedulerPolicy();
         DefaultScheduler scheduler = new DefaultScheduler(tq, pool, policy);
-        DefaultJobProcessor defaultJobProcessor = new DefaultJobProcessor(queueId, tq, scheduler, pool);
-        return defaultJobProcessor;
+        return new DefaultJobProcessor(queueId, tq, scheduler, pool);
     }
 
-    private WorkerPool createPool(int poolId, List<WorkerNode> workerNodes){
+    private WorkerPool createPool(int poolId, List<WorkerNode> workerNodes) {
         Collection<Worker> workers = Collections.synchronizedList(new LinkedList<>());
-        for(WorkerNode workerNode : workerNodes){
+        for (WorkerNode workerNode : workerNodes) {
             workers.addAll(workerCreator.createWorkers(poolId, workerNode));
         }
 
@@ -183,7 +185,7 @@ public class ArrebolController {
         return pool;
     }
 
-    public List<DefaultJobProcessorDTO> getQueues() {
+    List<DefaultJobProcessorDTO> getQueues() {
         LOGGER.info("Getting all queues");
         return this.jobProcessorManager.getJobProcessors();
     }
@@ -195,9 +197,8 @@ public class ArrebolController {
         this.jobProcessorManager.addWorkers(queueId, workers);
     }
 
-    public DefaultJobProcessorDTO getQueue(String queueId) {
+    DefaultJobProcessorDTO getQueue(String queueId) {
         LOGGER.info("Getting queue [" + queueId + "]");
-        DefaultJobProcessorDTO defaultJobProcessorDTO = this.jobProcessorManager.getJobProcessor(queueId);
-        return defaultJobProcessorDTO;
+        return this.jobProcessorManager.getJobProcessor(queueId);
     }
 }
