@@ -41,14 +41,14 @@ public class DefaultJobProcessor implements JobProcessor {
     public DefaultJobProcessor() {
     }
 
-    public DefaultJobProcessor(final String queueId, final TaskQueue taskQueue,
+    public DefaultJobProcessor(final String queueId, final String queueName, final TaskQueue taskQueue,
         final DefaultScheduler defaultScheduler, final WorkerPool workerPool) {
         this.queueId = queueId;
+        this.name = queueName;
         this.taskQueue = taskQueue;
         this.defaultScheduler = defaultScheduler;
         this.pool = workerPool;
         this.jobs = Collections.synchronizedMap(new HashMap<>());
-        this.name = taskQueue.getName();
     }
 
     @Override

@@ -69,7 +69,7 @@ public class ArrebolController {
         //create the scheduler bind the pieces together
         FifoSchedulerPolicy policy = new FifoSchedulerPolicy();
         DefaultScheduler scheduler = new DefaultScheduler(tq, pool, policy);
-        return new DefaultJobProcessor(defaultQueueId, tq, scheduler, pool);
+        return new DefaultJobProcessor(defaultQueueId, defaultQueueName, tq, scheduler, pool);
     }
     
     private Configuration loadConfigurationFile() {
@@ -170,7 +170,7 @@ public class ArrebolController {
         //create the scheduler bind the pieces together
         FifoSchedulerPolicy policy = new FifoSchedulerPolicy();
         DefaultScheduler scheduler = new DefaultScheduler(tq, pool, policy);
-        return new DefaultJobProcessor(queueId, tq, scheduler, pool);
+        return new DefaultJobProcessor(queueId, jobProcessorSpec.getName(), tq, scheduler, pool);
     }
 
     private WorkerPool createPool(int poolId, List<WorkerNode> workerNodes) {
