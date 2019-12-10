@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Timer;
 import java.util.TimerTask;
 import org.apache.log4j.Logger;
@@ -50,10 +51,11 @@ public class JobProcessorManager {
     }
 
     public DefaultJobProcessorDTO getJobProcessor(String queueId) {
-        if(!queues.containsKey(queueId)) {
+        DefaultJobProcessor d = QueueDBManager.getInstance().findOne(queueId);
+        if(Objects.isNull(d)) {
             throw new QueueNotFoundException(String.format(Exceptions.QUEUE_NOT_FOUND_PATTERN, queueId));
         }
-        DefaultJobProcessorDTO defaultJobProcessorDTO = new DefaultJobProcessorDTO((DefaultJobProcessor) this.queues.get(queueId));
+        DefaultJobProcessorDTO defaultJobProcessorDTO = new DefaultJobProcessorDTO(d);
         return defaultJobProcessorDTO;
     }
 

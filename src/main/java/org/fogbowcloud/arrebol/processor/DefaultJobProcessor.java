@@ -28,6 +28,7 @@ public class DefaultJobProcessor implements JobProcessor {
     @Id
     @Column(name = "ID")
     private String queueId;
+    private String name;
     @Transient
     private TaskQueue taskQueue;
     @Transient
@@ -47,6 +48,7 @@ public class DefaultJobProcessor implements JobProcessor {
         this.defaultScheduler = defaultScheduler;
         this.pool = workerPool;
         this.jobs = Collections.synchronizedMap(new HashMap<>());
+        this.name = taskQueue.getName();
     }
 
     @Override
@@ -56,7 +58,7 @@ public class DefaultJobProcessor implements JobProcessor {
 
     @Override
     public String getName() {
-        return taskQueue.getName();
+        return this.name;
     }
 
     @Override
