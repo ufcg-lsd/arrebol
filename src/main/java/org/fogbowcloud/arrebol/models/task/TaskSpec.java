@@ -1,5 +1,6 @@
 package org.fogbowcloud.arrebol.models.task;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
@@ -23,6 +24,7 @@ public class TaskSpec implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
+    @JsonIgnore
     private Long id;
 
     @ElementCollection
