@@ -120,7 +120,7 @@ public class RawWorkerIntegrationTest {
 
         String taskId = "taskId-"+ idCount++;
         TaskSpec taskSpec = new TaskSpec(1L, new HashMap<>(), cmds, new HashMap<>());
-        Task task = new Task(taskId, null);
+        Task task = new Task(taskId, taskSpec);
 
         return task;
     }
