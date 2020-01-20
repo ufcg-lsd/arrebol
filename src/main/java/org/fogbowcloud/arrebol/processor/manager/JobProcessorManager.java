@@ -65,7 +65,11 @@ public class JobProcessorManager {
         this.jobProcessorDatabaseCommitter.schedule(new TimerTask() {
                                                  public void run() {
                                                      LOGGER.info("Commit job pool from queue [" + queueId + "] to the database");
-                                                     QueueDBManager.getInstance().save((DefaultJobProcessor) queues.get(queueId));
+                                                     try {
+                                                         QueueDBManager.getInstance().save((DefaultJobProcessor) queues.get(queueId));
+                                                     } catch (Exception e) {
+                                                         LOGGER.error("Error while saving job processor [" + queueId + "]: " + e.getMessage());
+                                                     }
                                                  }
                                              }, COMMIT_PERIOD_MILLIS, COMMIT_PERIOD_MILLIS
         );
@@ -73,8 +77,12 @@ public class JobProcessorManager {
         this.jobStateMonitor.schedule(new TimerTask() {
                                           public void run() {
                                               LOGGER.info("Updating job states from queue [" + queueId + "]");
-                                              for (Job job : queues.get(queueId).getJobs().values()) {
-                                                  updateJobState(job);
+                                              try {
+                                                  for (Job job : queues.get(queueId).getJobs().values()) {
+                                                      updateJobState(job);
+                                                  }
+                                              } catch (Exception e) {
+                                                  LOGGER.error("Error while updating job states from queue [" + queueId + "]: " + e.getMessage());
                                               }
                                           }
                                       }, UPDATE_PERIOD_MILLIS, UPDATE_PERIOD_MILLIS
