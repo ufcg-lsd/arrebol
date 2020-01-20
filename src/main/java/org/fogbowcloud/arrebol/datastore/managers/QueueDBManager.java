@@ -22,7 +22,7 @@ public class QueueDBManager {
         return instance;
     }
 
-    public void save(DefaultJobProcessor queue) {
+    public synchronized void save(DefaultJobProcessor queue) {
         String s = String.format("Searching queue %s", queue.getId());
         LOGGER.debug(s);
         this.defaultQueueRepository.save(queue);
