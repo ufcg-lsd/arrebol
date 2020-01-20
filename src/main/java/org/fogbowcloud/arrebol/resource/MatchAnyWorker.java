@@ -1,14 +1,17 @@
 package org.fogbowcloud.arrebol.resource;
 
 import java.util.Map;
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.OneToOne;
 import javax.persistence.Transient;
 import org.fogbowcloud.arrebol.execution.TaskExecutionResult;
 import org.fogbowcloud.arrebol.execution.TaskExecutor;
 import org.fogbowcloud.arrebol.execution.Worker;
+import org.fogbowcloud.arrebol.execution.docker.DockerTaskExecutor;
 import org.fogbowcloud.arrebol.models.specification.Specification;
 import org.fogbowcloud.arrebol.models.task.Task;
 
@@ -29,7 +32,7 @@ public class MatchAnyWorker implements Worker {
     private Specification spec;
     @Transient
     private int poolId;
-    @Transient
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true, targetEntity = DockerTaskExecutor.class)
     private TaskExecutor executor;
 
     public MatchAnyWorker(String id, Specification spec, int poolId, TaskExecutor delegatedExecutor) {

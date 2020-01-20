@@ -5,6 +5,7 @@ import java.io.FileInputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
+import java.util.concurrent.ConcurrentHashMap;
 import org.apache.log4j.Logger;
 import org.fogbowcloud.arrebol.execution.Worker;
 import org.fogbowcloud.arrebol.execution.WorkerTypes;
@@ -57,7 +58,7 @@ public class ArrebolController {
             System.exit(FAIL_EXIT_CODE);
         }
 
-        Map<String, JobProcessor> queues = new HashMap<>();
+        Map<String, JobProcessor> queues = new ConcurrentHashMap<>();
         this.jobProcessorManager = new JobProcessorManager(queues);
     }
 
@@ -69,7 +70,7 @@ public class ArrebolController {
         //create the scheduler bind the pieces together
         FifoSchedulerPolicy policy = new FifoSchedulerPolicy();
         DefaultScheduler scheduler = new DefaultScheduler(tq, pool, policy);
-        return new DefaultJobProcessor(defaultQueueId, tq, scheduler, pool);
+        return new DefaultJobProcessor(defaultQueueId, defaultQueueName, tq, scheduler, pool);
     }
     
     private Configuration loadConfigurationFile() {
@@ -170,7 +171,7 @@ public class ArrebolController {
         //create the scheduler bind the pieces together
         FifoSchedulerPolicy policy = new FifoSchedulerPolicy();
         DefaultScheduler scheduler = new DefaultScheduler(tq, pool, policy);
-        return new DefaultJobProcessor(queueId, tq, scheduler, pool);
+        return new DefaultJobProcessor(queueId, jobProcessorSpec.getName(), tq, scheduler, pool);
     }
 
     private WorkerPool createPool(int poolId, List<WorkerNode> workerNodes) {

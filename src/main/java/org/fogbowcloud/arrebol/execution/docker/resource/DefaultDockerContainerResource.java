@@ -4,6 +4,9 @@ import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.Transient;
 import org.apache.log4j.Logger;
 import org.fogbowcloud.arrebol.execution.docker.constants.DockerConstants;
 import org.fogbowcloud.arrebol.execution.docker.exceptions.DockerCreateContainerException;
@@ -13,11 +16,17 @@ import org.fogbowcloud.arrebol.execution.docker.exceptions.DockerStartException;
 import org.fogbowcloud.arrebol.execution.docker.helpers.DockerContainerRequestHelper;
 import org.fogbowcloud.arrebol.execution.docker.helpers.DockerImageRequestHelper;
 
+@Entity
 public class DefaultDockerContainerResource implements DockerContainerResource {
+    @Transient
     private static final Logger LOGGER = Logger.getLogger(DefaultDockerContainerResource.class);
     private boolean started;
+    @Id
     private String resourceId;
+    private String apiAddress;
+    @Transient
     private DockerContainerRequestHelper dockerContainerRequestHelper;
+    @Transient
     private DockerImageRequestHelper dockerImageRequestHelper;
 
     /**
@@ -29,7 +38,10 @@ public class DefaultDockerContainerResource implements DockerContainerResource {
         this.dockerContainerRequestHelper = dockerContainerRequestHelper;
         this.dockerImageRequestHelper = dockerImageRequestHelper;
         this.started = false;
+        this.apiAddress = dockerContainerRequestHelper.getAddress();
     }
+
+    public DefaultDockerContainerResource(){}
 
     @Override
     public void start(ContainerSpecification containerSpecification)
@@ -120,7 +132,7 @@ public class DefaultDockerContainerResource implements DockerContainerResource {
 
     @Override
     public String getApiAddress() {
-        return this.dockerContainerRequestHelper.getAddress();
+        return this.apiAddress;
     }
 
     @Override

@@ -28,6 +28,7 @@ public class DefaultJobProcessor implements JobProcessor {
     @Id
     @Column(name = "ID")
     private String queueId;
+    private String name;
     @Transient
     private TaskQueue taskQueue;
     @Transient
@@ -40,9 +41,10 @@ public class DefaultJobProcessor implements JobProcessor {
     public DefaultJobProcessor() {
     }
 
-    public DefaultJobProcessor(final String queueId, final TaskQueue taskQueue,
+    public DefaultJobProcessor(final String queueId, final String queueName, final TaskQueue taskQueue,
         final DefaultScheduler defaultScheduler, final WorkerPool workerPool) {
         this.queueId = queueId;
+        this.name = queueName;
         this.taskQueue = taskQueue;
         this.defaultScheduler = defaultScheduler;
         this.pool = workerPool;
@@ -56,7 +58,7 @@ public class DefaultJobProcessor implements JobProcessor {
 
     @Override
     public String getName() {
-        return taskQueue.getName();
+        return this.name;
     }
 
     @Override
