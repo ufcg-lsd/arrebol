@@ -23,7 +23,7 @@ public class DockerFileHandlerHelper {
                             .getExitCode();
             return exitCode;
         } catch (Exception e) {
-            throw new RuntimeException("Error while write to file [" + filePath + "] in container [" + containerId + "]");
+            throw new RuntimeException("Error while write to file [" + filePath + "] in container [" + containerId + "]: " + e.getMessage());
         }
     }
 
