@@ -120,4 +120,8 @@ public class DefaultJobProcessor implements JobProcessor {
     public void setTaskQueue(TaskQueue taskQueue) {
         this.taskQueue = taskQueue;
     }
+
+    public TaskQueue getTaskQueue() {
+        return taskQueue;
+    }
 }

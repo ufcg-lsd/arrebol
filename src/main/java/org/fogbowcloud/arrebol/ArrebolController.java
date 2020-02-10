@@ -5,7 +5,9 @@ import java.io.FileInputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
+import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 import org.apache.log4j.Logger;
 import org.fogbowcloud.arrebol.datastore.managers.QueueDBManager;
 import org.fogbowcloud.arrebol.execution.Worker;
@@ -13,6 +15,7 @@ import org.fogbowcloud.arrebol.execution.WorkerTypes;
 import org.fogbowcloud.arrebol.execution.creator.DockerWorkerCreator;
 import org.fogbowcloud.arrebol.execution.creator.RawWorkerCreator;
 import org.fogbowcloud.arrebol.execution.creator.WorkerCreator;
+import org.fogbowcloud.arrebol.models.command.CommandState;
 import org.fogbowcloud.arrebol.models.configuration.Configuration;
 import org.fogbowcloud.arrebol.models.job.Job;
 import org.fogbowcloud.arrebol.models.job.JobState;
@@ -60,6 +63,56 @@ public class ArrebolController {
         this.jobProcessorManager = new JobProcessorManager(queues);
     }
 
+    public void start() {
+        DefaultJobProcessor jp = QueueDBManager.getInstance().findOne(defaultQueueId);
+        if (Objects.isNull(jp)) {
+            jp = (DefaultJobProcessor) createDefaultJobProcessor();
+        } else {
+            TaskQueue tq = new TaskQueue(defaultQueueId, defaultQueueName);
+            FifoSchedulerPolicy policy = new FifoSchedulerPolicy();
+            WorkerPool pool = createPool(defaultPoolId);
+            DefaultScheduler scheduler = new DefaultScheduler(tq, pool, policy);
+            jp.setDefaultScheduler(scheduler);
+            jp.setTaskQueue(tq);
+            resetJobs(jp);
+        }
+        this.jobProcessorManager.addJobProcessor(jp);
+        this.jobProcessorManager.startJobProcessor(defaultQueueId);
+
+
+        //commit the job pool to DB using a COMMIT_PERIOD_MILLIS PERIOD between successive commits
+        //(I also specified the delay to the start the fist commit to be COMMIT_PERIOD_MILLIS)
+
+        // TODO: read from bd
+    }
+
+    private void resetJobs(DefaultJobProcessor jp) {
+        jp.getJobs().entrySet().stream()
+            .filter(x -> hasUnfinishedTask(x.getValue()))
+            .forEach(x -> {
+                // RESET JOB STATE
+                resetJob(x.getValue());
+                // ADD TASKS TO QUEUE
+                x.getValue().getTasks().forEach(t -> jp.getTaskQueue().addTask(t));
+            });
+    }
+
+    private boolean hasUnfinishedTask(Job job) {
+        long unfinished = job.getTasks().stream()
+            .filter(x -> x.getState() != TaskState.FINISHED && x.getState() != TaskState.FAILED)
+            .count();
+        return unfinished > 0;
+    }
+
+    private void resetJob(Job job) {
+        job.getTasks().forEach(t -> t.getTaskSpec().getCommands().forEach(c -> {
+            c.setState(CommandState.UNSTARTED);
+            c.setExitcode(Integer.MAX_VALUE);
+        }));
+        job.getTasks().forEach(t -> t.setState(TaskState.PENDING));
+        job.setJobState(JobState.QUEUED);
+    }
+
     private JobProcessor createDefaultJobProcessor() {
         TaskQueue tq = new TaskQueue(defaultQueueId, defaultQueueName);
 
@@ -103,28 +156,6 @@ public class ArrebolController {
         LOGGER.info("pool={" + pool + "} created with workers={" + workers + "}");
 
         return pool;
-    }
-
-    public void start() {
-        DefaultJobProcessor jp = QueueDBManager.getInstance().findOne(defaultQueueId);
-        if (Objects.isNull(jp)) {
-            jp = (DefaultJobProcessor) createDefaultJobProcessor();
-        } else {
-            TaskQueue tq = new TaskQueue(defaultQueueId, defaultQueueName);
-            FifoSchedulerPolicy policy = new FifoSchedulerPolicy();
-            WorkerPool pool = createPool(defaultPoolId);
-            DefaultScheduler scheduler = new DefaultScheduler(tq, pool, policy);
-            jp.setDefaultScheduler(scheduler);
-            jp.setTaskQueue(tq);
-        }
-        this.jobProcessorManager.addJobProcessor(jp);
-        this.jobProcessorManager.startJobProcessor(defaultQueueId);
-
-
-        //commit the job pool to DB using a COMMIT_PERIOD_MILLIS PERIOD between successive commits
-        //(I also specified the delay to the start the fist commit to be COMMIT_PERIOD_MILLIS)
-
-        // TODO: read from bd
     }
 
     public void stop() {
