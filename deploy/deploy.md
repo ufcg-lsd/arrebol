@@ -14,7 +14,7 @@ In ubuntu 18.04, run the `setup.sh` script to install dependencies.
 All configuration files is inside `config` directory.
 
 * Define an password to postgres data base and write to `postgres.env`
-* Define an email/password to pgadmin and write to `postgres.env`
+* Define an email/password to pgadmin and write to `pgadmin.env`
 * Fill the field `spring.datasource.password` on `application.properties` with the postgres database password.
 * Update the properties of `arrebol.json`
 
