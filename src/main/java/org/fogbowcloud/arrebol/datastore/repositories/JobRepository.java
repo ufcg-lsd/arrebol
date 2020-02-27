@@ -1,4 +1,4 @@
-package org.fogbowcloud.arrebol.repositories;
+package org.fogbowcloud.arrebol.datastore.repositories;
 
 import org.fogbowcloud.arrebol.models.job.Job;
 import org.springframework.data.jpa.repository.JpaRepository;

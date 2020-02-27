@@ -22,7 +22,9 @@ import org.fogbowcloud.arrebol.execution.docker.tasklet.Tasklet;
 import org.fogbowcloud.arrebol.execution.docker.tasklet.TaskletHelper;
 import org.fogbowcloud.arrebol.models.configuration.Configuration;
 import org.fogbowcloud.arrebol.models.specification.Specification;
+import org.fogbowcloud.arrebol.processor.spec.WorkerNode;
 import org.fogbowcloud.arrebol.resource.MatchAnyWorker;
+import org.fogbowcloud.arrebol.utils.AppUtil;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 
@@ -49,14 +51,25 @@ public class DockerWorkerCreator implements WorkerCreator {
         for (String address : configuration.getResourceAddresses()) {
             for (int i = 0; i < poolSize; i++) {
                 LOGGER.info("Creating docker worker with address=" + address);
-                Worker worker = createDockerWorker(poolId, i, address);
+                Worker worker = createDockerWorker(poolId, address);
                 workers.add(worker);
             }
         }
         return workers;
     }
 
-    private Worker createDockerWorker(Integer poolId, int resourceId, String address) {
+    @Override
+    public Collection<Worker> createWorkers(Integer poolId, WorkerNode workerNode) {
+        Collection<Worker> workers = new LinkedList<>();
+        for(int i = 0; i < workerNode.getPoolSize(); i++){
+            LOGGER.info("Creating docker worker with address=" + workerNode.getAddress());
+            Worker worker = createDockerWorker(poolId, workerNode.getAddress());
+            workers.add(worker);
+        }
+        return workers;
+    }
+
+    private Worker createDockerWorker(Integer poolId, String address) {
         String containerId = "docker-executor-" + UUID.randomUUID().toString();
         DockerContainerResource dockerContainerResource =
                 createDockerContainerResource(address, containerId);
@@ -65,7 +78,9 @@ public class DockerWorkerCreator implements WorkerCreator {
                 new DockerTaskExecutor(
                         this.configuration.getImageId(), dockerContainerResource, tasklet);
         Specification resourceSpec = null;
-        return new MatchAnyWorker(resourceSpec, "resourceId-" + resourceId, poolId, executor);
+        Worker worker = new MatchAnyWorker(AppUtil.generateUniqueStringId(), resourceSpec, poolId, executor);
+        LOGGER.info("Created Docker Worker [" + worker.getId() + "]");
+        return worker;
     }
 
     private DockerContainerResource createDockerContainerResource(

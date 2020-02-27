@@ -16,4 +16,6 @@ public interface Resource {
     String getId();
 
     int getPoolId();
+
+    Map<String, String> getMetadata();
 }

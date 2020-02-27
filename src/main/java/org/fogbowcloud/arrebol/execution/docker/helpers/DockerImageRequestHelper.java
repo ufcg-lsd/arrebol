@@ -12,7 +12,7 @@ public class DockerImageRequestHelper {
 
     public void pullImage(String imageId) throws Exception {
         final String endpoint =
-            String.format("%s/images/create?fromImage=%s:latest", apiAddress, imageId);
+            String.format("%s/images/create?fromImage=%s", apiAddress, imageId);
         HttpWrapper.doRequest(HttpPost.METHOD_NAME, endpoint);
     }
 }

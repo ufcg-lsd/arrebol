@@ -10,4 +10,6 @@ public class DockerConstants {
     public static final String JSON_IMAGE_ID_KEY = "imageId";
     public static final String JSON_WORKER_PULL_SIZE_KEY = "workerPoolSize";
     public static final String JSON_RESOURCE_ADDRESSES_KEY = "resourceAddresses";
+
+    public static final String ADDRESS_METADATA_KEY = "address";
 }

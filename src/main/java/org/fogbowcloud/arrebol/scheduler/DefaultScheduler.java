@@ -5,8 +5,7 @@ import org.fogbowcloud.arrebol.execution.ExecutionBroker;
 import org.fogbowcloud.arrebol.execution.Worker;
 import org.fogbowcloud.arrebol.models.task.Task;
 import org.fogbowcloud.arrebol.models.task.TaskState;
-import org.fogbowcloud.arrebol.queue.TaskQueue;
-import org.fogbowcloud.arrebol.resource.Resource;
+import org.fogbowcloud.arrebol.processor.TaskQueue;
 import org.fogbowcloud.arrebol.resource.WorkerPool;
 import org.fogbowcloud.arrebol.resource.ResourceState;
 

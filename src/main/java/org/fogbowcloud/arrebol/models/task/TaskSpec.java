@@ -1,11 +1,14 @@
 package org.fogbowcloud.arrebol.models.task;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
 import javax.persistence.CascadeType;
 import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.validation.Valid;
@@ -17,7 +20,12 @@ public class TaskSpec implements Serializable {
 
     private static final long serialVersionUID = -6111900503456749695L;
 
-    @Id private String id;
+    private String label;
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    @JsonIgnore
+    private Long id;
 
     @ElementCollection
     private Map<String, String> requirements;
@@ -33,7 +41,7 @@ public class TaskSpec implements Serializable {
     @ElementCollection private Map<String, String> metadata;
 
     public TaskSpec(
-            String id, Map<String, String> requirements, List<Command> commands, Map<String, String> metadata) {
+            Long id, Map<String, String> requirements, List<Command> commands, Map<String, String> metadata) {
         this.id = id;
         this.requirements = requirements;
         this.commands = commands;
@@ -44,7 +52,15 @@ public class TaskSpec implements Serializable {
         // Default constructor.
     }
 
-    public String getId() {
+    public String getLabel() {
+        return label;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public Long getId() {
         return this.id;
     }
 

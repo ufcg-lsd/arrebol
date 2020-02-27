@@ -73,7 +73,7 @@ public class TaskletHelper {
                                 + "]");
             }
         } catch (Throwable e) {
-            LOGGER.error(e);
+            LOGGER.error(e.getMessage());
             throw new Exception(
                     "Cannot send task script [" + taskId + "] to container [" + containerId + "]");
         }

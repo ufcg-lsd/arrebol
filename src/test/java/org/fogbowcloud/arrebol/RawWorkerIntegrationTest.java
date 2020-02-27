@@ -10,12 +10,13 @@ import org.fogbowcloud.arrebol.models.specification.Specification;
 import org.fogbowcloud.arrebol.models.task.Task;
 import org.fogbowcloud.arrebol.models.task.TaskSpec;
 import org.fogbowcloud.arrebol.models.task.TaskState;
-import org.fogbowcloud.arrebol.queue.TaskQueue;
+import org.fogbowcloud.arrebol.processor.TaskQueue;
 import org.fogbowcloud.arrebol.resource.MatchAnyWorker;
 import org.fogbowcloud.arrebol.resource.StaticPool;
 import org.fogbowcloud.arrebol.resource.WorkerPool;
 import org.fogbowcloud.arrebol.scheduler.DefaultScheduler;
 import org.fogbowcloud.arrebol.scheduler.FifoSchedulerPolicy;
+import org.fogbowcloud.arrebol.utils.AppUtil;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -118,7 +119,7 @@ public class RawWorkerIntegrationTest {
         cmds.add(new Command((cmd)));
 
         String taskId = "taskId-"+ idCount++;
-        TaskSpec taskSpec = new TaskSpec(taskId+"spec", new HashMap<>(), cmds, new HashMap<>());
+        TaskSpec taskSpec = new TaskSpec(1L, new HashMap<>(), cmds, new HashMap<>());
         Task task = new Task(taskId, taskSpec);
 
         return task;
@@ -129,7 +130,7 @@ public class RawWorkerIntegrationTest {
         Specification resourceSpec = null;
         for (int i = 0; i < workerPoolSize; i++) {
             TaskExecutor taskExecutor = new RawTaskExecutor();
-            workers.add(new MatchAnyWorker(resourceSpec, "resourceId-"+i, poolId, taskExecutor));
+            workers.add(new MatchAnyWorker(AppUtil.generateUniqueStringId(), resourceSpec, poolId, taskExecutor));
         }
         return workers;
     }

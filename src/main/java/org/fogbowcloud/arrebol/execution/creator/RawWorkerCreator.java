@@ -8,10 +8,12 @@ import org.fogbowcloud.arrebol.execution.raw.RawTaskExecutor;
 import org.fogbowcloud.arrebol.execution.TaskExecutor;
 import org.fogbowcloud.arrebol.execution.Worker;
 import org.fogbowcloud.arrebol.models.specification.Specification;
+import org.fogbowcloud.arrebol.processor.spec.WorkerNode;
 import org.fogbowcloud.arrebol.resource.MatchAnyWorker;
 
 import java.util.Collection;
 import java.util.LinkedList;
+import org.fogbowcloud.arrebol.utils.AppUtil;
 
 public class RawWorkerCreator implements WorkerCreator {
 
@@ -27,18 +29,23 @@ public class RawWorkerCreator implements WorkerCreator {
         Collection<Worker> workers = new LinkedList<>();
         int poolSize = new Integer(configuration.getWorkerPoolSize());
         for (int i = 0; i < poolSize; i++) {
-            LOGGER.info("Creating raw worker[" + i + "]");
-            Worker worker = createRawWorker(poolId, i);
+            Worker worker = createRawWorker(poolId);
             workers.add(worker);
         }
         return workers;
     }
 
-    private Worker createRawWorker(Integer poolId, int resourceId) {
+    @Override
+    public Collection<Worker> createWorkers(Integer poolId, WorkerNode workerNode) {
+        return null;
+    }
+
+    private Worker createRawWorker(Integer poolId) {
         TaskExecutor executor = new RawTaskExecutor();
         Specification resourceSpec = null;
-        Worker worker = new MatchAnyWorker(resourceSpec, "resourceId-" + resourceId, poolId,
-            executor);
+        Worker worker = new MatchAnyWorker(AppUtil.generateUniqueStringId(), resourceSpec, poolId,
+                    executor);
+        LOGGER.info("Created raw worker [" + worker.getId() + "]");
         return worker;
     }
 }
