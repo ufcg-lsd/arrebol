@@ -11,7 +11,7 @@ In ubuntu 18.04, run the `setup.sh` script to install dependencies.
 
 ## Fill configuration files
 
-All configuration files was inside `config` directory.
+All configuration files is inside `config` directory.
 
 * Define an password to postgres data base and write to `postgres.env`
 * Define an email/password to pgadmin and write to `postgres.env`
