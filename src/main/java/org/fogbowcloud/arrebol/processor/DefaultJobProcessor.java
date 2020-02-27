@@ -108,4 +108,20 @@ public class DefaultJobProcessor implements JobProcessor {
         }
         return addresses.size();
     }
+
+    public WorkerPool getPool() {
+        return pool;
+    }
+
+    public void setDefaultScheduler(DefaultScheduler defaultScheduler) {
+        this.defaultScheduler = defaultScheduler;
+    }
+
+    public void setTaskQueue(TaskQueue taskQueue) {
+        this.taskQueue = taskQueue;
+    }
+
+    public TaskQueue getTaskQueue() {
+        return taskQueue;
+    }
 }

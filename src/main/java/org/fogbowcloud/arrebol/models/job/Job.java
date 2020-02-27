@@ -20,7 +20,7 @@ public class Job implements Serializable {
     @JsonProperty("job_state")
     private JobState jobState;
 
-    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "job_id")
     private Collection<Task> tasks;
 
