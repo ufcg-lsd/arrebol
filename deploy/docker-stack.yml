@@ -1,0 +1,38 @@
+version: '3.7'
+services:
+  postgresql:
+    image: postgres
+    env_file: ./config/postgres.env
+    ports: 
+      - 5432:5432
+    networks: 
+      - arrebol-net
+    volumes: 
+      - postgresdata:/var/lib/postgresql/data
+      - ./config/init.sql:/docker-entrypoint-initdb.d/init.sql
+
+  pgadmin:
+    image: dpage/pgadmin4
+    env_file: ./config/pgadmin.env
+    ports:
+      - 15432:80
+    networks:
+      - arrebol-net
+      
+  arrebol:
+    image: ufcglsd/arrebol:latest
+    ports:
+      - 8080:8080
+    networks: 
+      - arrebol-net
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./config/arrebol.json:/service/config/arrebol.json
+      - ./config/application.properties:/service/config/application.properties
+
+volumes:
+  postgresdata: {}
+
+networks:
+  arrebol-net:
+    driver: overlay
