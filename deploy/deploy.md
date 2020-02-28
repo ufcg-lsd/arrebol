@@ -1,34 +1,32 @@
-# Deploying an Arrebol Service
+# Deploying the Arrebol Service
 
-For the production mode, the Arrebol is deployed in a docker container from a [arrebol docker image](https://hub.docker.com/repository/docker/ufcglsd/arrebol). Containerization facilitates deployment and has several other advantages.
-
-## Dependencies
-In ubuntu 18.04, run the `setup.sh` script to install dependencies.
+The Arrebol service could be deployed as a docker container from a [arrebol docker image](https://hub.docker.com/repository/docker/ufcglsd/arrebol).  Most of the required dependencies to run Arrebol are kept in the own [Arrebol docker image](https://hub.docker.com/repository/docker/ufcglsd/arrebol). The only exception is the Docker Engine. To install it, in an apt-based environmnet, please run the `setup.sh` script as follow:
 
   ```
   sudo bash setup.sh
   ```
 
-## Fill configuration files
+## Configuration
 
-All configuration files is inside `config` directory.
+All the configuration files are within the `deploy/config` directory. It is necesssary to edit:
 
-* Define an password to postgres data base and write to `postgres.env`
-* Define an email/password to pgadmin and write to `pgadmin.env`
-* Fill the field `spring.datasource.password` on `application.properties` with the postgres database password.
-* Update the properties of `arrebol.json`
+* The `postgres.env`, to define a password to the database;
+* The `pgadmin.env`, to define an the database admin credentials;
+* Assign the previously defined database password in the `spring.datasource.password` property on `application.properties` file;
+* Configure the `arrebol.json` file to tune Arrebol internals.
 
-## Start deploy stack
+## Install
 
-Run the `deploy-stack.sh` script to start deploy stack (arrebol/postgres/pgadmin).
+After the configuration, execute the `deploy/deploy-stack.sh` script to install and run Arrebol components.
 
   ```
   sudo bash deploy-stack.sh
   ```
 
-## Check deployment
+## Check 
 
-To check if deployment is function correct do some requests shown below and verify the output.
+To verify whether the deploy is running correctly, one can submit below sample requests to the Arrebol service.
+
 
 ---
 Request
@@ -181,15 +179,3 @@ Expected
     "job_state": "FINISHED"
 }
 ```
-
-## Error Cases
-
-### Deploy stack script
-While running `deploy-stack.sh` the following error may occur:
-```bash
-sudo bash deploy-stack.sh
-Creating service lsd_arrebol
-failed to create service lsd_arrebol: Error response from daemon: network lsd_arrebol-net not found
-```
-To solve, just run the script again.
-
