@@ -8,7 +8,7 @@ The Arrebol service could be deployed as a docker container from a [arrebol dock
 
 ## Configuration
 
-All the configuration files are within the `deploy/config` directory. It is necesssary to edit:
+All the configuration files are within the `deploy/config` directory. It is necessary to edit:
 
 * The `postgres.env`, to define a password to the database;
 * The `pgadmin.env`, to define an the database admin credentials;
