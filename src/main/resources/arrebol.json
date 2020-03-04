@@ -1,0 +1,17 @@
+{
+  "poolType":"docker",
+  "properties": [
+    {
+      "key":"workerPoolSize",
+      "value": 5
+    },
+    {
+      "key": "imageId",
+      "value": "wesleymonte/simple-worker"
+    },
+    {
+      "key": "resourceAddresses",
+      "value": ["http://localhost:5555"]
+    }
+  ]
+}

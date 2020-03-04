@@ -1,93 +1,223 @@
 package org.fogbowcloud.arrebol;
 
+import com.google.gson.Gson;
+import java.io.FileInputStream;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.util.Map.Entry;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 import org.apache.log4j.Logger;
-import org.fogbowcloud.arrebol.execution.DockerTaskExecutor;
-import org.fogbowcloud.arrebol.execution.RawTaskExecutor;
-import org.fogbowcloud.arrebol.execution.TaskExecutor;
+import org.fogbowcloud.arrebol.datastore.managers.QueueDBManager;
 import org.fogbowcloud.arrebol.execution.Worker;
+import org.fogbowcloud.arrebol.execution.WorkerTypes;
+import org.fogbowcloud.arrebol.execution.creator.DockerWorkerCreator;
+import org.fogbowcloud.arrebol.execution.creator.RawWorkerCreator;
+import org.fogbowcloud.arrebol.execution.creator.WorkerCreator;
+import org.fogbowcloud.arrebol.models.command.CommandState;
+import org.fogbowcloud.arrebol.models.configuration.Configuration;
 import org.fogbowcloud.arrebol.models.job.Job;
 import org.fogbowcloud.arrebol.models.job.JobState;
-import org.fogbowcloud.arrebol.models.specification.Specification;
-import org.fogbowcloud.arrebol.models.task.Task;
 import org.fogbowcloud.arrebol.models.task.TaskState;
-import org.fogbowcloud.arrebol.queue.TaskQueue;
-import org.fogbowcloud.arrebol.repositories.JobRepository;
-import org.fogbowcloud.arrebol.resource.MatchAnyWorker;
+import org.fogbowcloud.arrebol.processor.DefaultJobProcessor;
+import org.fogbowcloud.arrebol.processor.JobProcessor;
+import org.fogbowcloud.arrebol.processor.TaskQueue;
+import org.fogbowcloud.arrebol.processor.dto.DefaultJobProcessorDTO;
+import org.fogbowcloud.arrebol.processor.manager.JobProcessorManager;
+import org.fogbowcloud.arrebol.processor.spec.JobProcessorSpec;
+import org.fogbowcloud.arrebol.processor.spec.WorkerNode;
 import org.fogbowcloud.arrebol.resource.StaticPool;
 import org.fogbowcloud.arrebol.resource.WorkerPool;
 import org.fogbowcloud.arrebol.scheduler.DefaultScheduler;
 import org.fogbowcloud.arrebol.scheduler.FifoSchedulerPolicy;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.fogbowcloud.arrebol.utils.ConfValidator;
 import org.springframework.stereotype.Component;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.BufferedReader;
 import java.util.*;
 
 @Component
 public class ArrebolController {
 
+    private static final int FAIL_EXIT_CODE = 1;
+    private static final String defaultQueueId = "default";
+    private static final String defaultQueueName = "Default Queue";
     private final Logger LOGGER = Logger.getLogger(ArrebolController.class);
+    private final JobProcessorManager jobProcessorManager;
+    private WorkerCreator workerCreator;
+    private Integer defaultPoolId;
 
-    private final Properties properties;
-    private final DefaultScheduler scheduler;
-    private final Map<String, Job> jobPool;
-    private final TaskQueue queue;
-
-    private final Timer jobDatabaseCommitter;
-
-    private static final int COMMIT_PERIOD_MILLIS = 1000 * 20;//20 seconds
-
-    @Autowired
-    private JobRepository jobRepository;
-
-    public ArrebolController(Properties properties) {
-        this.properties = properties;
-
-        String path = Thread.currentThread().getContextClassLoader().getResource("").getPath();
-        Properties arrebolProperties = new Properties();
-
-        try (InputStream input = new FileInputStream(path + File.separator + "arrebol.conf")) {
-            arrebolProperties.load(input);
-        } catch (IOException ex) {
-            LOGGER.error("Error on loading properties file path=" + path, ex);
-            System.exit(1);
+    public ArrebolController() {
+        defaultPoolId = 1;
+        try {
+            Configuration configuration = loadConfigurationFile();
+            ConfValidator.validate(configuration);
+            buildWorkerCreator(configuration);
+        } catch (Throwable e) {
+            LOGGER.error(e.getMessage(), e);
+            System.exit(FAIL_EXIT_CODE);
         }
 
-        String queueId = UUID.randomUUID().toString();
-        String queueName = "defaultQueue";
+        Map<String, JobProcessor> queues = new ConcurrentHashMap<>();
+        this.jobProcessorManager = new JobProcessorManager(queues);
+    }
 
-        this.queue = new TaskQueue(queueId, queueName);
+    public void start() {
+        DefaultJobProcessor jp = QueueDBManager.getInstance().findOne(defaultQueueId);
+        if (Objects.isNull(jp)) {
+            jp = (DefaultJobProcessor) createDefaultJobProcessor();
+        } else {
+            TaskQueue tq = new TaskQueue(defaultQueueId, defaultQueueName);
+            FifoSchedulerPolicy policy = new FifoSchedulerPolicy();
+            WorkerPool pool = createPool(defaultPoolId);
+            DefaultScheduler scheduler = new DefaultScheduler(tq, pool, policy);
+            jp.setDefaultScheduler(scheduler);
+            jp.setTaskQueue(tq);
+            resetJobs(jp);
+        }
+        this.jobProcessorManager.addJobProcessor(jp);
+        this.jobProcessorManager.startJobProcessor(defaultQueueId);
 
-        int poolId = 1;
-        WorkerPool pool = createPool(arrebolProperties, poolId);
+
+        //commit the job pool to DB using a COMMIT_PERIOD_MILLIS PERIOD between successive commits
+        //(I also specified the delay to the start the fist commit to be COMMIT_PERIOD_MILLIS)
+
+        // TODO: read from bd
+    }
+
+    private void resetJobs(DefaultJobProcessor jp) {
+        jp.getJobs().entrySet().stream()
+            .filter(x -> hasUnfinishedTask(x.getValue()))
+            .forEach(x -> {
+                // RESET JOB STATE
+                resetJob(x.getValue());
+                // ADD TASKS TO QUEUE
+                x.getValue().getTasks().forEach(t -> jp.getTaskQueue().addTask(t));
+            });
+    }
+
+    private boolean hasUnfinishedTask(Job job) {
+        long unfinished = job.getTasks().stream()
+            .filter(x -> x.getState() != TaskState.FINISHED && x.getState() != TaskState.FAILED)
+            .count();
+        return unfinished > 0;
+    }
+
+    private void resetJob(Job job) {
+        job.getTasks().forEach(t -> t.getTaskSpec().getCommands().forEach(c -> {
+            c.setState(CommandState.UNSTARTED);
+            c.setExitcode(Integer.MAX_VALUE);
+        }));
+        job.getTasks().forEach(t -> t.setState(TaskState.PENDING));
+        job.setJobState(JobState.QUEUED);
+    }
+
+    private JobProcessor createDefaultJobProcessor() {
+        TaskQueue tq = new TaskQueue(defaultQueueId, defaultQueueName);
+
+        WorkerPool pool = createPool(defaultPoolId);
 
         //create the scheduler bind the pieces together
         FifoSchedulerPolicy policy = new FifoSchedulerPolicy();
-        this.scheduler = new DefaultScheduler(queue, pool, policy);
-
-        this.jobPool = Collections.synchronizedMap(new HashMap<String,  Job>());
-        this.jobDatabaseCommitter = new Timer(true);
+        DefaultScheduler scheduler = new DefaultScheduler(tq, pool, policy);
+        return new DefaultJobProcessor(defaultQueueId, defaultQueueName, tq, scheduler, pool);
+    }
+    
+    private Configuration loadConfigurationFile() {
+        Configuration configuration = null;
+        Reader targetReader;
+        String confFilePath = System.getProperty(ArrebolApplication.CONF_FILE_PROPERTY);
+        try {
+            if (Objects.isNull(confFilePath)) {
+                confFilePath = "arrebol.json";
+                targetReader = new InputStreamReader(Objects.requireNonNull(
+                    ArrebolApplication.class.getClassLoader().getResourceAsStream(confFilePath)));
+            } else {
+                InputStream fileInputStream  = new FileInputStream(confFilePath);
+                targetReader = new InputStreamReader(fileInputStream);
+            }
+            BufferedReader bufferedReader = new BufferedReader(targetReader);
+            Gson gson = new Gson();
+            configuration = gson.fromJson(bufferedReader, Configuration.class);
+        } catch (Exception e) {
+            System.exit(1);
+        }
+        return configuration;
     }
 
-    private static final String RAW_TYPE = "raw";
-    private static final String DOCKER_TYPE = "docker";
-
-    private WorkerPool createPool(Properties properties, int poolId) {
+    private WorkerPool createPool(int poolId) {
 
         //we need to deal with missing/wrong properties
 
-        Collection<Worker> workers = new LinkedList<>();
-        String poolType = properties.getProperty("pool.type");
+        Collection<Worker> workers = Collections.synchronizedList(new LinkedList<>(workerCreator.createWorkers(poolId)));
 
-        int poolSize = new Integer(properties.getProperty("pool.size"));
-        for (int i = 0; i < poolSize; i++) {
-            TaskExecutor executor = createTaskExecutor(poolType, properties);
-            Specification resourceSpec = null;
-            Worker worker = new MatchAnyWorker(resourceSpec, "resourceId-"+i, poolId, executor);
-            workers.add(worker);
+        WorkerPool pool = new StaticPool(poolId, workers);
+        LOGGER.info("pool={" + pool + "} created with workers={" + workers + "}");
+
+        return pool;
+    }
+
+    public void stop() {
+        // TODO: delete all resources?
+    }
+
+    String addJob(String queue, Job job) {
+        job.setJobState(JobState.QUEUED);
+        this.jobProcessorManager.addJob(queue, job);
+
+        return job.getId();
+    }
+
+    void stopJob(Job job) {
+        ////still unsupported
+    }
+
+    Job getJob(String queueId, String jobId) {
+        return this.jobProcessorManager.getJob(queueId, jobId);
+    }
+
+    TaskState getTaskState(String taskId) {
+        //FIXME:
+        return null;
+    }
+
+    private void buildWorkerCreator(Configuration configuration) throws Exception {
+        String poolType = configuration.getPoolType();
+        if (poolType.equals(WorkerTypes.DOCKER.getType())) {
+            this.workerCreator = new DockerWorkerCreator(configuration);
+        } else if (poolType.equals(WorkerTypes.RAW.getType())) {
+            this.workerCreator = new RawWorkerCreator(configuration);
+        } else {
+            String poolTypeMsg = "Worker Pool Type configuration property wrong or missing. Please, verify your configuration file.";
+            throw new IllegalArgumentException(poolTypeMsg);
+        }
+    }
+
+    String createQueue(JobProcessorSpec jobProcessorSpec) {
+        JobProcessor jobProcessor = createQueueFromSpec(jobProcessorSpec);
+        this.jobProcessorManager.addJobProcessor(jobProcessor);
+        this.jobProcessorManager.startJobProcessor(jobProcessor.getId());
+        return jobProcessor.getId();
+    }
+
+    private JobProcessor createQueueFromSpec(JobProcessorSpec jobProcessorSpec) {
+        String queueId = UUID.randomUUID().toString();
+        TaskQueue tq = new TaskQueue(queueId, jobProcessorSpec.getName());
+
+        defaultPoolId++;
+        WorkerPool pool = createPool(defaultPoolId, jobProcessorSpec.getWorkerNodes());
+
+        //create the scheduler bind the pieces together
+        FifoSchedulerPolicy policy = new FifoSchedulerPolicy();
+        DefaultScheduler scheduler = new DefaultScheduler(tq, pool, policy);
+        return new DefaultJobProcessor(queueId, jobProcessorSpec.getName(), tq, scheduler, pool);
+    }
+
+    private WorkerPool createPool(int poolId, List<WorkerNode> workerNodes) {
+        Collection<Worker> workers = Collections.synchronizedList(new LinkedList<>());
+        for (WorkerNode workerNode : workerNodes) {
+            workers.addAll(workerCreator.createWorkers(poolId, workerNode));
         }
 
         WorkerPool pool = new StaticPool(poolId, workers);
@@ -96,66 +226,20 @@ public class ArrebolController {
         return pool;
     }
 
-    private TaskExecutor createTaskExecutor(String type, Properties properties) {
-
-        TaskExecutor executor = null;
-
-        if (type.equals(RAW_TYPE)) {
-            executor = new RawTaskExecutor();
-        } else if (type.equals(DOCKER_TYPE)) {
-            String imageId = properties.getProperty("pool.image_id");
-            executor = new DockerTaskExecutor(imageId, "docker-executor-" + UUID.randomUUID().toString());
-        }
-
-        return executor;
+    List<DefaultJobProcessorDTO> getQueues() {
+        LOGGER.info("Getting all queues");
+        return this.jobProcessorManager.getJobProcessors();
     }
 
-    public void start() {
-
-        Thread schedulerThread = new Thread(this.scheduler, "scheduler-thread");
-        schedulerThread.start();
-
-        //commit the job pool to DB using a COMMIT_PERIOD_MILLIS PERIOD between successive commits
-        //(I also specified the delay to the start the fist commit to be COMMIT_PERIOD_MILLIS)
-        this.jobDatabaseCommitter.schedule(new TimerTask() {
-                    public void run() {
-                        LOGGER.info("Commit job pool to the database");
-                        for(Job job : jobPool.values()) {
-                            jobRepository.save(job);
-                        }
-                    }
-                }, COMMIT_PERIOD_MILLIS, COMMIT_PERIOD_MILLIS
-        );
-
-        // TODO: read from bd
+    public void addWorkers(String queueId, WorkerNode workerNode) {
+        //REVIEW POOL ID
+        LOGGER.info("Adding WorkerNode [" + workerNode.getAddress() + "] to Queue [" + queueId + "]");
+        Collection<Worker> workers = workerCreator.createWorkers(defaultPoolId, workerNode);
+        this.jobProcessorManager.addWorkers(queueId, workers);
     }
 
-    public void stop() {
-        // TODO: delete all resources?
-    }
-
-    public String addJob(Job job) {
-
-        job.setJobState(JobState.READY);
-        this.jobPool.put(job.getId(), job);
-
-        for(Task task : job.getTasks()){
-            this.queue.addTask(task);
-        }
-
-        return job.getId();
-    }
-
-    public String stopJob(Job job) {
-
-        for(Task task : job.getTasks()){
-         //
-        }
-        return job.getId();
-    }
-
-    public TaskState getTaskState(String taskId) {
-        //FIXME:
-        return null;
+    DefaultJobProcessorDTO getQueue(String queueId) {
+        LOGGER.info("Getting queue [" + queueId + "]");
+        return this.jobProcessorManager.getJobProcessor(queueId);
     }
 }

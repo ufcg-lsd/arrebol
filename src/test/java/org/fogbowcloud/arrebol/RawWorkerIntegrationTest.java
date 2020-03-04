@@ -1,7 +1,7 @@
 package org.fogbowcloud.arrebol;
 
 import org.apache.log4j.Logger;
-import org.fogbowcloud.arrebol.execution.RawTaskExecutor;
+import org.fogbowcloud.arrebol.execution.raw.RawTaskExecutor;
 import org.fogbowcloud.arrebol.execution.TaskExecutor;
 import org.fogbowcloud.arrebol.execution.Worker;
 import org.fogbowcloud.arrebol.models.command.Command;
@@ -10,12 +10,13 @@ import org.fogbowcloud.arrebol.models.specification.Specification;
 import org.fogbowcloud.arrebol.models.task.Task;
 import org.fogbowcloud.arrebol.models.task.TaskSpec;
 import org.fogbowcloud.arrebol.models.task.TaskState;
-import org.fogbowcloud.arrebol.queue.TaskQueue;
+import org.fogbowcloud.arrebol.processor.TaskQueue;
 import org.fogbowcloud.arrebol.resource.MatchAnyWorker;
 import org.fogbowcloud.arrebol.resource.StaticPool;
 import org.fogbowcloud.arrebol.resource.WorkerPool;
 import org.fogbowcloud.arrebol.scheduler.DefaultScheduler;
 import org.fogbowcloud.arrebol.scheduler.FifoSchedulerPolicy;
+import org.fogbowcloud.arrebol.utils.AppUtil;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -118,26 +119,19 @@ public class RawWorkerIntegrationTest {
         cmds.add(new Command((cmd)));
 
         String taskId = "taskId-"+ idCount++;
-        TaskSpec taskSpec = new TaskSpec(taskId+"spec", new DummySpec(), cmds, new HashMap<>());
+        TaskSpec taskSpec = new TaskSpec(1L, new HashMap<>(), cmds, new HashMap<>());
         Task task = new Task(taskId, taskSpec);
 
         return task;
     }
 
-    private Collection<Worker> createPool(int size, int poolId){
-        Collection<Worker> workers = new LinkedList<Worker>();
-        int poolSize = 5;
+    private Collection<Worker> createPool(int workerPoolSize, int poolId){
+        Collection<Worker> workers = new LinkedList<>();
         Specification resourceSpec = null;
-        for (int i = 0; i < poolSize; i++) {
+        for (int i = 0; i < workerPoolSize; i++) {
             TaskExecutor taskExecutor = new RawTaskExecutor();
-            workers.add(new MatchAnyWorker(resourceSpec, "resourceId-"+i, poolId, taskExecutor));
+            workers.add(new MatchAnyWorker(AppUtil.generateUniqueStringId(), resourceSpec, poolId, taskExecutor));
         }
         return workers;
-    }
-
-    private class DummySpec extends Specification {
-        public DummySpec() {
-            super(null);
-        }
     }
 }

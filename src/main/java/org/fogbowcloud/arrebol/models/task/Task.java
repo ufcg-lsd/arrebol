@@ -1,5 +1,6 @@
 package org.fogbowcloud.arrebol.models.task;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import javax.persistence.*;
 import java.io.Serializable;
 import java.util.Objects;
@@ -16,6 +17,7 @@ public class Task implements Serializable {
     private TaskState state;
 
     @OneToOne(cascade = CascadeType.ALL)
+    @JsonProperty("tasks_specs")
     private TaskSpec taskSpec;
 
     public Task(String id, TaskSpec taskSpec) {
@@ -24,13 +26,14 @@ public class Task implements Serializable {
         this.state = TaskState.PENDING;
     }
 
-    Task(){
+    Task() {
         //Default constructor
     }
 
     public String getId() {
         return this.id;
     }
+
 
     public TaskState getState() {
         return this.state;
@@ -46,12 +49,16 @@ public class Task implements Serializable {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
         Task task = (Task) o;
         return Objects.equals(id, task.id) &&
-                state == task.state &&
-                Objects.equals(taskSpec, task.taskSpec);
+            state == task.state &&
+            Objects.equals(taskSpec, task.taskSpec);
     }
 
     @Override

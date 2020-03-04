@@ -1,0 +1,9 @@
+{
+  "poolType":"raw",
+  "properties": [
+    {
+      "key":"workerPoolSize",
+      "value": 5
+    }
+  ]
+}

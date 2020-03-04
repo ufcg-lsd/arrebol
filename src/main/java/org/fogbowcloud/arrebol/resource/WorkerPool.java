@@ -9,4 +9,6 @@ public interface WorkerPool {
     int getId();
 
     Collection<Worker> getWorkers();
+
+    void addWorkers(Collection<Worker> workers);
 }

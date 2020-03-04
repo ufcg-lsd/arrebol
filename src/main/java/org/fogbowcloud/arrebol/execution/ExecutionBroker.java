@@ -1,11 +1,10 @@
 package org.fogbowcloud.arrebol.execution;
 
+import java.util.UUID;
 import org.apache.log4j.Logger;
 import org.fogbowcloud.arrebol.models.task.Task;
 import org.fogbowcloud.arrebol.models.task.TaskState;
 import org.fogbowcloud.arrebol.resource.ResourceState;
-
-import java.util.UUID;
 
 public class ExecutionBroker {
 
@@ -50,7 +49,8 @@ public class ExecutionBroker {
             }
 
             private void onFinish() {
-                logger.info("task={" + task + "} worker={" + worker + "} has finished successfully");
+                logger
+                    .info("task={" + task + "} worker={" + worker + "} has finished successfully");
                 task.setState(TaskState.FINISHED);
                 worker.setState(ResourceState.IDLE);
             }
@@ -61,6 +61,6 @@ public class ExecutionBroker {
                 worker.setState(ResourceState.IDLE);
             }
         },
-        workerThreadId).start();
+            workerThreadId).start();
     }
 }

@@ -14,15 +14,15 @@ import java.util.Map;
 @RequestMapping(value = ApiDocumentation.ApiEndpoints.VERSION_ENDPOINT)
 public class VersionController {
 
-    private static Map<String,String> VERSION;
+    private static Map<String, String> VERSION;
 
-    public VersionController(){
+    public VersionController() {
         VERSION = new HashMap<>();
         VERSION.put("VERSION", ApiDocumentation.ApiInfo.VERSION);
     }
 
     @RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Map> getVersion(){
+    public ResponseEntity<Map> getVersion() {
         return ResponseEntity.ok(VERSION);
     }
 }
