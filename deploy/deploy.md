@@ -183,3 +183,13 @@ Expected
 }
 ```
 
+## Hard Restart
+
+To hard restart the Arrebol Stack, run the commands as follow:
+```bash
+sudo docker stack rm lsd
+sudo docker volume rm lsd_postgresdata
+sudo docker pull ufcglsd/arrebol:saps
+sudo bash deploy-stack.sh
+```
+
