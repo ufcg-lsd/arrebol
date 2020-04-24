@@ -25,7 +25,7 @@ After the configuration, execute the `deploy/deploy-stack.sh` script to install 
 
 ## Check 
 
-To verify whether the deploy is running correctly, one can submit below sample requests to the Arrebol service.
+To verify whether the deploy is running correctly, submit below sample requests to the Arrebol service.
 
 
 ---
@@ -56,6 +56,7 @@ curl -X POST \
          "commands":[
             "echo Hello World!",
             "sleep 2",
+            "touch /nfs/test1",
             "sleep 2",
             "echo Goodbye World!"
          ],
@@ -72,6 +73,7 @@ curl -X POST \
          "commands":[
             "echo Hello World!",
             "sleep 2",
+            "touch /nfs/test2",
             "sleep 2",
             "echo Goodbye World!"
          ],
@@ -92,6 +94,7 @@ Expected
 Request 
 * Use the job id of previous request
 * Do until you see that the Job is finished
+* **After Job is `finished`, check if was created a file `test1` and `test2` into `/nfs` directory from `worker host`.**
 
 ```bash
 curl -X GET http://127.0.0.1:8080/queues/default/jobs/e77d7b5c-dc3b-4f22-83ea-b6cb48736455
@@ -179,3 +182,4 @@ Expected
     "job_state": "FINISHED"
 }
 ```
+
