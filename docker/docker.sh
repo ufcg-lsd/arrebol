@@ -27,15 +27,16 @@ publish() {
 }
 
 define_params() {
-  case $1 in
-    build)
-      build $2
+  case "$@" in
+    build) shift
+      build "$@"
       ;;
-    run)
-      run $2 $3
+    run) shift
+      run "$@"
       ;;
-    publish)
-      publish $2
+    publish) shift
+      publish "$@"
+      ;;
   esac
 }
 
