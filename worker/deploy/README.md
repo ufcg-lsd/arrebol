@@ -28,7 +28,7 @@ ansible_files_path=./ansible-playbook
 
 ## Install
 
-After configuring the `hosts.conf` file, execute the `install.sh` script to setup the Worker Node.
+After configuring the `hosts.conf` file, execute the `install.sh` script in the coordination host to setup the Worker Node.
 
   ```
   sudo bash install.sh
