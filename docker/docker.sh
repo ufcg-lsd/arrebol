@@ -18,6 +18,7 @@ run() {
     --name "${CONTAINER_NAME}" \
     -p ${PORT}:8080 \
     -v "$(pwd)"/src/main/java/resources/arrebol.json:/service/config/arrebol.json \
+    -v "$(pwd)"/src/main/java/resources/application.properties:/service/config/application.properties \
     "${ARREBOL_REPO}":"${TAG}"
 }
 
