@@ -6,6 +6,10 @@ The Arrebol service could be deployed as a docker container from a [arrebol dock
   sudo bash setup.sh
   ```
 
+## Requirements
+
+Arrebol needs a `Worker Node` to run its Jobs. Instructions for deploying a worker are [here](../worker/deploy).
+
 ## Configuration
 
 All the configuration files are within the `deploy/config` directory. It is necessary to edit:
