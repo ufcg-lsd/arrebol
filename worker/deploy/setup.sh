@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # A script to setup a worker environment.
-# It must be runned on Ubuntu 16.04 via 'sudo'
+# It must run on Ubuntu 16.04 via 'sudo'
 
 install_docker() {
     echo "--> Installing docker"
