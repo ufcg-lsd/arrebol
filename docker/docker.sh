@@ -5,15 +5,15 @@ readonly ARREBOL_CONTAINER=arrebol
 
 build() {
   local DOCKERFILE_DIR=docker/Dockerfile
-  local TAG="${1-latest}"
+  local TAG="${1:-latest}"
   mvn clean install -DskipTests
   docker build --tag "${ARREBOL_REPO}":"${TAG}" \
           --file "${DOCKERFILE_DIR}" .
 }
 
 run() {
-  local TAG="${1-latest}"
-  local PORT="${2-8080}"
+  local TAG="${1:-latest}"
+  local PORT="${2:-8080}"
   docker run -dit \
     --name "${ARREBOL_CONTAINER}" \
     -p ${PORT}:8080 \
