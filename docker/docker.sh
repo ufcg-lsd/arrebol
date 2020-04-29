@@ -3,6 +3,8 @@
 readonly ARREBOL_REPO=ufcglsd/arrebol
 readonly ARREBOL_CONTAINER=arrebol
 
+# ${parameter:-word} will set `word` if `parameter` is null or unset.
+
 build() {
   local DOCKERFILE_DIR=docker/Dockerfile
   local TAG="${1:-latest}"
