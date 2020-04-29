@@ -1,11 +1,12 @@
 # Worker Node deployment
 
-Arrebol tasks are processed by Workers. In a typical deployment, a few Workers are deployed together in a single virtual machine, a Worker Node. As each task run in a isolated docker container, the Docker engine and other dependencies must have be installed and configured into the Worker Node. Below, we described how to configure the Worker Node.
+Arrebol tasks are processed by Workers. In a typical deployment, a few Workers are deployed together in a single virtual machine, a Worker Node. As each task run in an isolated docker container, the Docker engine and other dependencies must have be installed and configured in the Worker Node. Below, we described how to configure the Worker Node.
 
 ## Requeriments
 
 Before the configuration and installation of Worker Node dependencies, each Worker Node virtual machine should be configured to be reached via SSH (using a rsa key pair). Also, the [Ansible automation tool](https://www.ansible.com/) should be installed in the deploy coordination host.
-Warning: Deployment does not work for nodes with Ubuntu version 14 or earlier.
+
+`Warning:` Deployment does not work for nodes with Ubuntu version 14 or earlier.
 
 ## Configuration
 
@@ -38,7 +39,7 @@ After configuring the `hosts.conf` file, execute the `install.sh` script in the 
 
 To verify whether the worker deployment was successful, one can submit below sample requests to the docker api.
 
-`Warning`: By default, the deployment opens port 5555 for the docker api.
+`Warning: By default, the deployment opens port 5555 for the docker api.
 
 ---
 Request
