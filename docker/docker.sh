@@ -24,7 +24,6 @@ run() {
 publish() {
   local tag="${1:-latest}"
   docker push "${ARREBOL_REPO}":"${tag}"
-  esac
 }
 
 define_params() {
