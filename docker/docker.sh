@@ -3,10 +3,9 @@
 readonly ARREBOL_REPO=ufcglsd/arrebol
 readonly ARREBOL_CONTAINER=arrebol
 
-# ${parameter:-word} will set `word` if `parameter` is null or unset.
-
 build() {
   local DOCKERFILE_DIR=docker/Dockerfile
+  # Will set `latest` if ${1} is null or unset.
   local TAG="${1:-latest}"
   mvn clean install -DskipTests
   docker build --tag "${ARREBOL_REPO}":"${TAG}" \
@@ -14,6 +13,8 @@ build() {
 }
 
 run() {
+  # Will set `latest` if ${1} is null or unset.
+  # Will set `8080` if ${2} is null or unset.
   local TAG="${1:-latest}"
   local PORT="${2:-8080}"
   docker run -dit \
@@ -25,6 +26,7 @@ run() {
 }
 
 publish() {
+  # Will set `latest` if ${1} is null or unset.
   local tag="${1:-latest}"
   docker push "${ARREBOL_REPO}":"${tag}"
 }
