@@ -10,6 +10,14 @@ readonly DEPLOY_WORKER_YML_FILE="deploy-worker.yml"
 readonly MY_PATH="`dirname \"$0\"`"              
 readonly MY_PATH="`( cd \"${MY_PATH}\" && pwd )`" 
 
+if [ -z "$MY_PATH" ] ; then
+  # For some reason, the path is not accessible
+  # to the script (e.g. permissions re-evaled after suid)
+  exit 1
+fi
+
+readonly HOSTS_CONF_FILE="${MY_PATH}/hosts.conf"
+
 check_variables() {
   for var in "$@"
   do
@@ -20,33 +28,53 @@ check_variables() {
   done
 }
 
-if [ -z "$MY_PATH" ] ; then
-  # For some reason, the path is not accessible
-  # to the script (e.g. permissions re-evaled after suid)
-  exit 1
-fi
+clean_machines_field() {
+  sed -i '/\[worker-machine\]/,/\[worker-machine:vars\]/{//!d}' "${1}"
+}
 
-HOSTS_CONF_FILE="${MY_PATH}/hosts.conf"
+add_machine() {
+  local ANSIBLE_HOSTS_FILE=$1
+  local MACHINE=$2
+  sed -i "/\[worker-machine:vars\]/i ${MACHINE}" ${ANSIBLE_HOSTS_FILE}
+}
 
-ANSIBLE_FILES_PATH=$(grep "${ANSIBLE_FILES_PATH_PATTERN}" "${HOSTS_CONF_FILE}" | awk -F "=" '{print $2}')
-PRIVATE_KEY_FILE_PATH=$(grep "${PRIVATE_KEY_FILE_PATH_PATTERN}" "${HOSTS_CONF_FILE}" | awk -F "=" '{print $2}')
-NFS_SERVER=$(grep -w "${NFS_SERVER_PATTERN}" "${HOSTS_CONF_FILE}" | awk -F "=" '{print $2}')
-NFS_SERVER_DIR=$(grep -w "${NFS_SERVER_DIR_PATTERN}" "${HOSTS_CONF_FILE}" | awk -F "=" '{print $2}')
+fill_machines_ip() {
+  local ANSIBLE_HOSTS_FILE=$1
 
-check_variables ANSIBLE_FILES_PATH PRIVATE_KEY_FILE_PATH NFS_SERVER NFS_SERVER_DIR
+  clean_machines_field ${ANSIBLE_HOSTS_FILE}
 
-ANSIBLE_HOSTS_FILE="${ANSIBLE_FILES_PATH}/hosts"
+  UNCOMMENTED_LINES=$(grep "^[^#;]" "${HOSTS_CONF_FILE}")
+  WORKER_MACHINES=$(grep "${DEPLOYED_WORKER_IP_PATTERN}" <<< ${UNCOMMENTED_LINES})
 
-# Clears the worker machine addresses
-sed -i '/\[worker-machine\]/,/\[worker-machine:vars\]/{//!d}' "${ANSIBLE_HOSTS_FILE}"
+  while read -r line ; do
+      WORKER_IP=$(echo ${line} | awk -F "=" '{print $2}')
 
-# Fill worker address field of hosts file
-grep "${DEPLOYED_WORKER_IP_PATTERN}" "${HOSTS_CONF_FILE}"| while read -r line ; do
-    DEPLOYED_WORKER_IP=$(echo ${line} | awk -F "=" '{print $2}')
-    sed -i "/\[worker-machine:vars\]/i ${DEPLOYED_WORKER_IP}" ${ANSIBLE_HOSTS_FILE}
-done
+      if [ -z "${WORKER_IP}" ]; then
+        echo "Error. The field ${line} was not set."
+        exit 1
+      fi
+      
+      add_machine ${ANSIBLE_HOSTS_FILE} ${WORKER_IP}
+  done <<< ${WORKER_MACHINES}
+}
 
-# Writes the path of the private key file in Ansible hosts file
-sed -i "s#.*${PRIVATE_KEY_FILE_PATH_PATTERN}=.*#${PRIVATE_KEY_FILE_PATH_PATTERN}=${PRIVATE_KEY_FILE_PATH}#" ${ANSIBLE_HOSTS_FILE}
+main() {
+  ANSIBLE_FILES_PATH=$(grep "${ANSIBLE_FILES_PATH_PATTERN}" "${HOSTS_CONF_FILE}" | awk -F "=" '{print $2}')
+  PRIVATE_KEY_FILE_PATH=$(grep "${PRIVATE_KEY_FILE_PATH_PATTERN}" "${HOSTS_CONF_FILE}" | awk -F "=" '{print $2}')
+  NFS_SERVER=$(grep -w "${NFS_SERVER_PATTERN}" "${HOSTS_CONF_FILE}" | awk -F "=" '{print $2}')
+  NFS_SERVER_DIR=$(grep -w "${NFS_SERVER_DIR_PATTERN}" "${HOSTS_CONF_FILE}" | awk -F "=" '{print $2}')
 
-(cd ${ANSIBLE_FILES_PATH} && ansible-playbook -vvv ${DEPLOY_WORKER_YML_FILE} -e nfs_server=${NFS_SERVER} -e nfs_server_dir=${NFS_SERVER_DIR})
+  check_variables ANSIBLE_FILES_PATH PRIVATE_KEY_FILE_PATH NFS_SERVER NFS_SERVER_DIR
+
+  ANSIBLE_HOSTS_FILE="${ANSIBLE_FILES_PATH}/hosts"
+
+  fill_machines_ip ${ANSIBLE_HOSTS_FILE}
+
+  # Writes the path of the private key file in Ansible hosts file
+  sed -i "s#.*${PRIVATE_KEY_FILE_PATH_PATTERN}=.*#${PRIVATE_KEY_FILE_PATH_PATTERN}=${PRIVATE_KEY_FILE_PATH}#" ${ANSIBLE_HOSTS_FILE}
+
+  (cd ${ANSIBLE_FILES_PATH} && ansible-playbook -vvv ${DEPLOY_WORKER_YML_FILE} -e nfs_server=${NFS_SERVER} -e nfs_server_dir=${NFS_SERVER_DIR})
+}
+
+main
+
