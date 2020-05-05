@@ -3,6 +3,8 @@
 readonly ANSIBLE_FILES_PATH_PATTERN="ansible_files_path"
 readonly PRIVATE_KEY_FILE_PATH_PATTERN="ansible_ssh_private_key_file"
 readonly DEPLOYED_WORKER_IP_PATTERN="deployed_worker_ip"
+readonly NFS_SERVER_PATTERN="nfs_server"
+readonly NFS_SERVER_DIR_PATTERN="nfs_server_dir"
 readonly DEPLOY_WORKER_YML_FILE="deploy-worker.yml"
 
 readonly MY_PATH="`dirname \"$0\"`"              
@@ -17,8 +19,11 @@ fi
 HOSTS_CONF_FILE="${MY_PATH}/hosts.conf"
 
 ANSIBLE_FILES_PATH=$(grep "${ANSIBLE_FILES_PATH_PATTERN}" "${HOSTS_CONF_FILE}" | awk -F "=" '{print $2}')
-ANSIBLE_HOSTS_FILE="${ANSIBLE_FILES_PATH}/hosts"
 PRIVATE_KEY_FILE_PATH=$(grep "${PRIVATE_KEY_FILE_PATH_PATTERN}" "${HOSTS_CONF_FILE}" | awk -F "=" '{print $2}')
+NFS_SERVER=$(grep -w "${NFS_SERVER_PATTERN}" "${HOSTS_CONF_FILE}" | awk -F "=" '{print $2}')
+NFS_SERVER_DIR=$(grep -w "${NFS_SERVER_DIR_PATTERN}" "${HOSTS_CONF_FILE}" | awk -F "=" '{print $2}')
+
+ANSIBLE_HOSTS_FILE="${ANSIBLE_FILES_PATH}/hosts"
 
 # Clears the worker machine addresses
 sed -i '/\[worker-machine\]/,/\[worker-machine:vars\]/{//!d}' "${ANSIBLE_HOSTS_FILE}"
@@ -32,4 +37,4 @@ done
 # Writes the path of the private key file in Ansible hosts file
 sed -i "s#.*${PRIVATE_KEY_FILE_PATH_PATTERN}=.*#${PRIVATE_KEY_FILE_PATH_PATTERN}=${PRIVATE_KEY_FILE_PATH}#" ${ANSIBLE_HOSTS_FILE}
 
-(cd ${ANSIBLE_FILES_PATH} && ansible-playbook -vvv ${DEPLOY_WORKER_YML_FILE})
+(cd ${ANSIBLE_FILES_PATH} && ansible-playbook -vvv ${DEPLOY_WORKER_YML_FILE} -e nfs_server=${NFS_SERVER} -e nfs_server_dir=${NFS_SERVER_DIR})
