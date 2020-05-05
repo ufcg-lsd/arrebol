@@ -20,6 +20,12 @@ deployed_worker_ip=10.30.1.36
 # Required
 remote_user=ubuntu
 
+# The NFS Server Address
+nfs_server=10.11.16.136
+
+# The NFS Server directory to mount
+nfs_server_dir=/nfs
+
 # Required (if not specified, ansible will use the host ssh keys)
 ansible_ssh_private_key_file=/home/admin/.ssh/priv_key
 
