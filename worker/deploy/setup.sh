@@ -3,6 +3,8 @@
 # A script to setup a worker environment.
 # It must run on Ubuntu 16.04 via 'sudo'
 
+readonly LOCAL_NFS_DIR="/nfs"
+
 install_docker() {
     echo "--> Installing docker"
     apt update
@@ -38,7 +40,25 @@ open_tcp_port() {
     sed -i "s@.*${PROPERTY_PATTERN}=.*@${PROPERTY_PATTERN}=${PROPERTY_VALUE}@" $DOCKER_CONF_FILE
 }
 
+set_up_nfs() {
+    echo "--> Setting up the NFS Client"
+    local NFS_SERVER=$1
+    local NFS_SERVER_DIR=$2
+    apt-get install -y nfs-common
+    mkdir -p ${LOCAL_NFS_DIR}
+
+    echo "--> Mounting ${NFS_SERVER_DIR} in to ${LOCAL_NFS_DIR}"
+    mount -t nfs ${NFS_SERVER}:${NFS_SERVER_DIR} ${LOCAL_NFS_DIR}
+}
+
 main() {
+
+    if [ "$#" -nq 2 ]; then
+        echo "Invalid arguments!"
+        echo "Use setup.sh <nfs_server> <nfs_server_dir>"
+        exit 1
+    if
+
     CHECK_DOCKER_INSTALLATION=$(dpkg -l | grep -c docker-ce)
 
     if ! [ $CHECK_DOCKER_INSTALLATION -ne 0 ]; then
@@ -50,7 +70,8 @@ main() {
     open_tcp_port
 
     systemctl daemon-reload
-    service docker restart   
+    service docker restart
+    set_up_nfs "$@"
 }
 
 main
