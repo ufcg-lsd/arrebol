@@ -6,7 +6,7 @@
     - name: "copy setup file"
       copy: src="../setup.sh" dest="/home/ubuntu"
     - name: Setting up environment
-      shell: "{{ setup }}"
+      shell: "{{ setup }} {{ nfs_server }} {{ nfs_server_dir }}"
       become: yes
     - name: Cleaning up
       shell: rm setup.sh
