@@ -10,6 +10,16 @@ readonly DEPLOY_WORKER_YML_FILE="deploy-worker.yml"
 readonly MY_PATH="`dirname \"$0\"`"              
 readonly MY_PATH="`( cd \"${MY_PATH}\" && pwd )`" 
 
+check_variables() {
+  for var in "$@"
+  do
+    if [ -z "${!var}" ]; then
+      echo "Error. The field ${var} was not set."
+      exit 1
+    fi
+  done
+}
+
 if [ -z "$MY_PATH" ] ; then
   # For some reason, the path is not accessible
   # to the script (e.g. permissions re-evaled after suid)
@@ -22,6 +32,8 @@ ANSIBLE_FILES_PATH=$(grep "${ANSIBLE_FILES_PATH_PATTERN}" "${HOSTS_CONF_FILE}" |
 PRIVATE_KEY_FILE_PATH=$(grep "${PRIVATE_KEY_FILE_PATH_PATTERN}" "${HOSTS_CONF_FILE}" | awk -F "=" '{print $2}')
 NFS_SERVER=$(grep -w "${NFS_SERVER_PATTERN}" "${HOSTS_CONF_FILE}" | awk -F "=" '{print $2}')
 NFS_SERVER_DIR=$(grep -w "${NFS_SERVER_DIR_PATTERN}" "${HOSTS_CONF_FILE}" | awk -F "=" '{print $2}')
+
+check_variables ANSIBLE_FILES_PATH PRIVATE_KEY_FILE_PATH NFS_SERVER NFS_SERVER_DIR
 
 ANSIBLE_HOSTS_FILE="${ANSIBLE_FILES_PATH}/hosts"
 
