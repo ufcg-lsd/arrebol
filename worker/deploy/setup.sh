@@ -3,7 +3,9 @@
 # A script to setup a worker environment.
 # It must run on Ubuntu 16.04 via 'sudo'
 
+
 readonly LOCAL_NFS_DIR="/nfs"
+readonly USAGE="usage: setup.sh <nfs_server> <nfs_server_dir>"
 
 install_docker() {
     echo "--> Installing docker"
@@ -52,12 +54,10 @@ set_up_nfs() {
 }
 
 main() {
-
-    if [ "$#" -nq 2 ]; then
-        echo "Invalid arguments!"
-        echo "Use setup.sh <nfs_server> <nfs_server_dir>"
+    if [ ! "$#" -eq 2 ]; then
+        echo "Error. ${USAGE}"
         exit 1
-    if
+    fi
 
     CHECK_DOCKER_INSTALLATION=$(dpkg -l | grep -c docker-ce)
 
@@ -74,4 +74,4 @@ main() {
     set_up_nfs "$@"
 }
 
-main
+main "$@"
