@@ -49,7 +49,12 @@ set_up_nfs() {
     apt-get install -y nfs-common
     mkdir -p ${LOCAL_NFS_DIR}
 
-    echo "--> Mounting ${NFS_SERVER_DIR} in to ${LOCAL_NFS_DIR}"
+    echo "--> Mounting ${NFS_SERVER_DIR} into ${LOCAL_NFS_DIR}"
+
+    if mountpoint -q -- "${LOCAL_NFS_DIR}"; then
+        echo "Umounting current ${LOCAL_NFS_DIR}..."
+        umount -f -l "${LOCAL_NFS_DIR}"
+    fi
     mount -t nfs ${NFS_SERVER}:${NFS_SERVER_DIR} ${LOCAL_NFS_DIR}
 }
 
