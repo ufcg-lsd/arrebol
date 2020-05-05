@@ -6,9 +6,13 @@ The Arrebol service could be deployed as a docker container from a [arrebol dock
   sudo bash setup.sh
   ```
 
+## Requirements
+
+Arrebol needs a `Worker Node` to run its Jobs. Instructions for deploying a worker are [here](../worker/deploy).
+
 ## Configuration
 
-All the configuration files are within the `deploy/config` directory. It is necesssary to edit:
+All the configuration files are within the `deploy/config` directory. It is necessary to edit:
 
 * The `postgres.env`, to define a password to the database;
 * The `pgadmin.env`, to define an the database admin credentials;
@@ -25,7 +29,7 @@ After the configuration, execute the `deploy/deploy-stack.sh` script to install 
 
 ## Check 
 
-To verify whether the deploy is running correctly, submit below sample requests to the Arrebol service.
+To verify whether the deploy is running correctly, one can submit below sample requests to the Arrebol service.
 
 
 ---
@@ -103,93 +107,93 @@ curl -X GET http://127.0.0.1:8080/queues/default/jobs/e77d7b5c-dc3b-4f22-83ea-b6
 Expected
 ```json
 {
-   "id":"e77d7b5c-dc3b-4f22-83ea-b6cb48736455",
-   "label":"MyJob",
-   "tasks":[
-      {
-         "id":"4c6c20fd-b679-4b1d-8b1b-08a37fb6e3cc",
-         "state":"FINISHED",
-         "tasks_specs":{
-            "label":"MyLabel1",
-            "requirements":{
-               "image":"ubuntu:latest",
-               "DockerRequirements":"DockerMemory == 1024 && DockerCPUWeight == 1024"
-            },
-            "commands":[
-               {
-                  "command":"echo Hello World!",
-                  "state":"FINISHED",
-                  "exitcode":0
-               },
-               {
-                  "command":"sleep 2",
-                  "state":"FINISHED",
-                  "exitcode":0
-               },
-               {
-                  "command":"touch /nfs/test1",
-                  "state":"FINISHED",
-                  "exitcode":0
-               },
-               {
-                  "command":"sleep 2",
-                  "state":"FINISHED",
-                  "exitcode":0
-               },
-               {
-                  "command":"echo Goodbye World!",
-                  "state":"FINISHED",
-                  "exitcode":0
-               }
-            ],
-            "metadata":{
-               "time":"111222333"
+    "id": "e77d7b5c-dc3b-4f22-83ea-b6cb48736455",
+    "label": "MyJob",
+    "tasks": [
+        {
+            "id": "ed27dc52-af1b-4c86-88ae-b86874f5a626",
+            "state": "FINISHED",
+            "tasks_specs": {
+                "label": "MyLabel1",
+                "requirements": {
+                    "image": "ubuntu:latest",
+                    "DockerRequirements": "DockerMemory == 1024 && DockerCPUWeight == 1024"
+                },
+                "commands": [
+                    {
+                        "command": "echo Hello World!",
+                        "state": "FINISHED",
+                        "exitcode": 0
+                    },
+                    {
+                        "command": "sleep 2",
+                        "state": "FINISHED",
+                        "exitcode": 0
+                    },
+                    {
+                        "command":"touch /nfs/test1",
+                        "state":"FINISHED",
+                        "exitcode":0
+                    },
+                    {
+                        "command": "sleep 2",
+                        "state": "FINISHED",
+                        "exitcode": 0
+                    },
+                    {
+                        "command": "echo Goodbye World!",
+                        "state": "FINISHED",
+                        "exitcode": 0
+                    }
+                ],
+                "metadata": {
+                    "time": "111222333"
+                }
             }
-         }
-      },
-      {
-         "id":"391017e3-ab1e-4784-a694-e33764df3cec",
-         "state":"FINISHED",
-         "tasks_specs":{
-            "label":"MyLabel2",
-            "requirements":{
-               "image":"ubuntu:latest",
-               "DockerRequirements":"DockerMemory == 1024 && DockerCPUWeight == 1024"
-            },
-            "commands":[
-               {
-                  "command":"echo Hello World!",
-                  "state":"FINISHED",
-                  "exitcode":0
-               },
-               {
-                  "command":"sleep 2",
-                  "state":"FINISHED",
-                  "exitcode":0
-               },
-               {
-                  "command":"touch /nfs/test2",
-                  "state":"FINISHED",
-                  "exitcode":0
-               },
-               {
-                  "command":"sleep 2",
-                  "state":"FINISHED",
-                  "exitcode":0
-               },
-               {
-                  "command":"echo Goodbye World!",
-                  "state":"FINISHED",
-                  "exitcode":0
-               }
-            ],
-            "metadata":{
-               "time":"111222333"
+        },
+        {
+            "id": "3934de84-440d-4786-8051-1f8aa0bb5bbb",
+            "state": "FINISHED",
+            "tasks_specs": {
+                "label": "MyLabel2",
+                "requirements": {
+                    "image": "ubuntu:latest",
+                    "DockerRequirements": "DockerMemory == 1024 && DockerCPUWeight == 1024"
+                },
+                "commands": [
+                    {
+                        "command": "echo Hello World!",
+                        "state": "FINISHED",
+                        "exitcode": 0
+                    },
+                    {
+                        "command": "sleep 2",
+                        "state": "FINISHED",
+                        "exitcode": 0
+                    },
+                    {
+                        "command":"touch /nfs/test2",
+                        "state":"FINISHED",
+                        "exitcode":0
+                    },
+                    {
+                        "command": "sleep 2",
+                        "state": "FINISHED",
+                        "exitcode": 0
+                    },
+                    {
+                        "command": "echo Goodbye World!",
+                        "state": "FINISHED",
+                        "exitcode": 0
+                    }
+                ],
+                "metadata": {
+                    "time": "111222333"
+                }
             }
-         }
-      }
-   ],
-   "job_state":"FINISHED"
+        }
+    ],
+    "job_state": "FINISHED"
 }
 ```
 
@@ -202,4 +206,3 @@ sudo docker volume rm lsd_postgresdata
 sudo docker pull ufcglsd/arrebol:saps
 sudo bash deploy-stack.sh
 ```
-
