@@ -15,12 +15,12 @@ All the configuration files are within the `deploy/config` directory. It is nece
 * Assign the previously defined database password in the `spring.datasource.password` property on `application.properties` file;
 * Configure the `arrebol.json` file to tune Arrebol internals.
 
-## Install
+## Starting
 
-After the configuration, execute the `deploy/deploy-stack.sh` script to install and run Arrebol components.
+After the configuration, execute the `deploy/deploy.sh` script to run Arrebol components.
 
   ```
-  sudo bash deploy-stack.sh
+  sudo bash deploy.sh start
   ```
 
 ## Check 
@@ -193,13 +193,10 @@ Expected
 }
 ```
 
-## Hard Restart
+## Stop
 
-To hard restart the Arrebol Stack, run the commands as follow:
+To stop the Arrebol Stack, run the commands as follow:
 ```bash
-sudo docker stack rm lsd
-sudo docker volume rm lsd_postgresdata
-sudo docker pull ufcglsd/arrebol:saps
-sudo bash deploy-stack.sh
+sudo bash deploy.sh stop
 ```
 
