@@ -48,6 +48,10 @@ public class ArrebolFacade {
         return arrebolController.getJob(queueId, jobId);
     }
 
+    public List<Job> getJobsByLabel(String queueId, String label) {
+        return arrebolController.getJobsByLabel(queueId, label);
+    }
+
     public void stopJob(Job job) {
         arrebolController.stopJob(job);
     }

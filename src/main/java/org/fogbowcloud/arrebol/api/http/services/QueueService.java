@@ -64,6 +64,11 @@ public class QueueService {
         return job;
     }
 
+    public List<Job> getJobsByLabelFromQueue(String queueId, String label) {
+        List<Job> jobs = arrebolFacade.getJobsByLabel(queueId, label);
+        return jobs;
+    }
+
     public String createQueue(JobProcessorSpec jobProcessorSpec) {
         String queueId = arrebolFacade.createQueue(jobProcessorSpec);
         return queueId;
