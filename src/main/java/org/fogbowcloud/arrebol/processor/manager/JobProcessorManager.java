@@ -109,11 +109,18 @@ public class JobProcessorManager {
         queues.get(queueId).addJob(job);
     }
 
-    public Job getJob(String queueId, String jobId){
+    public Job getJob(String queueId, String jobId) {
         if(!queues.containsKey(queueId)) {
             throw new QueueNotFoundException(String.format(Exceptions.QUEUE_NOT_FOUND_PATTERN, queueId));
         }
         return QueueDBManager.getInstance().findOneJob(queueId, jobId);
+    }
+
+    public List<Job> getJobsByLabel(String queueId, String label) {
+        if(!queues.containsKey(queueId)) {
+            throw new QueueNotFoundException(String.format(Exceptions.QUEUE_NOT_FOUND_PATTERN, queueId));
+        }
+        return QueueDBManager.getInstance().getJobsByLabel(queueId, label);
     }
 
     //The arrebol does not change job state internally, so we need this workaround
