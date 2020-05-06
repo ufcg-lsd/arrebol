@@ -5,6 +5,10 @@ import org.fogbowcloud.arrebol.datastore.repositories.DefaultQueueRepository;
 import org.fogbowcloud.arrebol.models.job.Job;
 import org.fogbowcloud.arrebol.processor.DefaultJobProcessor;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
 public class QueueDBManager {
 
     private final Logger LOGGER = Logger.getLogger(QueueDBManager.class);
@@ -36,6 +40,17 @@ public class QueueDBManager {
         String s = String.format("Searching job %s in queue %s", queueId, jobId);
         LOGGER.debug(s);
         return this.defaultQueueRepository.findOne(queueId).getJob(jobId);
+    }
+
+    public List<Job> getJobsByLabel(String queueId, String label) {
+        List<Job> result = new ArrayList<>();
+        Map<String, Job> jobs = this.defaultQueueRepository.findOne(queueId).getJobs();
+        for(Job job : jobs.values()) {
+            if(job.getLabel().contains(label)) {
+                result.add(job);
+            }
+        }
+        return result;
     }
 
     public boolean containsJob(String queueId, String jobId){
