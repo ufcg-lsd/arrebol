@@ -56,7 +56,7 @@ public class QueueController {
 
         try {
             List<Job> jobs = queueService.getJobsByLabelFromQueue(queueId, label);
-            return new ResponseEntity(jobs, HttpStatus.CREATED);
+            return new ResponseEntity(jobs, HttpStatus.OK);
         } catch (Throwable t) {
             LOGGER.error(String.format(Messages.Exception.GENERIC_EXCEPTION, t.getMessage()), t);
             throw t;
