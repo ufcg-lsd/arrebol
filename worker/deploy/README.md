@@ -44,7 +44,9 @@ After configuring the `hosts.conf` file, execute the `install.sh` script in the 
 
 To verify whether the worker deployment was successful, one can submit below sample requests to the docker api.
 
-`Note: By default, the deployment opens port 5555 for the docker api.`
+`Note 1: By default, the deployment opens port 5555 for the docker api.`
+
+`Note 2: If you use a cloud provider you may need to add a firewall rule.`
 
 ---
 Request
