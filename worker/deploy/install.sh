@@ -2,7 +2,7 @@
 
 readonly ANSIBLE_FILES_PATH_PATTERN="ansible_files_path"
 readonly PRIVATE_KEY_FILE_PATH_PATTERN="ansible_ssh_private_key_file"
-readonly DEPLOYED_WORKER_IP_PATTERN="deployed_worker_ip"
+readonly DEPLOYED_WORKER_IP_PATTERN="worker_ip"
 readonly DEPLOY_WORKER_YML_FILE="deploy-worker.yml"
 
 readonly MY_PATH="`dirname \"$0\"`"              
