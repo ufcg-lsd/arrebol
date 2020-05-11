@@ -13,7 +13,7 @@ sudo apt-add-repository --yes --update ppa:ansible/ansible
 sudo apt install ansible
 ```
 
-`Warning:` Deployment does not work for nodes with Ubuntu version 14 or earlier.
+`Note: Deployment does not work for nodes with Ubuntu version 14 or earlier.`
 
 ## Configuration
 
@@ -46,7 +46,7 @@ After configuring the `hosts.conf` file, execute the `install.sh` script in the 
 
 To verify whether the worker deployment was successful, one can submit below sample requests to the docker api.
 
-`Warning: By default, the deployment opens port 5555 for the docker api.`
+`Note: By default, the deployment opens port 5555 for the docker api.`
 
 ---
 Request
