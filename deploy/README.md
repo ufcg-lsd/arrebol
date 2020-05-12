@@ -1,14 +1,14 @@
 # Deploying the Arrebol Service
 
-The Arrebol service can be deployed as a docker container from a [arrebol docker image](https://hub.docker.com/repository/docker/ufcglsd/arrebol). Most of the required dependencies to run Arrebol are kept in its own image. The only exception is the Docker Engine. To install it, in an apt-based environmnet, please run the `setup.sh` script as follow:
+The Arrebol service has two main components, the Arrebol Server and the Arrebol Worker. This document describes how to install the Arrebol server component. Before installing the Arrebol Server, please install the [Worker](../worker/deploy).
+
+## Requirements
+
+The Docker service can be deployed as a docker container based on the from the [Arrebol docker image](https://hub.docker.com/repository/docker/ufcglsd/arrebol). To be able to run the Arrebol container, it is necessary to install the Docker Engine. To install it, in an apt-based environmnet, checkout this repository and run the `setup.sh` script as follow:
 
   ```
   sudo bash setup.sh
   ```
-
-## Requirements
-
-Arrebol needs `Worker Nodes` to run its Jobs. Instructions for deploying a worker are [here](../worker/deploy).
 
 ## Configuration
 
@@ -30,7 +30,6 @@ After the configuration, execute the `deploy/deploy-stack.sh` script to install 
 ## Check 
 
 To verify whether the deploy is running correctly, one can submit below sample requests to the Arrebol service.
-
 
 ---
 Request
