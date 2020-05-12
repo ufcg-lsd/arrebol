@@ -13,7 +13,7 @@ sudo apt-add-repository --yes --update ppa:ansible/ansible
 sudo apt install -y ansible
 ```
 
-`Note: Deployment does not work for nodes with Ubuntu version 14 or earlier.`
+`Note: The deployment requires versions newer than 14 for ubuntu.`
 
 ## Configuration
 
