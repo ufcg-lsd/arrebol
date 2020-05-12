@@ -1,12 +1,20 @@
 # Worker Node deployment
 
-Arrebol tasks are processed by Workers. In a typical deployment, a few Workers are deployed together in a single virtual machine, a Worker Node. As each task run in an isolated docker container, the Docker engine and other dependencies must have be installed and configured in the Worker Node. Below, we described how to configure the Worker Node.
+Arrebol tasks are processed by the Workers. In a typical deployment, multiple Workers are deployed together in a single virtual machine, a `Worker Node`. As each task run in an isolated docker container, the Docker engine and other dependencies must have be installed and configured in the Worker Node. Below, we detail the configuration procedure.
 
 ## Requeriments
 
-Before the configuration and installation of Worker Node dependencies, each Worker Node virtual machine should be configured to be reached via SSH (using a rsa key pair). Also, the [Ansible automation tool](https://www.ansible.com/) should be installed in the deploy coordination host.
+Before the configuration and installation of Worker Node dependencies, each Worker Node virtual machine should be configured to be reached via SSH (using a rsa key pair). Also, the [Ansible](https://www.ansible.com/) automation tool should be installed in the deploy `coordination host`. This host is a machine that commands that deploy. To this end, the `coordination host` should be able to access the Worker Node through SSH.
 
-`Warning:` Deployment does not work for nodes with Ubuntu version 14 or earlier.
+To install Ansible run these commands:
+```bash
+sudo apt update
+sudo apt install software-properties-common
+sudo apt-add-repository --yes --update ppa:ansible/ansible
+sudo apt install -y ansible
+```
+
+`Note: The deployment requires versions newer than 14 for ubuntu.`
 
 ## Configuration
 
@@ -14,13 +22,11 @@ The `hosts.conf` configuration file should be edited to declare the Worker Node.
 
 ### Example
 ```
-# Required
-deployed_worker_ip=10.30.1.36
+worker_ip_1=10.30.1.36
+worker_ip_2=10.30.1.37
 
-# Required
 remote_user=ubuntu
 
-# Required (if not specified, ansible will use the host ssh keys)
 ansible_ssh_private_key_file=/home/admin/.ssh/priv_key
 
 # Default
@@ -39,7 +45,9 @@ After configuring the `hosts.conf` file, execute the `install.sh` script in the 
 
 To verify whether the worker deployment was successful, one can submit below sample requests to the docker api.
 
-`Warning: By default, the deployment opens port 5555 for the docker api.
+`Note 1: By default, the deployment opens port 5555 for the docker api.`
+
+`Note 2: If you use a cloud provider you may need to add a firewall rule.`
 
 ---
 Request
