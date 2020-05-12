@@ -1,24 +1,35 @@
-# Worker Node deployment
+# Worker Node Deployment
 
-Arrebol tasks are processed by the Workers. In a typical deployment, multiple Workers are deployed together in a single virtual machine, a `Worker Node`. As each task run in an isolated docker container, the Docker engine and other dependencies must have be installed and configured in the Worker Node. Below, we detail the configuration procedure.
+Worker Node is the definition for a host where `workers` live. You need to deploy at least one worker node for Arrebol.
 
-## Requeriments
+`Note: The worker node requires versions newer than 14 for ubuntu.`
 
-Before the configuration and installation of Worker Node dependencies, each Worker Node virtual machine should be configured to be reached via SSH (using a rsa key pair). Also, the [Ansible](https://www.ansible.com/) automation tool should be installed in the deploy `coordination host`. This host is a machine that commands that deploy. To this end, the `coordination host` should be able to access the Worker Node through SSH.
+## Dependencies
+The coordination host is a machine running any Unix-like OS. Log in the coordination host and run the following commands to install dependencies.
 
-To install Ansible run these commands:
-```bash
+```
 sudo apt update
 sudo apt install software-properties-common
 sudo apt-add-repository --yes --update ppa:ansible/ansible
-sudo apt install -y ansible
+sudo apt install -y ansible git grep sed 
 ```
 
-`Note: The deployment requires versions newer than 14 for ubuntu.`
+## Installation
+
+Before the configuration and installation of Worker Node dependencies, each Worker Node virtual machine should be configured to be reached via SSH (using a rsa key pair). Also, the [Ansible](https://www.ansible.com/) automation tool should be installed in the deploy `coordination host`. This host is a machine that commands that deploy. To this end, the `coordination host` should be able to access the Worker Node through SSH.
+
+Log in the coordination host and run the below commands to get the files to perform deploy
+
+```bash
+git clone -b feature/remote-worker https://github.com/ufcg-lsd/arrebol.git
+
+cd arrebol/worker/deploy
+```
 
 ## Configuration
 
-The `hosts.conf` configuration file should be edited to declare the Worker Node. See below how to edit it.
+Inside the `arrebol/worker/deploy` directory you will find a file called `hosts.conf`.
+The `hosts.conf` configuration file should be edited to declare the Worker Node. See below how to edit it. 
 
 ### Example
 ```
