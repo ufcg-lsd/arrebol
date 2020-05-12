@@ -1,6 +1,6 @@
 # Deploying the Arrebol Service
 
-The Arrebol service could be deployed as a docker container from a [arrebol docker image](https://hub.docker.com/repository/docker/ufcglsd/arrebol).  Most of the required dependencies to run Arrebol are kept in the own image. The only exception is the Docker Engine. To install it, in an apt-based environmnet, please run the `setup.sh` script as follow:
+The Arrebol service can be deployed as a docker container from a [arrebol docker image](https://hub.docker.com/repository/docker/ufcglsd/arrebol). Most of the required dependencies to run Arrebol are kept in its own image. The only exception is the Docker Engine. To install it, in an apt-based environmnet, please run the `setup.sh` script as follow:
 
   ```
   sudo bash setup.sh
@@ -17,7 +17,7 @@ All the configuration files are within the `deploy/config` directory. It is nece
 * The `postgres.env`, to define a password to the database;
 * The `pgadmin.env`, to define an the database admin credentials;
 * Assign the previously defined database password in the `spring.datasource.password` property on `application.properties` file;
-* Configure the `arrebol.json` file to tune Arrebol internals. In it you will write the worker nodes ip.
+* Configure the `arrebol.json` file to tune Arrebol internals. You will write the worker nodes ip there.
 
 ## Install
 
