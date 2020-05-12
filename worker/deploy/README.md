@@ -4,6 +4,10 @@ Worker Node is the definition for a host where `workers` live. You need to deplo
 
 `Note: The worker node requires versions newer than 14 for ubuntu.`
 
+## Coordination Host
+
+The coordination host is a host responsible for leading the deployment of worker nodes. It must have access to all worker nodes via SSH.
+
 ## Dependencies
 The coordination host is a machine running any Unix-like OS. Log in the coordination host and run the following commands to install dependencies.
 
