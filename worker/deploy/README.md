@@ -18,6 +18,33 @@ The **coordination host** is basically a machine from which scripts are executed
 ## **Setup**
 ---
 
+### _Create RSA Key Pair_
+
+`Note: If you already have a key pair configured between the coordination host and the worker nodes go to Install dependencies.`
+
+Log into the coordination host, and then use command-line SSH to generate a key pair using the RSA algorithm.
+To generate RSA keys, on the command line, enter:
+
+```bash
+mkdir -p ~/.ssh
+cd ~/.ssh
+ssh-keygen -t rsa -N "" -f coordination_host_key
+chmod 600 coordination_host_key
+```
+The coordination host private key will be generated using the filename 
+**coordination_host_key** and the public key using the filename **coordination_host_key.pub**. It was stored in a **.ssh** directory off home directory.
+
+Now you need to authorize the coordination host to access the worker node via SSH.
+
+First you need have the **coordination_host_key.pub** in the worker node. After, log into the worker node machine and write the **coordination_host_key.pub** into **authorized keys** using the commands below:
+```bash
+mkdir -p ~/.ssh
+touch ~/.ssh/authorized_keys
+cat ~/coordination_host_key.pub >> ~/.ssh/authorized_keys
+```
+
+
+
 ### _Install dependencies_
 
 Log in the coordination host and run the following commands to install dependencies.
