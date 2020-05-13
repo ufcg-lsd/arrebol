@@ -7,13 +7,28 @@
 
 **Worker Node** is the host where workers live. You need to deploy at least one worker node for Arrebol.
 
-`Note`: The worker node requires versions newer than 14 for ubuntu.
-
 ### _Coordination Host_
 
 The **coordination host** is basically a machine from which scripts are executed to deploy worker nodes. The coordination host must have access to worker nodes via **SSH (using a rsa key pair)** to perform its function.
 
 ![Worker Deployment](../../imgs/wd.png)
+
+## **Minimum Requirements**
+---
+
+### _Worker Node_
+  The requirements of the Worker Node depend a lot on the workload of the Jobs you intend to submit to Arrebol. Below is a minimum standard recommendation:
+
+  - vCPU: 2
+  - RAM: 2GB
+  - FREE DISK SPACE: 10GB
+  - OS: Ubuntu 16 or higher
+
+### _Coordination Host_
+  - vCPU: 1
+  - RAM: 1GB
+  - FREE DISK SPACE: 10GB
+  - OS: Ubuntu 16 or higher
 
 ## **Setup**
 ---
@@ -94,7 +109,7 @@ ansible_ssh_private_key_file=
 |:---------------------------------:|----------------|
 | **worker_ip**                         | The **worker node** addresses. For each ip create a field beginning with **_worker_ip_**. |
 | **remote_user**                       | The user name that should be used to access the **worker nodes** via ssh.  |
-| **ansible_ssh_private_key_file**      | The path to the **private key** that will be used to access worker nodes via ssh       |
+| **ansible_ssh_private_key_file**      | The path to the **coordination host private key** that will be used to access worker nodes via ssh       |
 
 ### _Install_
 
