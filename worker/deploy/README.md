@@ -13,6 +13,7 @@
 
 The **coordination host** is basically a machine from which scripts are executed to deploy worker nodes. The coordination host must have access to worker nodes via **SSH (using a rsa key pair)** to perform its function.
 
+![Worker Deployment](../../imgs/wd.png)
 
 ## **Setup**
 ---
