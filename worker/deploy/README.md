@@ -33,7 +33,7 @@ The **coordination host** is basically a machine from which scripts are executed
 ## **Setup**
 ---
 
-### _Create RSA Key Pair_
+### _1.Create RSA Key Pair_
 
 `Note: If you already have a key pair configured between the coordination host and the worker nodes go to Install dependencies.`
 
@@ -60,7 +60,7 @@ cat ~/coordination_host_key.pub >> ~/.ssh/authorized_keys
 
 
 
-### _Install dependencies_
+### _2.Install dependencies_
 
 Log in the coordination host and run the following commands to install dependencies.
 
@@ -71,7 +71,7 @@ sudo apt-add-repository --yes --update ppa:ansible/ansible
 sudo apt install -y ansible git grep sed 
 ```
 
-### _Download the repository_
+### _3.Download the repository_
 
 Log in the coordination host and run the below commands to download the arrebol repository.
 
@@ -79,7 +79,7 @@ Log in the coordination host and run the below commands to download the arrebol 
 git clone -b feature/remote-worker https://github.com/ufcg-lsd/arrebol.git
 ```
 
-### _Fill configuration file_
+### _4.Fill configuration file_
 
 Go to the directory _worker/deploy_ inside _arrebol_ directory.
 
@@ -111,7 +111,7 @@ ansible_ssh_private_key_file=
 | **remote_user**                       | The user name that should be used to access the **worker nodes** via ssh.  |
 | **ansible_ssh_private_key_file**      | The path to the **coordination host private key** that will be used to access worker nodes via ssh       |
 
-### _Install_
+### _5.Install_
 
 After configuring the `hosts.conf` file, execute the `install.sh` script in the coordination host to setup the Worker Node.
 
