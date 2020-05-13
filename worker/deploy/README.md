@@ -12,9 +12,12 @@ The **coordination host** is basically a machine from which scripts are executed
 
 ![Worker Deployment](../../imgs/wd.png)
 
-## **Minimum Requirements**
+## **Infrastructure**
 
 ### _Worker Node_
+
+  #### Requirements
+
   The requirements of the Worker Node depend a lot on the workload of the Jobs you intend to submit to Arrebol. Below is a minimum standard recommendation:
 
   - vCPU: 2
@@ -22,7 +25,15 @@ The **coordination host** is basically a machine from which scripts are executed
   - FREE DISK SPACE: 10GB
   - OS: Ubuntu 16 or higher
 
+  #### Security Group
+
+  * Custom TCP Rule to allow ingress in the port 5555 (Docker API)
+  * Custom TCP Rule to allow ingress in the port 22 (SSH)
+  --- 
+
 ### _Coordination Host_
+
+  #### Requirements 
   - vCPU: 1
   - RAM: 1GB
   - FREE DISK SPACE: 10GB
