@@ -92,8 +92,9 @@ Then, edit the `hosts.conf` file present in this directory, as instructed in the
 # Required
 # For each worker node write a field started by `worker_ip`
 
-worker_ip_1=10.30.1.36
-worker_ip_2=10.30.1.37
+worker_ip_1=
+worker_ip_2=
+worker_ip_n=
 
 # Required
 remote_user=
