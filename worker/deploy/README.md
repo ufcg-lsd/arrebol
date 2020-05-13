@@ -1,7 +1,6 @@
 # Worker Node Deployment
 
 ## **Overview**
----
 
 ### _Worker Node_
 
@@ -14,7 +13,6 @@ The **coordination host** is basically a machine from which scripts are executed
 ![Worker Deployment](../../imgs/wd.png)
 
 ## **Minimum Requirements**
----
 
 ### _Worker Node_
   The requirements of the Worker Node depend a lot on the workload of the Jobs you intend to submit to Arrebol. Below is a minimum standard recommendation:
@@ -31,7 +29,6 @@ The **coordination host** is basically a machine from which scripts are executed
   - OS: Ubuntu 16 or higher
 
 ## **Setup**
----
 
 ### _1.Create RSA Key Pair_
 
@@ -120,7 +117,6 @@ After configuring the `hosts.conf` file, execute the `install.sh` script in the 
   ```
 
 ## **Check**
----
 
 
 To verify whether the worker deployment was successful, one can submit below sample requests to the docker api.
