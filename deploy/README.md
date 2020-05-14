@@ -1,31 +1,180 @@
 # Deploying the Arrebol Service
 
-The Arrebol service has two main components, the Arrebol Server and the Arrebol Worker. This document describes how to install the Arrebol server component. Before installing the Arrebol Server, please install the [Worker](../worker/deploy).
+This document provides an easy way to deploy a Arrebol Service. The Arrebol has two main components, the **Arrebol Server** and the **Worker Node**. Then, before installing the Arrebol Server, please deploy a [Worker Node](../worker/deploy).
 
-## Requirements
+## Overview
 
-The Docker service can be deployed as a docker container based on the from the [Arrebol docker image](https://hub.docker.com/repository/docker/ufcglsd/arrebol). To be able to run the Arrebol container, install the Docker Engine. To install it, in an apt-based environmnet, checkout this repository and run the `setup.sh` script as follow:
+The Arrebol Service manager the job execution in the worker nodes and monitor the job state. It mean that Arrebol uses the Worker Node resources to run the jobs.
+
+## Infrastruture
+
+You just need a machine for Arrebol Service.
+
+### Requirements
+* vCPU: 2
+* RAM: 2GB
+* FREE DISK SPACE: 10GB
+* OS: Ubuntu 16 or higher 
+
+### Security Group
+* Custom TCP Rule to allow ingress in the port **8080** to access **Arrebol API**
+* Custom TCP Rule to allow ingress in the port **5432** to access **Postgresql DB** (Optional)
+* Custom TCP Rule to allow ingress in the port **15432** to access **Pgadmin** (Optional)
+
+## Setup
+
+### 1.Download the repository
+
+Log in the arrebol host and follow the instructions.
+
+To download thre repository is need the git installed. Case it was not installed, run theses commands to install:
+```bash
+sudo apt update
+sudo apt install -y git
+```
+Run the below commands to download the arrebol repository:
+```bash
+git clone -b feature/remote-worker https://github.com/ufcg-lsd/arrebol.git
+```
+
+### 2.Install dependencies
+
+Log in the coordination host and run the following commands to install dependencies.
 
   ```
+  cd arrebol/deploy
   sudo bash setup.sh
   ```
 
-## Configuration
+### 3. Fill configuration files
 
-All the configuration files are within the `deploy/config` directory. It is necessary to edit:
+Go to the _deploy/config_ directory  inside _arrebol_:
+```bash
+cd arrebol/deploy/config
+```
 
-* The `postgres.env`, to define a password to the database;
-* The `pgadmin.env`, to define an the database admin credentials;
-* Assign the previously defined database password in the `spring.datasource.password` property on `application.properties` file;
-* Configure the `arrebol.json` file to tune Arrebol internals. You will write the worker nodes ip there.
+It was the configuration files. It is necessary to edit the files in order: **postgres.env**, **pgadmin.env**, **application.properties** and **arrebol.json**.
 
-## Install
+#### Postgres Configuration
 
-After the configuration, execute the `deploy/deploy-stack.sh` script to install and run the Arrebol server.
+File: postgres.env
 
-  ```
-  sudo bash deploy-stack.sh
-  ```
+```
+POSTGRES_PASSWORD=
+```
+
+The **POSTGRES_PASSWORD** define a password to the postgres database. The postgres user is **postgres** by default. 
+
+Considering that password is **@rrebol**. The content of the postgres.env file would be:
+
+```
+POSTGRES_PASSWORD=@arrebol
+```
+
+#### PgAdmin Configuration
+
+File: pgadmin.env
+
+```
+PGADMIN_DEFAULT_EMAIL=
+PGADMIN_DEFAULT_PASSWORD=
+```
+
+The **PGADMIN_DEFAULT_EMAIL** and **PGADMIN_DEFAULT_PASSWORD** define a admin user to login in the pgadmin. 
+The **PGADMIN_DEFAULT_EMAIL** does not necessarily have to exist but it must be valid.
+
+Considering that **PGADMIN_DEFAULT_EMAIL** is **arrebol@lsd.ufcg.edu.br** and **PGADMIN_DEFAULT_PASSWORD** is **pg@dmin**. The content of the pgadmin.env file would be:
+
+```
+PGADMIN_DEFAULT_EMAIL=arrebol@lsd.ufcg.edu.br
+PGADMIN_DEFAULT_PASSWORD=pg@dmin
+```
+
+#### Application properties Configuration
+
+File: application.properties
+
+There is one property that need to be filled in this file:
+* **spring.datasource.password**
+
+The **spring.datasource.password** is the password that arrebol service was use to connect to data base. The value of it is the **POSTGRES_PASSWORD** that was define previously.
+
+Considering that **POSTGRES_PASSWORD** is **@rrebol**. The content of the application.properties file would be:
+
+```
+spring.jpa.database=POSTGRESQL
+spring.datasource.driverClassName=org.postgresql.Driver
+spring.datasource.platform=postgres
+spring.datasource.url=jdbc:postgresql://postgresql:5432/arrebol
+spring.datasource.username=postgres
+spring.datasource.password=@rrebol
+spring.jpa.generate-ddl=true
+
+spring.jpa.hibernate.ddl-auto=update
+```
+
+#### Arrebol Properties
+
+File: arrebol.json
+```json
+{
+  "poolType":"docker",
+  "properties": [
+    {
+      "key":"workerPoolSize",
+      "value": 5
+    },
+    {
+      "key": "imageId",
+      "value": "wesleymonte/simple-worker"
+    },
+    {
+      "key": "resourceAddresses",
+      "value": []
+    }
+  ]
+}
+```
+
+| Field                             | Description    |
+|:---------------------------------:|----------------|
+| **workerPoolSize**                |  Defines the maximum number of workers that can run on the same node. |
+| **imageId**                       | Sets the default docker image used to create workers. |
+| **resourceAddress**               | Defines an address list of worker nodes. |
+
+The workerPoolSize is **5** and imageId is **wesleymonte/simple-worker** by default. 
+
+Considering that your worker nodes are **10.30.1.1** and **10.30.1.2**. The content of the **arrebol.json** file would be:
+
+```json
+{
+  "poolType":"docker",
+  "properties": [
+    {
+      "key":"workerPoolSize",
+      "value": 5
+    },
+    {
+      "key": "imageId",
+      "value": "wesleymonte/simple-worker"
+    },
+    {
+      "key": "resourceAddresses",
+      "value": ["10.30.1.1", "10.30.1.2"]
+    }
+  ]
+}
+```
+
+### 4.Install
+
+Log in the arrebol host and run the below commands to install the arrebol service:
+```
+cd arrebol/deploy
+sudo bash deploy-stack.sh
+```
+
+Wait a few minutes, it may take a while for the services to be ready.
 
 ## Check 
 
