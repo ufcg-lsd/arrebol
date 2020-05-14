@@ -1,5 +1,7 @@
 # Worker Node Deployment
 
+This document provides instructions for deploying worker nodes. It was designed to facilitate the deployment of worker nodes over multiple machines.
+
 ## **Overview**
 
 ### _Worker Node_
