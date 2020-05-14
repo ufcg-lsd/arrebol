@@ -16,6 +16,8 @@ The **coordination host** is a machine from which scripts are executed to deploy
 
 ## **Infrastructure**
 
+You will need at least two hosts: **a coordination host** and **a worker node**. At the end of the deployment, the coordination host is no longer needed.
+
 ### _Worker Node_
 
   #### Requirements
@@ -39,6 +41,10 @@ The **coordination host** is a machine from which scripts are executed to deploy
   - RAM: 1GB
   - FREE DISK SPACE: 10GB
   - OS: Ubuntu 16 or higher
+
+  #### Security Group
+
+  * Custom TCP Rule to allow egress in the port 22 (SSH)
 
 ## **Setup**
 
