@@ -53,12 +53,13 @@ cd ~/.ssh
 ssh-keygen -t rsa -N "" -f coordination_host_key
 chmod 600 coordination_host_key
 ```
-The coordination host private key will be generated using the filename 
-**coordination_host_key** and the public key using the filename **coordination_host_key.pub**. It was stored in a **~/.ssh** directory off home directory.
+If the commands were successful we will have two new files in the **~/.ssh** directory: 
+* **coordination_host_key**: The private key. It authenticates the coordination host. Ansible uses this key to access worker nodes.
+* **coordination_host_key.pub**: The public key. It authorizes the coordination host to access the worker node. Its content must be in the authorized keys of each worker node.
 
-Now you need to authorize the coordination host to access the worker node via SSH.
+To coordination host have authorization to access worker node via SSH the public key (**coordination_host_key.pub**) must be copied in an **authorized keys file** from worker node.
 
-First you need have the **coordination_host_key.pub** in the worker node. After, log into the worker node machine and write the **coordination_host_key.pub** into **authorized keys** using the commands below:
+Then, log into the worker node machine and create a copy of the public key as you see fit. The commands below write the public key into **authorized_keys** of worker node considering that it is in the home directory.
 ```bash
 mkdir -p ~/.ssh
 touch ~/.ssh/authorized_keys
