@@ -8,7 +8,7 @@
 
 ### _Coordination Host_
 
-The **coordination host** is basically a machine from which scripts are executed to deploy worker nodes. The coordination host must have access to worker nodes via **SSH (using a rsa key pair)** to perform its function.
+The **coordination host** is a machine from which scripts are executed to deploy worker nodes. The coordination host must have access to worker nodes via **SSH (using a rsa key pair)** to perform its function.
 
 ![Worker Deployment](../../imgs/wd.png)
 
@@ -29,7 +29,6 @@ The **coordination host** is basically a machine from which scripts are executed
 
   * Custom TCP Rule to allow ingress in the port 5555 (Docker API)
   * Custom TCP Rule to allow ingress in the port 22 (SSH)
-  --- 
 
 ### _Coordination Host_
 
@@ -55,7 +54,7 @@ ssh-keygen -t rsa -N "" -f coordination_host_key
 chmod 600 coordination_host_key
 ```
 The coordination host private key will be generated using the filename 
-**coordination_host_key** and the public key using the filename **coordination_host_key.pub**. It was stored in a **.ssh** directory off home directory.
+**coordination_host_key** and the public key using the filename **coordination_host_key.pub**. It was stored in a **~/.ssh** directory off home directory.
 
 Now you need to authorize the coordination host to access the worker node via SSH.
 
@@ -95,17 +94,17 @@ Go to the directory _worker/deploy_ inside _arrebol_ directory.
 cd arrebol/worker/deploy
 ```
 
-Then, edit the `hosts.conf` file present in this directory, as instructed in the following.\
+Then, edit the `hosts.conf` file present in this directory, as follows.\
  **All fields** of the files must be filled. See below how to edit it. 
 
 #### Hosts configuration
 ```
 # Required
 # For each worker node write a field started by `worker_ip`
+# In this example, there will be 2 worker nodes.
 
 worker_ip_1=
 worker_ip_2=
-worker_ip_n=
 
 # Required
 remote_user=
