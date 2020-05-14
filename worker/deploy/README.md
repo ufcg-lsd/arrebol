@@ -135,7 +135,7 @@ worker_ip_2=10.30.1.2
 
 remote_user=ubuntu
 
-ansible_ssh_private_key_file=*~/.ssh/coordination_host
+ansible_ssh_private_key_file=~/.ssh/coordination_host
 ```
 
 ### _5.Install_
