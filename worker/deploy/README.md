@@ -104,21 +104,20 @@ cd arrebol/worker/deploy
 ```
 
 Then, edit the `hosts.conf` file present in this directory, as follows.\
- **All fields** of the files must be filled. See below how to edit it. 
+ **All fields of the files must be filled**. See below how to edit it. 
 
 #### Hosts configuration
+
+File: host.conf
 ```
-# Required
 # For each worker node write a field started by `worker_ip`
 # In this example, there will be 2 worker nodes.
 
 worker_ip_1=
 worker_ip_2=
 
-# Required
 remote_user=
 
-# Required
 ansible_ssh_private_key_file=
 ```
 
@@ -127,6 +126,17 @@ ansible_ssh_private_key_file=
 | **worker_ip**                         | The **worker node** addresses. For each ip create a field beginning with **_worker_ip_**. |
 | **remote_user**                       | The user name that should be used to access the **worker nodes** via ssh.  |
 | **ansible_ssh_private_key_file**      | The path to the **coordination host private key** that will be used to access worker nodes via ssh       |
+
+Considering that this user name is **ubuntu**, your worker nodes are **10.30.1.1** and **10.30.1.2**, and the private key are in the **~/.ssh/coordination_host**. The content of the **host.conf** file would be:
+
+```
+worker_ip_1=10.30.1.1
+worker_ip_2=10.30.1.2
+
+remote_user=ubuntu
+
+ansible_ssh_private_key_file=*~/.ssh/coordination_host
+```
 
 ### _5.Install_
 
