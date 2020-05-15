@@ -117,8 +117,10 @@ spring.jpa.hibernate.ddl-auto=update
 
 #### Arrebol Properties
 
-Configure the arrebol.json file to tune Arrebol internals. 
-In order to facilitate the deployment, it is only necessary to add the addresses to the **resourceAddresses** list.
+Configure the arrebol.json file to tune Arrebol internals.
+
+Each property in this file is defined by a `key` field that identifies the property and a `value` field that defines the value of that property.
+In order to facilitate the deployment, it is only necessary to add the addresses to the `resourceAddresses` list.
 
 File: arrebol.json
 ```json
