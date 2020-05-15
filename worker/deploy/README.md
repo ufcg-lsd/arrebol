@@ -1,6 +1,6 @@
 # Worker Node Deployment
 
-This document provides instructions for deploying worker nodes. It was designed to facilitate the deployment of worker nodes over multiple machines.
+This document provides instructions for deploying worker nodes. It has been designed to facilitate the deployment of worker nodes over multiple machines.
 
 ## **Overview**
 
@@ -51,6 +51,7 @@ You will need at least two hosts: **a coordination host** and **a worker node**.
 ### _1.Create RSA Key Pair_
 
 `Note: If you already have a key pair configured between the coordination host and the worker nodes go to Install dependencies.`
+`Note 2 The deployment use the same private key to access all worker nodes` 
 
 Log into the coordination host, and then use command-line SSH to generate a key pair using the RSA algorithm.
 To generate RSA keys, on the command line, enter:
