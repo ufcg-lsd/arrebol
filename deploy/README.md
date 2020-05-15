@@ -4,7 +4,7 @@ This document provides an easy way to deploy a Arrebol Service. The Arrebol has 
 
 ## Overview
 
-The Arrebol Service manager the job execution in the worker nodes and monitor the job state. It mean that Arrebol uses the Worker Node resources to run the jobs.
+The Arrebol Service manage the job execution in the worker nodes and monitor the job state. In short, the Arrebol uses the Worker Node resources to run the jobs.
 
 ## Infrastruture
 
@@ -27,19 +27,19 @@ You just need a machine for Arrebol Service.
 
 Log in the arrebol host and follow the instructions.
 
-To download thre repository is need the git installed. Case it was not installed, run theses commands to install:
+To download the repository is need the git installed. Case it was not installed, run these commands to install:
 ```bash
 sudo apt update
 sudo apt install -y git
 ```
-Run the below commands to download the arrebol repository:
+Run the below command to download the arrebol repository:
 ```bash
 git clone -b feature/remote-worker https://github.com/ufcg-lsd/arrebol.git
 ```
 
 ### 2.Install dependencies
 
-Log in the coordination host and run the following commands to install dependencies.
+Log in the arrebol host and run the following commands to install dependencies.
 
   ```
   cd arrebol/deploy
@@ -48,12 +48,12 @@ Log in the coordination host and run the following commands to install dependenc
 
 ### 3. Fill configuration files
 
-Go to the _deploy/config_ directory  inside _arrebol_:
+Still within the `deploy` directory, go to` config` directory.
 ```bash
-cd arrebol/deploy/config
+cd config
 ```
 
-It was the configuration files. It is necessary to edit the files in order: **postgres.env**, **pgadmin.env**, **application.properties** and **arrebol.json**.
+Now it is necessary to edit the files in the following order: **postgres.env**, **pgadmin.env**, **application.properties** and **arrebol.json**.
 
 #### Postgres Configuration
 
@@ -80,8 +80,10 @@ PGADMIN_DEFAULT_EMAIL=
 PGADMIN_DEFAULT_PASSWORD=
 ```
 
-The **PGADMIN_DEFAULT_EMAIL** and **PGADMIN_DEFAULT_PASSWORD** define a admin user to login in the pgadmin. 
-The **PGADMIN_DEFAULT_EMAIL** does not necessarily have to exist but it must be valid.
+| Field                             | Description    |
+|:---------------------------------:|----------------|
+| **PGADMIN_DEFAULT_EMAIL**                |  This is the email address used when setting up the initial administrator account to login to pgAdmin. |
+| **PGADMIN_DEFAULT_PASSWORD**              | This is the password used when setting up the initial administrator account to login to pgAdmin. |
 
 Considering that **PGADMIN_DEFAULT_EMAIL** is **arrebol@lsd.ufcg.edu.br** and **PGADMIN_DEFAULT_PASSWORD** is **pg@dmin**. The content of the pgadmin.env file would be:
 
@@ -97,7 +99,7 @@ File: application.properties
 There is one property that need to be filled in this file:
 * **spring.datasource.password**
 
-The **spring.datasource.password** is the password that arrebol service was use to connect to data base. The value of it is the **POSTGRES_PASSWORD** that was define previously.
+The **spring.datasource.password** is the password that arrebol service will use to connect to database. Its value is the same **POSTGRES_PASSWORD** previously defined.
 
 Considering that **POSTGRES_PASSWORD** is **@rrebol**. The content of the application.properties file would be:
 
@@ -114,6 +116,9 @@ spring.jpa.hibernate.ddl-auto=update
 ```
 
 #### Arrebol Properties
+
+Configure the arrebol.json file to tune Arrebol internals. 
+In order to facilitate the deployment, it is only necessary to add the addresses to the **resourceAddresses** list.
 
 File: arrebol.json
 ```json
@@ -168,9 +173,9 @@ Considering that your worker nodes are **10.30.1.1** and **10.30.1.2**. The cont
 
 ### 4.Install
 
-Log in the arrebol host and run the below commands to install the arrebol service:
+Now go back to the **arrebol/deploy** directory and run the below commands to install the arrebol service:
 ```
-cd arrebol/deploy
+cd ..
 sudo bash deploy-stack.sh
 ```
 
