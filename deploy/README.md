@@ -4,7 +4,7 @@ This document provides an easy way to deploy a Arrebol Service. The Arrebol has 
 
 ## Overview
 
-The Arrebol Service manage the job execution in the worker nodes and monitor the job state. In short, the Arrebol uses the Worker Node resources to run the jobs.
+The Arrebol Service manages the job execution in the worker nodes and monitor the job state. In short, the Arrebol uses the Worker Node resources to run the jobs.
 
 ## Infrastruture
 
