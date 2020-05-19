@@ -1,16 +1,16 @@
-# Worker Node Deployment
+# Worker Deployment
 
-This document provides instructions for deploying worker nodes. It has been designed to facilitate the deployment of worker nodes over multiple machines.
+This document describes the deploy of Workers. The deply process was design to ease the deployment of Workers over multiple hosts. Before explaining the details of the deployment process, the document first describe the main concepts used on the document.
 
 ## **Overview**
 
 ### _Worker Node_
 
-**Worker Node** is the host where workers live. You need to deploy at least one worker node for Arrebol.
+**Worker Node** is the host where workers run. One needs to deploy at least one Worker Node for Arrebol.
 
 ### _Coordination Host_
 
-The **coordination host** is a machine from which scripts are executed to deploy worker nodes. The coordination host must have access to worker nodes via **SSH (using a rsa key pair)** to perform its function.
+The **coordination host** is a host from which scripts are executed to perfom the deployment. The coordination host must have access to Worker Nodes via **SSH (using a rsa key pair)** to perform its function.
 
 ![Worker Deployment](../../imgs/wd.png)
 
@@ -22,39 +22,46 @@ You will need at least two hosts: **a coordination host** and **a worker node**.
 
   #### Requirements
 
-  The requirements of the Worker Node depend a lot on the workload of the Jobs you intend to submit to Arrebol. Below is a minimum standard recommendation:
+  The required spec of the Worker Node depends on the load submitted to Arrebol. Below, we indicate a minimum recommendation:
 
   - vCPU: 2
   - RAM: 2GB
   - FREE DISK SPACE: 10GB
   - OS: Ubuntu 16 or higher
 
-  #### Security Group
-
-  * Custom TCP Rule to allow ingress in the port 5555 (Docker API)
-  * Custom TCP Rule to allow ingress in the port 22 (SSH)
+  #### Network acccess rules
+  
+  To allow the communication between the Arrebol server and the Worker, it is necessary to allow ingress on below ports:
+  
+  * Ingress TCP traffic on port 5555 (Docker API)
+  * Ingress TCP traffic in the port 22 (SSH)
 
 ### _Coordination Host_
 
   #### Requirements 
+  
+   Since the installation process is not a heavy task, a tiny host such as described by the below spec could handle the task.
+  
   - vCPU: 1
   - RAM: 1GB
   - FREE DISK SPACE: 10GB
   - OS: Ubuntu 16 or higher
 
-  #### Security Group
+  #### Network acccess rules
 
-  * Custom TCP Rule to allow egress in the port 22 (SSH)
+    Since the uses commands the deploymeent via the coordination host, it is necessary to allow enable access to the host through below port:
+    
+  * Ingress TCP traffic in the port 22 (SSH)
 
 ## **Setup**
 
 ### _1.Create RSA Key Pair_
 
-`Note: If you already have a key pair configured between the coordination host and the worker nodes go to Install dependencies.`
-`Note 2 The deployment use the same private key to access all worker nodes` 
+`Note: If you already have a key pair configured between the coordination host and the Worker Nodes, proceed to the Install dependencies section.`
+`Note 2 The deployment uses the same private key to access all Worker Nodes` 
 
-Log into the coordination host, and then use command-line SSH to generate a key pair using the RSA algorithm.
-To generate RSA keys, on the command line, enter:
+Log into the coordination host, and then use ssh-keygen tool to generate a key pair using the RSA algorithm.
+To generate RSA keys, on the terminal, execute below commands:
 
 ```bash
 mkdir -p ~/.ssh
@@ -62,19 +69,11 @@ cd ~/.ssh
 ssh-keygen -t rsa -N "" -f coordination_host_key
 chmod 600 coordination_host_key
 ```
-If the commands were successful we will have two new files in the **~/.ssh** directory: 
+If the commands were successful, the ssh-keygen tool had generated  two new files in the **~/.ssh** directory: 
 * **coordination_host_key**: The private key. It authenticates the coordination host. Ansible uses this key to access worker nodes.
 * **coordination_host_key.pub**: The public key. It authorizes the coordination host to access the worker node. Its content must be in the authorized keys of each worker node.
 
-To coordination host have authorization to access worker node via SSH the public key (**coordination_host_key.pub**) must be copied in an **authorized keys file** from worker node.
-
-Then, log into the worker node machine and create a copy of the public key as you see fit. The commands below write the public key into **authorized_keys** of worker node considering that it is in the home directory.
-```bash
-mkdir -p ~/.ssh
-touch ~/.ssh/authorized_keys
-cat ~/coordination_host_key.pub >> ~/.ssh/authorized_keys
-```
-
+To allow the communicaton between the coordination and the Worker Nodes via SSH, the public key (**coordination_host_key.pub**) must be copied in the **authorized keys file** of the Worker Node. To this end, log into the Worker Node hosts and append the public key content to the `~/.ssh/authorized_keys` files.
 
 
 ### _2.Install dependencies_
