@@ -8,7 +8,7 @@ public interface K8sClient {
 	//FIXME what does it return?
 	//??? createNamespace();
     
-    V1Job createJob(String name, String containerImage, List<String> command);
+    V1Job createJob(String name, String containerImage, String command);
     
     V1Status deleteJob(String name);
     
