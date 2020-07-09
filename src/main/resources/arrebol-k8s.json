@@ -8,6 +8,9 @@
     {
       "key": "address",
       "value": "http://127.0.0.1:8001"
+    },{
+      "key": "namespace",
+      "value": "default"
     }
   ]
 }
