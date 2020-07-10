@@ -34,9 +34,10 @@ public class K8sWorkerCreator implements WorkerCreator {
 		String address = configuration.getAddress();
 		int poolSize = configuration.getCapacity();
 		String namespace = configuration.getNamespace();
+		String volumeName = configuration.getVolumeName();
 		for (int i = 0; i < poolSize; i++) {
 			LOGGER.info("Creating k8s worker with address=" + address);
-			Worker worker = createK8sWorker(poolId, address, namespace);
+			Worker worker = createK8sWorker(poolId, address, namespace, volumeName);
 			workers.add(worker);
 		}
 
@@ -50,14 +51,14 @@ public class K8sWorkerCreator implements WorkerCreator {
 		return null;
 	}
 
-	private Worker createK8sWorker(Integer poolId, String address, String namespace) {
+	private Worker createK8sWorker(Integer poolId, String address, String namespace, String volumeName) {
 		String id = "k8s-executor-" + UUID.randomUUID().toString();
 		K8sClusterResource k8sClusterResource = new DefaultK8sClusterResource(id, address);
 		Specification resourceSpec = null;
 
 		K8sClient k8sClient = null;
 		try {
-			k8sClient = new DefaultK8sClient(address, namespace);
+			k8sClient = new DefaultK8sClient(address, namespace, volumeName);
 		} catch (IOException e) {
 			LOGGER.error("Error while create k8s client in worker [" + id + "]", e);
 		}
