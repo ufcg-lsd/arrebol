@@ -11,6 +11,9 @@
     },{
       "key": "namespace",
       "value": "default"
+    },{
+      "key": "volumeName",
+      "value": "nfs"
     }
   ]
 }
