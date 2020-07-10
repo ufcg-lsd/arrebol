@@ -9,21 +9,17 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.OneToOne;
 import javax.persistence.Transient;
 
 import org.apache.log4j.Logger;
 import org.fogbowcloud.arrebol.execution.TaskExecutionResult;
 import org.fogbowcloud.arrebol.execution.TaskExecutor;
 import org.fogbowcloud.arrebol.execution.TaskExecutionResult.RESULT;
-import org.fogbowcloud.arrebol.execution.k8s.client.DefaultK8sClient;
 import org.fogbowcloud.arrebol.execution.k8s.client.K8sClient;
-import org.fogbowcloud.arrebol.execution.k8s.resource.DefaultK8sClusterResource;
 import org.fogbowcloud.arrebol.execution.k8s.resource.K8sClusterResource;
 import org.fogbowcloud.arrebol.models.command.Command;
 import org.fogbowcloud.arrebol.models.command.CommandState;
