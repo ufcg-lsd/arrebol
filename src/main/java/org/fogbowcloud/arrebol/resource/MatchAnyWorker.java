@@ -12,6 +12,7 @@ import org.fogbowcloud.arrebol.execution.TaskExecutionResult;
 import org.fogbowcloud.arrebol.execution.TaskExecutor;
 import org.fogbowcloud.arrebol.execution.Worker;
 import org.fogbowcloud.arrebol.execution.docker.DockerTaskExecutor;
+import org.fogbowcloud.arrebol.execution.k8s.K8sTaskExecutor;
 import org.fogbowcloud.arrebol.models.specification.Specification;
 import org.fogbowcloud.arrebol.models.task.Task;
 
@@ -32,7 +33,7 @@ public class MatchAnyWorker implements Worker {
     private Specification spec;
     @Transient
     private int poolId;
-    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true, targetEntity = DockerTaskExecutor.class)
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true, targetEntity = K8sTaskExecutor.class)
     private TaskExecutor executor;
 
     public MatchAnyWorker(String id, Specification spec, int poolId, TaskExecutor delegatedExecutor) {
