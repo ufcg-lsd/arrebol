@@ -5,11 +5,8 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Objects;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
 import javax.persistence.Transient;
 
 import org.apache.log4j.Logger;
@@ -22,20 +19,25 @@ import io.kubernetes.client.openapi.models.V1Container;
 import io.kubernetes.client.openapi.models.V1Job;
 import io.kubernetes.client.openapi.models.V1JobSpec;
 import io.kubernetes.client.openapi.models.V1ObjectMeta;
+import io.kubernetes.client.openapi.models.V1PersistentVolumeClaimVolumeSource;
 import io.kubernetes.client.openapi.models.V1PodSpec;
 import io.kubernetes.client.openapi.models.V1PodTemplateSpec;
 import io.kubernetes.client.openapi.models.V1Status;
+import io.kubernetes.client.openapi.models.V1Volume;
+import io.kubernetes.client.openapi.models.V1VolumeMount;
 import io.kubernetes.client.util.ClientBuilder;
 
 public class DefaultK8sClient implements K8sClient {
 	
 	private String namespace;
-	@Transient
+	
     private BatchV1Api batchApi;
+	
+	private String volumeName; 
 	
 	private final Logger LOGGER = Logger.getLogger(DefaultK8sClient.class);
 
-    public DefaultK8sClient(String host, String namespace) throws IOException {
+    public DefaultK8sClient(String host, String namespace, String volumeName) throws IOException {
         ApiClient client = ClientBuilder.defaultClient();
         client.setBasePath(host);
         client.setDebugging(true);
@@ -43,6 +45,7 @@ public class DefaultK8sClient implements K8sClient {
         Configuration.setDefaultApiClient(client);
         this.batchApi = new BatchV1Api();
         this.namespace = namespace;
+        this.volumeName = volumeName;
     }
     
     public DefaultK8sClient() {}
@@ -50,16 +53,37 @@ public class DefaultK8sClient implements K8sClient {
     @Override
     public V1Job createJob(String name, String imageId, String command) throws ApiException {
     	List<String> commandList = buildCommands(command);
+    	V1Container podContainer = new V1Container()
+    			.name(name)
+                .image(imageId)
+                .command(commandList);
+    		
     	
         V1PodSpec podSpec = new V1PodSpec()
                 .restartPolicy("Never")
                 .containers(Arrays.asList(
-                    new V1Container()
-                        .name(name)
-                        .image(imageId)
-                        .command(commandList)
-                        )
-                	);
+                		podContainer
+                	)
+                );
+        
+        if(Objects.nonNull(volumeName)) {
+    		podContainer.volumeMounts(Arrays.asList(
+            		new V1VolumeMount()
+            		.name("k8s-nfs")
+            		.mountPath("/nfs")
+            		)
+    			);
+    		
+    		podSpec.volumes(Arrays.asList(
+        			new V1Volume()
+    				.name("k8s-nfs")
+    				.persistentVolumeClaim(
+    						new V1PersistentVolumeClaimVolumeSource()
+    						.claimName(volumeName)
+    						)
+    				)
+    			);
+    	}
         
         V1Job job =  new V1Job()
                 .apiVersion("batch/v1")
