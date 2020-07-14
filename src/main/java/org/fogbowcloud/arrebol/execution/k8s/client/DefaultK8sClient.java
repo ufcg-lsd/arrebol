@@ -7,6 +7,10 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
 
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
 import javax.persistence.Transient;
 
 import org.apache.log4j.Logger;
@@ -27,14 +31,21 @@ import io.kubernetes.client.openapi.models.V1Volume;
 import io.kubernetes.client.openapi.models.V1VolumeMount;
 import io.kubernetes.client.util.ClientBuilder;
 
+@Entity
 public class DefaultK8sClient implements K8sClient {
+	
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private Integer id;
 	
 	private String namespace;
 	
+	@Transient
     private BatchV1Api batchApi;
 	
 	private String volumeName; 
 	
+	@Transient
 	private final Logger LOGGER = Logger.getLogger(DefaultK8sClient.class);
 
     public DefaultK8sClient(String host, String namespace, String volumeName) throws IOException {
@@ -119,4 +130,22 @@ public class DefaultK8sClient implements K8sClient {
 		return batchApi.readNamespacedJob(name, this.namespace, null, null, null);
 	}
 
+	public Integer getId() {
+		return id;
+	}
+
+	public String getNamespace() {
+		return namespace;
+	}
+
+	public BatchV1Api getBatchApi() {
+		return batchApi;
+	}
+
+	public String getVolumeName() {
+		return volumeName;
+	}
+
+	
+	
 }

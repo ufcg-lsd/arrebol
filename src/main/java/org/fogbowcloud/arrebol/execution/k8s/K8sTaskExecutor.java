@@ -9,17 +9,21 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.OneToOne;
 import javax.persistence.Transient;
 
 import org.apache.log4j.Logger;
 import org.fogbowcloud.arrebol.execution.TaskExecutionResult;
 import org.fogbowcloud.arrebol.execution.TaskExecutor;
 import org.fogbowcloud.arrebol.execution.TaskExecutionResult.RESULT;
+import org.fogbowcloud.arrebol.execution.k8s.client.DefaultK8sClient;
 import org.fogbowcloud.arrebol.execution.k8s.client.K8sClient;
+import org.fogbowcloud.arrebol.execution.k8s.resource.DefaultK8sClusterResource;
 import org.fogbowcloud.arrebol.execution.k8s.resource.K8sClusterResource;
 import org.fogbowcloud.arrebol.models.command.Command;
 import org.fogbowcloud.arrebol.models.command.CommandState;
@@ -37,9 +41,9 @@ public class K8sTaskExecutor implements TaskExecutor {
 	private Integer id;
 	@Transient
 	private final Logger LOGGER = Logger.getLogger(K8sTaskExecutor.class);
-	@Transient
+	@OneToOne(cascade = CascadeType.ALL, orphanRemoval = true, targetEntity = DefaultK8sClusterResource.class)
 	private K8sClusterResource k8sClusterResource;
-	@Transient
+	@OneToOne(cascade = CascadeType.ALL, orphanRemoval = true, targetEntity = DefaultK8sClient.class)
 	private K8sClient k8sClient;
 	@Transient
 	private static final long POOLING_PERIOD_TIME_MS = 5 * 1000;
