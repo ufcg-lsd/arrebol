@@ -105,7 +105,7 @@ public class DefaultK8sClient implements K8sClient {
                         .template(new V1PodTemplateSpec()
                             .metadata(new V1ObjectMeta().labels(Collections.singletonMap("app",name)))
                             .spec(podSpec)
-                        ).backoffLimit(0)
+                        ).backoffLimit(2)
                 );
         
         return batchApi.createNamespacedJob(namespace, job, null, null, null);
