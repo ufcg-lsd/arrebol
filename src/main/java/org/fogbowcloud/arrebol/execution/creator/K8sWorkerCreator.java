@@ -45,10 +45,16 @@ public class K8sWorkerCreator implements WorkerCreator {
 	}
 
 	@Override
-	// TODO implement this method
 	public Collection<Worker> createWorkers(Integer poolId, WorkerNode workerNode) {
-		// TODO Auto-generated method stub
-		return null;
+		Collection<Worker> workers = new LinkedList<>();
+		String namespace = configuration.getNamespace();
+		String volumeName = configuration.getVolumeName();
+        for(int i = 0; i < workerNode.getPoolSize(); i++){
+            LOGGER.info("Creating k8s worker with address=" + workerNode.getAddress());
+            Worker worker = createK8sWorker(poolId, workerNode.getAddress(), namespace, volumeName);
+            workers.add(worker);
+        }
+        return workers;
 	}
 
 	private Worker createK8sWorker(Integer poolId, String address, String namespace, String volumeName) {
