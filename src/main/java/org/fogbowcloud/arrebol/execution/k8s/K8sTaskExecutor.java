@@ -89,15 +89,15 @@ public class K8sTaskExecutor implements TaskExecutor {
 			}
 
 			if (wasSuccessful(job)) {
-				successTask(task);
+				finishSuccessfulExecution(task);
 				taskExecutionResult = getSuccessResultInstance(tasksListSize);
 			} else {
-				failTask(task);
+				finishFailExecution(task);
 				taskExecutionResult = getFailResultInstance(tasksListSize);
 			}
 		} catch (ApiException e) {
 			LOGGER.error("Error while call K8s client API. " + e.getMessage(), e);
-			failTask(task);
+			finishFailExecution(task);
 			taskExecutionResult = getFailResultInstance(tasksListSize);
 			return taskExecutionResult;
 		}
@@ -135,14 +135,14 @@ public class K8sTaskExecutor implements TaskExecutor {
 		return successedQuant != null && successedQuant > 0;
 	}
 
-	private void successTask(Task task) {
+	private void finishSuccessfulExecution(Task task) {
 		for (Command c : task.getTaskSpec().getCommands()) {
 			c.setState(CommandState.FINISHED);
 			c.setExitcode(TaskExecutionResult.SUCCESS_RESULT);
 		}
 	}
 
-	private void failTask(Task task) {
+	private void finishFailExecution(Task task) {
 		for (Command c : task.getTaskSpec().getCommands()) {
 			c.setState(CommandState.FAILED);
 			c.setExitcode(TaskExecutionResult.UNDETERMINED_RESULT);
