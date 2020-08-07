@@ -12,10 +12,10 @@ public class K8sConfiguration {
 
 	public K8sConfiguration(Configuration configuration) throws Exception {
 		checkK8sConfigurationProperties(configuration);
-		Property<Double> capacity = configuration.getProperty(K8sConstants.JSON_CLUSTER_CAPACITY_KEY);
-		Property<String> address = configuration.getProperty(K8sConstants.JSON_CLUSTER_ADDRESS_KEY);
-		Property<String> namespace = configuration.getProperty(K8sConstants.JSON_CLUSTER_NAMESPACE_KEY);
-		Property<String> volumeName = configuration.getProperty(K8sConstants.JSON_CLUSTER_VOLUME_NAME_KEY);
+		Property<Double> capacity = configuration.getProperty(K8sConstants.K8S_CLUSTER_CAPACITY);
+		Property<String> address = configuration.getProperty(K8sConstants.K8S_CLUSTER_ADDRESS);
+		Property<String> namespace = configuration.getProperty(K8sConstants.K8S_CLUSTER_NAMESPACE);
+		Property<String> volumeName = configuration.getProperty(K8sConstants.K8S_CLUSTER_VOLUME_NAME);
 		this.capacity = capacity.getValue().intValue();
 		this.address = address.getValue();
 		this.namespace = namespace.getValue();
@@ -28,9 +28,9 @@ public class K8sConfiguration {
 		String addressMsg = "K8s cluster address configuration property wrong or missing." + verifyMsg;
 		String namespaceMsg = "K8s cluster namespace configuration property wrong or missing." + verifyMsg;
 
-		Property<Double> capacity = configuration.getProperty(K8sConstants.JSON_CLUSTER_CAPACITY_KEY);
-		Property<String> address = configuration.getProperty(K8sConstants.JSON_CLUSTER_ADDRESS_KEY);
-		Property<String> namespace = configuration.getProperty(K8sConstants.JSON_CLUSTER_NAMESPACE_KEY);
+		Property<Double> capacity = configuration.getProperty(K8sConstants.K8S_CLUSTER_CAPACITY);
+		Property<String> address = configuration.getProperty(K8sConstants.K8S_CLUSTER_ADDRESS);
+		Property<String> namespace = configuration.getProperty(K8sConstants.K8S_CLUSTER_NAMESPACE);
 
 		if (address.getValue() == null || address.getValue().trim().isEmpty()) {
 			throw new Exception(addressMsg);
