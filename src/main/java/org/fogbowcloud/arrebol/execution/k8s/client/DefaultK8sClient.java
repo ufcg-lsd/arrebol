@@ -3,8 +3,10 @@ package org.fogbowcloud.arrebol.execution.k8s.client;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 import javax.persistence.Entity;
@@ -15,6 +17,7 @@ import javax.persistence.Transient;
 
 import org.apache.log4j.Logger;
 
+import io.kubernetes.client.custom.Quantity;
 import io.kubernetes.client.openapi.ApiClient;
 import io.kubernetes.client.openapi.ApiException;
 import io.kubernetes.client.openapi.Configuration;
@@ -26,6 +29,7 @@ import io.kubernetes.client.openapi.models.V1ObjectMeta;
 import io.kubernetes.client.openapi.models.V1PersistentVolumeClaimVolumeSource;
 import io.kubernetes.client.openapi.models.V1PodSpec;
 import io.kubernetes.client.openapi.models.V1PodTemplateSpec;
+import io.kubernetes.client.openapi.models.V1ResourceRequirements;
 import io.kubernetes.client.openapi.models.V1Status;
 import io.kubernetes.client.openapi.models.V1Volume;
 import io.kubernetes.client.openapi.models.V1VolumeMount;
@@ -62,7 +66,7 @@ public class DefaultK8sClient implements K8sClient {
     public DefaultK8sClient() {}
     
     @Override
-    public V1Job createJob(String name, String imageId, String command) throws ApiException {
+    public V1Job createJob(String name, String imageId, String memoryRequest, String cpuRequest, String command) throws ApiException {
     	List<String> commandList = buildCommands(command);
     	V1Container podContainer = new V1Container()
     			.name(name)
@@ -95,6 +99,18 @@ public class DefaultK8sClient implements K8sClient {
     				)
     			);
     	}
+        
+        if(Objects.nonNull(cpuRequest) && Objects.nonNull(memoryRequest)) {
+        	V1ResourceRequirements requests = new V1ResourceRequirements();
+        	
+        	Quantity cpu = new Quantity(cpuRequest);
+        	requests.putRequestsItem("cpu", cpu);
+        	
+        	Quantity memory = new Quantity(memoryRequest);
+        	requests.putRequestsItem("memory", memory);
+        	
+        	podContainer.resources(requests);
+        }
         
         V1Job job =  new V1Job()
                 .apiVersion("batch/v1")

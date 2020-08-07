@@ -23,6 +23,7 @@ import org.fogbowcloud.arrebol.execution.TaskExecutor;
 import org.fogbowcloud.arrebol.execution.TaskExecutionResult.RESULT;
 import org.fogbowcloud.arrebol.execution.k8s.client.DefaultK8sClient;
 import org.fogbowcloud.arrebol.execution.k8s.client.K8sClient;
+import org.fogbowcloud.arrebol.execution.k8s.constants.K8sConstants;
 import org.fogbowcloud.arrebol.execution.k8s.resource.DefaultK8sClusterResource;
 import org.fogbowcloud.arrebol.execution.k8s.resource.K8sClusterResource;
 import org.fogbowcloud.arrebol.models.command.Command;
@@ -67,14 +68,18 @@ public class K8sTaskExecutor implements TaskExecutor {
 
 		Map<String, String> requirements = task.getTaskSpec().getRequirements();
 		String imageId = getImageId(requirements);
+		String memoryRequest = getK8sRequest(requirements, K8sConstants.K8S_REQUIREMENTS_RAM_REQUEST);
+		String cpuRequest = getK8sRequest(requirements, K8sConstants.K8S_REQUIREMENTS_CPU_REQUEST);
 
 		LOGGER.debug("Image id: " + imageId);
 		LOGGER.debug("Command: " + command);
+		LOGGER.debug("Memory request: " + memoryRequest);
+		LOGGER.debug("CPU request: " + cpuRequest);
 
 		int tasksListSize = task.getTaskSpec().getCommands().size();
 
 		try {
-			V1Job job = k8sClient.createJob(jobName, imageId, command);
+			V1Job job = k8sClient.createJob(jobName, imageId, memoryRequest, cpuRequest, command);
 			boolean jobIsRunning = true;
 
 			while (jobIsRunning) {
@@ -128,6 +133,31 @@ public class K8sTaskExecutor implements TaskExecutor {
 			imageId = requirements.get(RequirementsContants.IMAGE_KEY);
 
 		return imageId;
+	}
+	
+	private String getK8sRequest(Map<String, String> requirements, String key) {
+		String value = null;
+		if (Objects.nonNull(requirements))
+			value = requirements.get(key);
+		return parseRequirement(value, key);
+	}
+
+	private String parseRequirement(String value, String key) {
+		if(value == null)
+			return value;
+		
+		if(key.equals(K8sConstants.K8S_REQUIREMENTS_CPU_REQUEST)) {
+			//Doc this: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#meaning-of-cpu
+			float valueF = Float.parseFloat(value);
+			int valueI = (int) (valueF * 1000);
+			value = valueI+"m";
+		}else if(key.equals(K8sConstants.K8S_REQUIREMENTS_RAM_REQUEST)) {
+			//Doc this: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#meaning-of-memory
+		}else {
+			value = null;
+		}
+		
+		return value;
 	}
 
 	private boolean wasSuccessful(V1Job job) {

@@ -6,7 +6,7 @@ import io.kubernetes.client.openapi.models.V1Status;
 
 public interface K8sClient {
 
-    V1Job createJob(String name, String imageId, String command) throws ApiException;
+    V1Job createJob(String name, String imageId, String memoryRequest, String cpuRequest, String command) throws ApiException;
     
     V1Status deleteJob(String name) throws ApiException;
     
