@@ -41,7 +41,7 @@ public class DefaultK8sClient implements K8sClient {
 	private String namespace;
 	
 	@Transient
-    private BatchV1Api batchApi;
+	private BatchV1Api batchApi;
 	
 	private String volumeName; 
 	
@@ -121,7 +121,7 @@ public class DefaultK8sClient implements K8sClient {
 	}
 
 	@Override
-    public V1Status deleteJob(String name) throws ApiException {
+	public V1Status deleteJob(String name) throws ApiException {
         return batchApi.deleteNamespacedJob(name, namespace, null, null,  null, null, null, null);    
     }
 
