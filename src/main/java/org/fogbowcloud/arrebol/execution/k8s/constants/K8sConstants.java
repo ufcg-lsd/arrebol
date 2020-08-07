@@ -5,5 +5,8 @@ public class K8sConstants {
 	public static final String K8S_CLUSTER_ADDRESS = "address";
 	public static final String K8S_CLUSTER_NAMESPACE = "namespace";
 	public static final String K8S_CLUSTER_VOLUME_NAME = "volumeName";
+	
+	public static final String K8S_REQUIREMENTS_CPU_REQUEST = "k8sCPU";
+	public static final String K8S_REQUIREMENTS_RAM_REQUEST = "k8sRAM";
 
 }
