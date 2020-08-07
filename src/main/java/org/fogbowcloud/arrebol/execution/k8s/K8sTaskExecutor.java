@@ -131,8 +131,8 @@ public class K8sTaskExecutor implements TaskExecutor {
 	}
 
 	private boolean wasSuccessful(V1Job job) {
-		Integer successedQuant = job.getStatus().getSucceeded();
-		return successedQuant != null && successedQuant > 0;
+		Integer succeededAmount = job.getStatus().getSucceeded();
+		return succeededAmount != null && succeededAmount > 0;
 	}
 
 	private void finishSuccessfulExecution(Task task) {
