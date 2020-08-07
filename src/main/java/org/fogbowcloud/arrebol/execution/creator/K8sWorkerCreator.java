@@ -60,6 +60,7 @@ public class K8sWorkerCreator implements WorkerCreator {
 	private Worker createK8sWorker(Integer poolId, String address, String namespace, String volumeName) {
 		String id = "k8s-executor-" + UUID.randomUUID().toString();
 		K8sClusterResource k8sClusterResource = new DefaultK8sClusterResource(id, address);
+		//TODO Add some specification here, something about the CPU and RAM requirements maybe
 		Specification resourceSpec = null;
 
 		K8sClient k8sClient = null;
