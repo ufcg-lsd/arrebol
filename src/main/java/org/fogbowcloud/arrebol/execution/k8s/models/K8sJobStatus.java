@@ -14,12 +14,10 @@ package org.fogbowcloud.arrebol.execution.k8s.models;
 
 import java.util.Objects;
 import com.google.gson.annotations.SerializedName;
-import io.kubernetes.client.openapi.models.V1JobCondition;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import java.util.ArrayList;
 import java.util.List;
-import org.joda.time.DateTime;
 
 /**
  * JobStatus represents the current state of a Job.
