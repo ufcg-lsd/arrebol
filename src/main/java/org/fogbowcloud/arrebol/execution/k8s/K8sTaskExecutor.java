@@ -24,6 +24,7 @@ import org.fogbowcloud.arrebol.execution.TaskExecutionResult.RESULT;
 import org.fogbowcloud.arrebol.execution.k8s.client.DefaultK8sClient;
 import org.fogbowcloud.arrebol.execution.k8s.client.K8sClient;
 import org.fogbowcloud.arrebol.execution.k8s.constants.K8sConstants;
+import org.fogbowcloud.arrebol.execution.k8s.models.K8sJob;
 import org.fogbowcloud.arrebol.execution.k8s.resource.DefaultK8sClusterResource;
 import org.fogbowcloud.arrebol.execution.k8s.resource.K8sClusterResource;
 import org.fogbowcloud.arrebol.models.command.Command;
@@ -32,7 +33,6 @@ import org.fogbowcloud.arrebol.models.task.RequirementsContants;
 import org.fogbowcloud.arrebol.models.task.Task;
 
 import io.kubernetes.client.openapi.ApiException;
-import io.kubernetes.client.openapi.models.V1Job;
 
 @Entity
 public class K8sTaskExecutor implements TaskExecutor {
@@ -79,9 +79,9 @@ public class K8sTaskExecutor implements TaskExecutor {
 		int tasksListSize = task.getTaskSpec().getCommands().size();
 
 		try {
-			V1Job job = k8sClient.createJob(jobName, imageId, memoryRequest, cpuRequest, command);
+			K8sJob job = k8sClient.createJob(jobName, imageId, memoryRequest, cpuRequest, command);
 			boolean jobIsRunning = true;
-
+			
 			while (jobIsRunning) {
 				try {
 					sleep(POOLING_PERIOD_TIME_MS);
@@ -139,28 +139,10 @@ public class K8sTaskExecutor implements TaskExecutor {
 		String value = null;
 		if (Objects.nonNull(requirements))
 			value = requirements.get(key);
-		return parseRequirement(value, key);
-	}
-
-	private String parseRequirement(String value, String key) {
-		if(value == null)
-			return value;
-		
-		if(key.equals(K8sConstants.K8S_REQUIREMENTS_CPU_REQUEST)) {
-			//Doc this: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#meaning-of-cpu
-			float valueF = Float.parseFloat(value);
-			int valueI = (int) (valueF * 1000);
-			value = valueI+"m";
-		}else if(key.equals(K8sConstants.K8S_REQUIREMENTS_RAM_REQUEST)) {
-			//Doc this: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#meaning-of-memory
-		}else {
-			value = null;
-		}
-		
 		return value;
 	}
 
-	private boolean wasSuccessful(V1Job job) {
+	private boolean wasSuccessful(K8sJob job) {
 		Integer succeededAmount = job.getStatus().getSucceeded();
 		return succeededAmount != null && succeededAmount > 0;
 	}
