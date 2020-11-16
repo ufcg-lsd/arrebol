@@ -119,6 +119,8 @@ spring.jpa.hibernate.ddl-auto=update
 
 Configure the arrebol.json file to tune Arrebol internals.
 
+##### Docker
+
 Each property in this file is defined by a `key` field that identifies the property and a `value` field that defines the value of that property.
 In order to facilitate the deployment, it is only necessary to add the addresses to the `resourceAddresses` list.
 
@@ -145,7 +147,7 @@ File: arrebol.json
 
 | Field                             | Description    |
 |:---------------------------------:|----------------|
-| **workerPoolSize**                |  Defines the maximum number of workers that can run on the same node. |
+| **workerPoolSize**                | Defines the maximum number of workers that can run on the same node. |
 | **imageId**                       | Sets the default docker image used to create workers. |
 | **resourceAddress**               | Defines an address list of worker nodes. |
 
@@ -173,6 +175,66 @@ Considering that your worker nodes are **10.30.1.1** and **10.30.1.2**. The cont
 }
 ```
 
+##### K8s
+
+Each property in this file is defined by a `key` field that identifies the property and a `value` field that defines the value of that property.
+
+File: arrebol.json
+```json
+{
+  "poolType":"k8s",
+  "properties": [
+    {
+      "key":"capacity",
+      "value": 5
+    },
+    {
+      "key": "address",
+      "value": "http://127.0.0.1:8001"
+    },{
+      "key": "namespace",
+      "value": "default"
+    },{
+      "key": "volumeName",
+      "value": null
+    }
+  ]
+}
+```
+
+| Field                             | Description    |
+|:---------------------------------:|----------------|
+| **capacity**                      | Defines the maximum number of jobs that can be sent to the k8s. |
+| **address**                       | Sets the k8s address used to send jobs. |
+| **namespace**                     | Defines the namespace used in k8s. |
+| **volumeName**                    | Defines the volume name that will be mounted in the job containers. (optional) |
+
+The capacity is **5**, namespace is **default** and volumeName is **null** by default. 
+
+Considering that your k8s cluster is at **http://10.30.1.1:8002** with a capacity for **20** jobs and a volume named **nfs**. The content of the **arrebol.json** file would be:
+
+```json
+{
+  "poolType":"k8s",
+  "properties": [
+    {
+      "key":"capacity",
+      "value": 20
+    },
+    {
+      "key": "address",
+      "value": "http://10.30.1.1:8002"
+    },{
+      "key": "namespace",
+      "value": "default"
+    },{
+      "key": "volumeName",
+      "value": "nfs"
+    }
+  ]
+}
+```
+
 ### 4.Install
 
 Now go back to the **arrebol/deploy** directory and run the below commands to install the arrebol service:
@@ -186,6 +248,8 @@ Wait a few minutes, it may take a while for the services to be ready.
 ## Check 
 
 To verify whether the deploy is running correctly, one can submit below sample requests to the Arrebol service.
+
+### Docker
 
 ---
 Request
@@ -306,6 +370,156 @@ Expected
                 "requirements": {
                     "image": "ubuntu:latest",
                     "DockerRequirements": "DockerMemory == 1024 && DockerCPUWeight == 1024"
+                },
+                "commands": [
+                    {
+                        "command": "echo Hello World!",
+                        "state": "FINISHED",
+                        "exitcode": 0
+                    },
+                    {
+                        "command": "sleep 2",
+                        "state": "FINISHED",
+                        "exitcode": 0
+                    },
+                    {
+                        "command": "sleep 2",
+                        "state": "FINISHED",
+                        "exitcode": 0
+                    },
+                    {
+                        "command": "echo Goodbye World!",
+                        "state": "FINISHED",
+                        "exitcode": 0
+                    }
+                ],
+                "metadata": {
+                    "time": "111222333"
+                }
+            }
+        }
+    ],
+    "job_state": "FINISHED"
+}
+```
+
+### K8s
+
+---
+Request
+```bash
+curl http://127.0.0.1:8080/queues/default
+```
+
+Expected
+```json
+{"id":"default","name":"Default Queue","waiting_jobs":0,"worker_pools":1,"pools_size":5}
+```
+---
+Request
+```bash
+curl -X POST \
+  http://127.0.0.1:8080/queues/default/jobs \
+  -H 'content-type: application/json' \
+  -d '{
+   "label":"MyJob",
+   "tasks_specs":[
+      {
+         "label":"MyLabel1",
+         "requirements":{
+            "image":"ubuntu:latest"
+         },
+         "commands":[
+            "echo Hello World!",
+            "sleep 2",
+            "sleep 2",
+            "echo Goodbye World!"
+         ],
+         "metadata":{
+            "time":"111222333"
+         }
+      },
+      {
+         "label":"MyLabel2",
+         "requirements":{
+            "image":"ubuntu:latest"
+         },
+         "commands":[
+            "echo Hello World!",
+            "sleep 2",
+            "sleep 2",
+            "echo Goodbye World!"
+         ],
+         "metadata":{
+            "time":"111222333"
+         }
+      }
+   ]
+}'
+```
+
+Expected
+```json
+{"id":"e77d7b5c-dc3b-4f22-83ea-b6cb48736455"}
+```
+
+---
+Request 
+* Use the job id of previous request
+* Do until you see that the Job is finished
+
+```bash
+curl -X GET http://127.0.0.1:8080/queues/default/jobs/e77d7b5c-dc3b-4f22-83ea-b6cb48736455
+```
+
+Expected
+```json
+{
+    "id": "e77d7b5c-dc3b-4f22-83ea-b6cb48736455",
+    "label": "MyJob",
+    "tasks": [
+        {
+            "id": "ed27dc52-af1b-4c86-88ae-b86874f5a626",
+            "state": "FINISHED",
+            "tasks_specs": {
+                "label": "MyLabel1",
+                "requirements": {
+                    "image": "ubuntu:latest"
+                },
+                "commands": [
+                    {
+                        "command": "echo Hello World!",
+                        "state": "FINISHED",
+                        "exitcode": 0
+                    },
+                    {
+                        "command": "sleep 2",
+                        "state": "FINISHED",
+                        "exitcode": 0
+                    },
+                    {
+                        "command": "sleep 2",
+                        "state": "FINISHED",
+                        "exitcode": 0
+                    },
+                    {
+                        "command": "echo Goodbye World!",
+                        "state": "FINISHED",
+                        "exitcode": 0
+                    }
+                ],
+                "metadata": {
+                    "time": "111222333"
+                }
+            }
+        },
+        {
+            "id": "3934de84-440d-4786-8051-1f8aa0bb5bbb",
+            "state": "FINISHED",
+            "tasks_specs": {
+                "label": "MyLabel2",
+                "requirements": {
+                    "image": "ubuntu:latest"
                 },
                 "commands": [
                     {
