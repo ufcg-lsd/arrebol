@@ -1,6 +1,6 @@
 #!/bin/bash
 
-readonly ANSIBLE_FILES_PATH_PATTERN="ansible_files_path"
+readonly ANSIBLE_HOSTS_FILE="./ansible-playbook/hosts"
 readonly PRIVATE_KEY_FILE_PATH_PATTERN="ansible_ssh_private_key_file"
 readonly DEPLOYED_WORKER_IP_PATTERN="worker_ip"
 readonly DEPLOY_WORKER_YML_FILE="deploy-worker.yml"
@@ -15,9 +15,6 @@ if [ -z "$MY_PATH" ] ; then
 fi
 
 HOSTS_CONF_FILE="${MY_PATH}/hosts.conf"
-
-ANSIBLE_FILES_PATH=$(grep "${ANSIBLE_FILES_PATH_PATTERN}" "${HOSTS_CONF_FILE}" | awk -F "=" '{print $2}')
-ANSIBLE_HOSTS_FILE="${ANSIBLE_FILES_PATH}/hosts"
 PRIVATE_KEY_FILE_PATH=$(grep "${PRIVATE_KEY_FILE_PATH_PATTERN}" "${HOSTS_CONF_FILE}" | awk -F "=" '{print $2}')
 
 # Clears the worker machine addresses
