@@ -1,3 +1,4 @@
+/* (C)2020 */
 package org.fogbowcloud.arrebol.execution.docker.resource;
 
 /**
@@ -8,13 +9,13 @@ package org.fogbowcloud.arrebol.execution.docker.resource;
  */
 public interface DockerContainerResource {
 
-    void start(ContainerSpecification containerSpecification) throws Exception;
+  void start(ContainerSpecification containerSpecification) throws Exception;
 
-    void stop() throws Exception;
+  void stop() throws Exception;
 
-    String getId();
+  String getId();
 
-    String getApiAddress();
+  String getApiAddress();
 
-    boolean isStarted();
+  boolean isStarted();
 }

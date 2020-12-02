@@ -1,3 +1,4 @@
+/* (C)2020 */
 package org.fogbowcloud.arrebol.execution.docker.resource;
 
 import static org.fogbowcloud.arrebol.execution.docker.DockerUnitTestUtil.MOCK_CONTAINER_NAME;
@@ -19,97 +20,104 @@ import org.mockito.Mockito;
 
 public class DefaultDockerContainerResourceTest {
 
-    private DockerContainerRequestHelper containerRequestHelper;
-    private DockerImageRequestHelper imageRequestHelper;
-    private DefaultDockerContainerResource defaultDockerContainerResource;
+  private DockerContainerRequestHelper containerRequestHelper;
+  private DockerImageRequestHelper imageRequestHelper;
+  private DefaultDockerContainerResource defaultDockerContainerResource;
 
-    @Before
-    public void setUp() throws Exception {
-        containerRequestHelper = Mockito.mock(DockerContainerRequestHelper.class);
-        Mockito.when(containerRequestHelper.createContainer(eq(MOCK_IMAGE_ID), Mockito.any(Map.class)))
-            .thenReturn(MOCK_CONTAINER_NAME);
+  @Before
+  public void setUp() throws Exception {
+    containerRequestHelper = Mockito.mock(DockerContainerRequestHelper.class);
+    Mockito.when(containerRequestHelper.createContainer(eq(MOCK_IMAGE_ID), Mockito.any(Map.class)))
+        .thenReturn(MOCK_CONTAINER_NAME);
 
-        imageRequestHelper = Mockito.mock(DockerImageRequestHelper.class);
+    imageRequestHelper = Mockito.mock(DockerImageRequestHelper.class);
 
-        defaultDockerContainerResource =
-            new DefaultDockerContainerResource(
-                MOCK_CONTAINER_NAME, containerRequestHelper, imageRequestHelper);
-    }
+    defaultDockerContainerResource =
+        new DefaultDockerContainerResource(
+            MOCK_CONTAINER_NAME, containerRequestHelper, imageRequestHelper);
+  }
 
-    @Test
-    public void testSuccessStart() throws Exception {
-        ContainerSpecification containerSpecification = new ContainerSpecification(MOCK_IMAGE_ID, new HashMap<>());
-        defaultDockerContainerResource.start(containerSpecification);
-    }
+  @Test
+  public void testSuccessStart() throws Exception {
+    ContainerSpecification containerSpecification =
+        new ContainerSpecification(MOCK_IMAGE_ID, new HashMap<>());
+    defaultDockerContainerResource.start(containerSpecification);
+  }
 
-    @Test(expected = DockerStartException.class)
-    public void testTwiceStart() throws UnsupportedEncodingException {
-        ContainerSpecification containerSpecification = new ContainerSpecification(MOCK_IMAGE_ID, new HashMap<>());
-        defaultDockerContainerResource.start(containerSpecification);
-        defaultDockerContainerResource.start(containerSpecification);
-    }
+  @Test(expected = DockerStartException.class)
+  public void testTwiceStart() throws UnsupportedEncodingException {
+    ContainerSpecification containerSpecification =
+        new ContainerSpecification(MOCK_IMAGE_ID, new HashMap<>());
+    defaultDockerContainerResource.start(containerSpecification);
+    defaultDockerContainerResource.start(containerSpecification);
+  }
 
-    @Test(expected = DockerImageNotFoundException.class)
-    public void testStartWithNullImageId() throws UnsupportedEncodingException {
-        ContainerSpecification containerSpecification = new ContainerSpecification(null, new HashMap<>());
-        defaultDockerContainerResource.start(containerSpecification);
-    }
+  @Test(expected = DockerImageNotFoundException.class)
+  public void testStartWithNullImageId() throws UnsupportedEncodingException {
+    ContainerSpecification containerSpecification =
+        new ContainerSpecification(null, new HashMap<>());
+    defaultDockerContainerResource.start(containerSpecification);
+  }
 
-    @Test
-    public void testStartWithNullRequirements() throws UnsupportedEncodingException {
-        ContainerSpecification containerSpecification = new ContainerSpecification(MOCK_IMAGE_ID, null);
-        defaultDockerContainerResource.start(containerSpecification);
-    }
+  @Test
+  public void testStartWithNullRequirements() throws UnsupportedEncodingException {
+    ContainerSpecification containerSpecification = new ContainerSpecification(MOCK_IMAGE_ID, null);
+    defaultDockerContainerResource.start(containerSpecification);
+  }
 
-    @Test(expected = IllegalArgumentException.class)
-    public void testStartWithNullContainerSpecification() throws UnsupportedEncodingException {
-        defaultDockerContainerResource.start(null);
-    }
+  @Test(expected = IllegalArgumentException.class)
+  public void testStartWithNullContainerSpecification() throws UnsupportedEncodingException {
+    defaultDockerContainerResource.start(null);
+  }
 
-    @Test(expected = DockerCreateContainerException.class)
-    public void testFailCreateDockerContainer() throws UnsupportedEncodingException {
-        Mockito.when(containerRequestHelper.createContainer(eq(MOCK_IMAGE_ID), Mockito.any(Map.class)))
-            .thenThrow(new DockerCreateContainerException("Error while create docker container"));
-        defaultDockerContainerResource =
-            new DefaultDockerContainerResource(
-                MOCK_CONTAINER_NAME, containerRequestHelper, imageRequestHelper);
-        ContainerSpecification containerSpecification = new ContainerSpecification(MOCK_IMAGE_ID, new HashMap<>());
-        defaultDockerContainerResource.start(containerSpecification);
-    }
+  @Test(expected = DockerCreateContainerException.class)
+  public void testFailCreateDockerContainer() throws UnsupportedEncodingException {
+    Mockito.when(containerRequestHelper.createContainer(eq(MOCK_IMAGE_ID), Mockito.any(Map.class)))
+        .thenThrow(new DockerCreateContainerException("Error while create docker container"));
+    defaultDockerContainerResource =
+        new DefaultDockerContainerResource(
+            MOCK_CONTAINER_NAME, containerRequestHelper, imageRequestHelper);
+    ContainerSpecification containerSpecification =
+        new ContainerSpecification(MOCK_IMAGE_ID, new HashMap<>());
+    defaultDockerContainerResource.start(containerSpecification);
+  }
 
-    @Test(expected = DockerStartException.class)
-    public void testFailStartDockerContainer() throws UnsupportedEncodingException {
-        Mockito.doThrow(new DockerStartException("Error while start docker container"))
-            .when(containerRequestHelper).startContainer();
-        defaultDockerContainerResource =
-            new DefaultDockerContainerResource(
-                MOCK_CONTAINER_NAME, containerRequestHelper, imageRequestHelper);
-        ContainerSpecification containerSpecification = new ContainerSpecification(MOCK_IMAGE_ID, new HashMap<>());
-        defaultDockerContainerResource.start(containerSpecification);
-    }
+  @Test(expected = DockerStartException.class)
+  public void testFailStartDockerContainer() throws UnsupportedEncodingException {
+    Mockito.doThrow(new DockerStartException("Error while start docker container"))
+        .when(containerRequestHelper)
+        .startContainer();
+    defaultDockerContainerResource =
+        new DefaultDockerContainerResource(
+            MOCK_CONTAINER_NAME, containerRequestHelper, imageRequestHelper);
+    ContainerSpecification containerSpecification =
+        new ContainerSpecification(MOCK_IMAGE_ID, new HashMap<>());
+    defaultDockerContainerResource.start(containerSpecification);
+  }
 
-    @Test
-    public void testSuccessStop() throws Exception {
-        testSuccessStart();
-        defaultDockerContainerResource.stop();
-    }
+  @Test
+  public void testSuccessStop() throws Exception {
+    testSuccessStart();
+    defaultDockerContainerResource.stop();
+  }
 
-    @Test(expected = DockerRemoveContainerException.class)
-    public void testStopInNotStartedResource() {
-        defaultDockerContainerResource.stop();
-    }
+  @Test(expected = DockerRemoveContainerException.class)
+  public void testStopInNotStartedResource() {
+    defaultDockerContainerResource.stop();
+  }
 
-    @Test(expected = DockerRemoveContainerException.class)
-    public void testTwiceStop() throws Exception {
-        testSuccessStart();
-        defaultDockerContainerResource.stop();
-        defaultDockerContainerResource.stop();
-    }
+  @Test(expected = DockerRemoveContainerException.class)
+  public void testTwiceStop() throws Exception {
+    testSuccessStart();
+    defaultDockerContainerResource.stop();
+    defaultDockerContainerResource.stop();
+  }
 
-    @Test(expected = DockerRemoveContainerException.class)
-    public void testFailStop() throws Exception {
-        Mockito.doThrow(new DockerRemoveContainerException("Error while remove docker container"))
-            .when(containerRequestHelper).removeContainer();
-        testSuccessStop();
-    }
+  @Test(expected = DockerRemoveContainerException.class)
+  public void testFailStop() throws Exception {
+    Mockito.doThrow(new DockerRemoveContainerException("Error while remove docker container"))
+        .when(containerRequestHelper)
+        .removeContainer();
+    testSuccessStop();
+  }
 }

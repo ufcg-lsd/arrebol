@@ -1,3 +1,4 @@
+/* (C)2020 */
 package org.fogbowcloud.arrebol.resource;
 
 import java.util.Map;
@@ -5,17 +6,17 @@ import org.fogbowcloud.arrebol.models.specification.Specification;
 
 public interface Resource {
 
-    boolean match(Map<String, String> requirements);
+  boolean match(Map<String, String> requirements);
 
-    ResourceState getState();
+  ResourceState getState();
 
-    void setState(ResourceState state);
+  void setState(ResourceState state);
 
-    Specification getSpecification();
+  Specification getSpecification();
 
-    String getId();
+  String getId();
 
-    int getPoolId();
+  int getPoolId();
 
-    Map<String, String> getMetadata();
+  Map<String, String> getMetadata();
 }

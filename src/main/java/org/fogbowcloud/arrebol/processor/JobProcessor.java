@@ -1,3 +1,4 @@
+/* (C)2020 */
 package org.fogbowcloud.arrebol.processor;
 
 import java.util.Collection;
@@ -7,24 +8,23 @@ import org.fogbowcloud.arrebol.models.job.Job;
 
 public interface JobProcessor {
 
-    String getId();
+  String getId();
 
-    String getName();
+  String getName();
 
-    void addJob(Job job);
+  void addJob(Job job);
 
-    void start();
+  void start();
 
-    Job getJob(String id);
+  Job getJob(String id);
 
-    Map<String, Job> getJobs();
+  Map<String, Job> getJobs();
 
-    boolean containsJob(String id);
+  boolean containsJob(String id);
 
-    void addWorkers(Collection<Worker> workers);
+  void addWorkers(Collection<Worker> workers);
 
-    int getPoolsSize();
+  int getPoolsSize();
 
-    int getWorkerPoolsSize();
-
+  int getWorkerPoolsSize();
 }

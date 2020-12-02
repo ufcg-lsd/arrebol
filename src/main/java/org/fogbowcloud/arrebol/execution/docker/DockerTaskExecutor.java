@@ -1,3 +1,4 @@
+/* (C)2020 */
 package org.fogbowcloud.arrebol.execution.docker;
 
 import static org.fogbowcloud.arrebol.execution.docker.constants.DockerConstants.ADDRESS_METADATA_KEY;
@@ -25,7 +26,6 @@ import org.fogbowcloud.arrebol.models.command.Command;
 import org.fogbowcloud.arrebol.models.command.CommandState;
 import org.fogbowcloud.arrebol.models.task.RequirementsContants;
 import org.fogbowcloud.arrebol.models.task.Task;
-import org.fogbowcloud.arrebol.resource.StaticPool;
 
 /**
  * This implementation of {@link TaskExecutor} manages the execution of a {@link Task} in a,
@@ -38,88 +38,105 @@ import org.fogbowcloud.arrebol.resource.StaticPool;
 @Entity
 public class DockerTaskExecutor implements TaskExecutor {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
-    @Transient
-    private final Logger LOGGER = Logger.getLogger(DockerTaskExecutor.class);
-    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true, targetEntity = DefaultDockerContainerResource.class)
-    private DockerContainerResource dockerContainerResource;
-    @Transient
-    private Tasklet tasklet;
-    private String defaultImageId;
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Integer id;
 
-    /**
-     * @param defaultImageId Image docker used as default if no one is specified in the task.
-     */
-    public DockerTaskExecutor(String defaultImageId,
-            DockerContainerResource dockerContainerResource, Tasklet tasklet) {
-        this.defaultImageId = defaultImageId;
-        this.dockerContainerResource = dockerContainerResource;
-        this.tasklet = tasklet;
+  @Transient private final Logger LOGGER = Logger.getLogger(DockerTaskExecutor.class);
+
+  @OneToOne(
+      cascade = CascadeType.ALL,
+      orphanRemoval = true,
+      targetEntity = DefaultDockerContainerResource.class)
+  private DockerContainerResource dockerContainerResource;
+
+  @Transient private Tasklet tasklet;
+  private String defaultImageId;
+
+  /** @param defaultImageId Image docker used as default if no one is specified in the task. */
+  public DockerTaskExecutor(
+      String defaultImageId, DockerContainerResource dockerContainerResource, Tasklet tasklet) {
+    this.defaultImageId = defaultImageId;
+    this.dockerContainerResource = dockerContainerResource;
+    this.tasklet = tasklet;
+  }
+
+  public DockerTaskExecutor() {}
+
+  /** {@inheritDoc} */
+  @Override
+  public TaskExecutionResult execute(Task task) {
+    TaskExecutionResult taskExecutionResult;
+    try {
+      ContainerSpecification containerSpecification = createContainerSpecification(task);
+      LOGGER.info(
+          "Starting the Docker Task Executor ["
+              + this.dockerContainerResource.getId()
+              + "] to execute task ["
+              + task.getId()
+              + "]");
+      this.dockerContainerResource.start(containerSpecification);
+    } catch (Throwable e) {
+      LOGGER.error("Error while start resource: [" + e.getMessage() + "]", e);
+      failTask(task);
+      taskExecutionResult = getFailResultInstance(task.getTaskSpec().getCommands().size());
+      return taskExecutionResult;
+    }
+    LOGGER.debug(
+        "Starting to execute task ["
+            + task.getId()
+            + "] in resource["
+            + this.dockerContainerResource.getId()
+            + "]");
+    taskExecutionResult = this.tasklet.execute(task);
+    try {
+      LOGGER.info("Stopping DockerTaskExecutor [" + this.dockerContainerResource.getId() + "]");
+      this.dockerContainerResource.stop();
+    } catch (Throwable e) {
+      LOGGER.error(
+          "Error while stop Docker Task Executor ["
+              + this.dockerContainerResource.getId()
+              + "]: ["
+              + e.getMessage()
+              + "]",
+          e);
     }
 
-    public DockerTaskExecutor(){}
+    return taskExecutionResult;
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public TaskExecutionResult execute(Task task) {
-        TaskExecutionResult taskExecutionResult;
-        try {
-            ContainerSpecification containerSpecification = createContainerSpecification(task);
-            LOGGER.info("Starting the Docker Task Executor [" + this.dockerContainerResource.getId() + "] to execute task [" + task.getId() + "]");
-            this.dockerContainerResource.start(containerSpecification);
-        } catch (Throwable e) {
-            LOGGER.error("Error while start resource: [" + e.getMessage() + "]", e);
-            failTask(task);
-            taskExecutionResult = getFailResultInstance(task.getTaskSpec().getCommands().size());
-            return taskExecutionResult;
-        }
-        LOGGER.debug("Starting to execute task [" + task.getId() + "] in resource[" + this.dockerContainerResource.getId() + "]");
-        taskExecutionResult = this.tasklet.execute(task);
-        try {
-            LOGGER.info("Stopping DockerTaskExecutor [" + this.dockerContainerResource.getId() + "]");
-            this.dockerContainerResource.stop();
-        } catch (Throwable e) {
-            LOGGER.error("Error while stop Docker Task Executor [" + this.dockerContainerResource.getId() + "]: [" + e.getMessage() + "]", e);
-        }
+  @Override
+  public Map<String, String> getMetadata() {
+    Map<String, String> metadata = new HashMap<>();
+    String address = this.dockerContainerResource.getApiAddress();
+    metadata.put(ADDRESS_METADATA_KEY, address);
+    return metadata;
+  }
 
-        return taskExecutionResult;
+  private ContainerSpecification createContainerSpecification(Task task) {
+    Map<String, String> requirements = task.getTaskSpec().getRequirements();
+    ContainerSpecification containerSpecification =
+        new ContainerSpecification(defaultImageId, requirements);
+    if (Objects.nonNull(requirements)) {
+      String imageId = requirements.get(RequirementsContants.IMAGE_KEY);
+      if (Objects.nonNull(imageId)) {
+        containerSpecification = new ContainerSpecification(imageId, requirements);
+      }
     }
+    return containerSpecification;
+  }
 
-    @Override
-    public Map<String, String> getMetadata() {
-        Map<String, String> metadata = new HashMap<>();
-        String address = this.dockerContainerResource.getApiAddress();
-        metadata.put(ADDRESS_METADATA_KEY, address);
-        return metadata;
+  private void failTask(Task task) {
+    for (Command c : task.getTaskSpec().getCommands()) {
+      c.setState(CommandState.FAILED);
+      c.setExitcode(TaskExecutionResult.UNDETERMINED_RESULT);
     }
+  }
 
-    private ContainerSpecification createContainerSpecification(Task task) {
-        Map<String, String> requirements = task.getTaskSpec().getRequirements();
-        ContainerSpecification containerSpecification = new ContainerSpecification(defaultImageId, requirements);
-        if( Objects.nonNull(requirements)){
-            String imageId = requirements.get(RequirementsContants.IMAGE_KEY);
-            if(Objects.nonNull(imageId)){
-                containerSpecification =
-                    new ContainerSpecification(imageId, requirements);
-            }
-        }
-        return containerSpecification;
-    }
-
-    private void failTask(Task task) {
-        for (Command c : task.getTaskSpec().getCommands()) {
-            c.setState(CommandState.FAILED);
-            c.setExitcode(TaskExecutionResult.UNDETERMINED_RESULT);
-        }
-    }
-
-    private TaskExecutionResult getFailResultInstance(int size) {
-        int[] exitCodes = new int[size];
-        Arrays.fill(exitCodes, TaskExecutionResult.UNDETERMINED_RESULT);
-        TaskExecutionResult taskExecutionResult =
-                new TaskExecutionResult(RESULT.FAILURE, exitCodes);
-        return taskExecutionResult;
-    }
+  private TaskExecutionResult getFailResultInstance(int size) {
+    int[] exitCodes = new int[size];
+    Arrays.fill(exitCodes, TaskExecutionResult.UNDETERMINED_RESULT);
+    TaskExecutionResult taskExecutionResult = new TaskExecutionResult(RESULT.FAILURE, exitCodes);
+    return taskExecutionResult;
+  }
 }
