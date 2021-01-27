@@ -242,4 +242,9 @@ public class ArrebolController {
         LOGGER.info("Getting queue [" + queueId + "]");
         return this.jobProcessorManager.getJobProcessor(queueId);
     }
+
+    public List<Job> getJobsByLabel(String queueId, String label) {
+        LOGGER.info("Searching on queue [" + queueId + "] job with label [" + label + "]");
+        return this.jobProcessorManager.getJobsByLabel(queueId, label);
+    }
 }

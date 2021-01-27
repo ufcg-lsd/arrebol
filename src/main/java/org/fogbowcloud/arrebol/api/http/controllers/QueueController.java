@@ -16,11 +16,7 @@ import org.fogbowcloud.arrebol.processor.spec.WorkerNode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping(value = ApiEndpoints.QUEUES)
@@ -47,6 +43,20 @@ public class QueueController {
 
             LOGGER.info("Added " + jobSpec.getLabel() + " with id " + jobId + ".");
             return new ResponseEntity(jobResponse, HttpStatus.CREATED);
+        } catch (Throwable t) {
+            LOGGER.error(String.format(Messages.Exception.GENERIC_EXCEPTION, t.getMessage()), t);
+            throw t;
+        }
+    }
+
+    @RequestMapping(value = ApiEndpoints.JOB_PATH, method = RequestMethod.GET)
+    public ResponseEntity<String> getJobsFromQueueByLabel(@PathVariable String queueId,
+                                                  @RequestParam String label) {
+        LOGGER.info("Searching job with label: " + label);
+
+        try {
+            List<Job> jobs = queueService.getJobsByLabelFromQueue(queueId, label);
+            return new ResponseEntity(jobs, HttpStatus.OK);
         } catch (Throwable t) {
             LOGGER.error(String.format(Messages.Exception.GENERIC_EXCEPTION, t.getMessage()), t);
             throw t;
