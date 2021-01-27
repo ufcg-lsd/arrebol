@@ -13,6 +13,7 @@ import org.fogbowcloud.arrebol.datastore.managers.QueueDBManager;
 import org.fogbowcloud.arrebol.execution.Worker;
 import org.fogbowcloud.arrebol.execution.WorkerTypes;
 import org.fogbowcloud.arrebol.execution.creator.DockerWorkerCreator;
+import org.fogbowcloud.arrebol.execution.creator.K8sWorkerCreator;
 import org.fogbowcloud.arrebol.execution.creator.RawWorkerCreator;
 import org.fogbowcloud.arrebol.execution.creator.WorkerCreator;
 import org.fogbowcloud.arrebol.models.command.CommandState;
@@ -32,6 +33,7 @@ import org.fogbowcloud.arrebol.resource.WorkerPool;
 import org.fogbowcloud.arrebol.scheduler.DefaultScheduler;
 import org.fogbowcloud.arrebol.scheduler.FifoSchedulerPolicy;
 import org.fogbowcloud.arrebol.utils.ConfValidator;
+import org.hibernate.boot.registry.classloading.spi.ClassLoaderService.Work;
 import org.springframework.stereotype.Component;
 
 import java.io.BufferedReader;
@@ -188,7 +190,9 @@ public class ArrebolController {
             this.workerCreator = new DockerWorkerCreator(configuration);
         } else if (poolType.equals(WorkerTypes.RAW.getType())) {
             this.workerCreator = new RawWorkerCreator(configuration);
-        } else {
+        } else if (poolType.equals(WorkerTypes.K8S.getType())) {
+        	this.workerCreator = new K8sWorkerCreator(configuration);
+    	}else {
             String poolTypeMsg = "Worker Pool Type configuration property wrong or missing. Please, verify your configuration file.";
             throw new IllegalArgumentException(poolTypeMsg);
         }

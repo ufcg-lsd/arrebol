@@ -7,6 +7,7 @@ public class TaskExecutionResult {
     // this class is more like an struct, not very much OO but it ok
 
     public static final int UNDETERMINED_RESULT = Integer.MAX_VALUE;
+    public static final int SUCCESS_RESULT = 0;
     private final RESULT taskResult;
     private final int[] exitcodes;
 

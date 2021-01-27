@@ -1,0 +1,19 @@
+{
+  "poolType":"k8s",
+  "properties": [
+    {
+      "key":"capacity",
+      "value": 5
+    },
+    {
+      "key": "address",
+      "value": "http://127.0.0.1:8001"
+    },{
+      "key": "namespace",
+      "value": "default"
+    },{
+      "key": "volumeName",
+      "value": "nfs"
+    }
+  ]
+}
