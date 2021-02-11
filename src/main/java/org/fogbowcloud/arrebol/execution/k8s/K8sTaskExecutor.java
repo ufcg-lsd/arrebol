@@ -1,14 +1,15 @@
+/* (C)2020 */
 package org.fogbowcloud.arrebol.execution.k8s;
 
 import static java.lang.Thread.sleep;
 import static org.fogbowcloud.arrebol.execution.docker.constants.DockerConstants.ADDRESS_METADATA_KEY;
 
+import io.kubernetes.client.openapi.ApiException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -16,13 +17,14 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.OneToOne;
 import javax.persistence.Transient;
-
 import org.apache.log4j.Logger;
 import org.fogbowcloud.arrebol.execution.TaskExecutionResult;
-import org.fogbowcloud.arrebol.execution.TaskExecutor;
 import org.fogbowcloud.arrebol.execution.TaskExecutionResult.RESULT;
+import org.fogbowcloud.arrebol.execution.TaskExecutor;
 import org.fogbowcloud.arrebol.execution.k8s.client.DefaultK8sClient;
 import org.fogbowcloud.arrebol.execution.k8s.client.K8sClient;
+import org.fogbowcloud.arrebol.execution.k8s.constants.K8sConstants;
+import org.fogbowcloud.arrebol.execution.k8s.models.K8sJob;
 import org.fogbowcloud.arrebol.execution.k8s.resource.DefaultK8sClusterResource;
 import org.fogbowcloud.arrebol.execution.k8s.resource.K8sClusterResource;
 import org.fogbowcloud.arrebol.models.command.Command;
@@ -30,137 +32,145 @@ import org.fogbowcloud.arrebol.models.command.CommandState;
 import org.fogbowcloud.arrebol.models.task.RequirementsContants;
 import org.fogbowcloud.arrebol.models.task.Task;
 
-import io.kubernetes.client.openapi.ApiException;
-import io.kubernetes.client.openapi.models.V1Job;
-
 @Entity
 public class K8sTaskExecutor implements TaskExecutor {
 
-	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Integer id;
-	@Transient
-	private final Logger LOGGER = Logger.getLogger(K8sTaskExecutor.class);
-	@OneToOne(cascade = CascadeType.ALL, orphanRemoval = true, targetEntity = DefaultK8sClusterResource.class)
-	private K8sClusterResource k8sClusterResource;
-	@OneToOne(cascade = CascadeType.ALL, orphanRemoval = true, targetEntity = DefaultK8sClient.class)
-	private K8sClient k8sClient;
-	@Transient
-	private static final long POOLING_PERIOD_TIME_MS = 5 * 1000;
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Integer id;
 
-	public K8sTaskExecutor(K8sClusterResource k8sClusterResource, K8sClient k8sClient) {
-		this.k8sClusterResource = k8sClusterResource;
-		this.k8sClient = k8sClient;
-	}
+  @Transient private final Logger LOGGER = Logger.getLogger(K8sTaskExecutor.class);
 
-	public K8sTaskExecutor() {
-	}
+  @OneToOne(
+      cascade = CascadeType.ALL,
+      orphanRemoval = true,
+      targetEntity = DefaultK8sClusterResource.class)
+  private K8sClusterResource k8sClusterResource;
 
-	@Override
-	public TaskExecutionResult execute(Task task) {
-		TaskExecutionResult taskExecutionResult = null;
+  @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true, targetEntity = DefaultK8sClient.class)
+  private K8sClient k8sClient;
 
-		String jobName = task.getId();
+  @Transient private static final long POOLING_PERIOD_TIME_MS = 5 * 1000;
 
-		List<Command> commands = task.getTaskSpec().getCommands();
-		String command = joinCommands(commands);
+  public K8sTaskExecutor(K8sClusterResource k8sClusterResource, K8sClient k8sClient) {
+    this.k8sClusterResource = k8sClusterResource;
+    this.k8sClient = k8sClient;
+  }
 
-		Map<String, String> requirements = task.getTaskSpec().getRequirements();
-		String imageId = getImageId(requirements);
+  public K8sTaskExecutor() {}
 
-		LOGGER.debug("Image id: " + imageId);
-		LOGGER.debug("Command: " + command);
+  @Override
+  public TaskExecutionResult execute(Task task) {
+    TaskExecutionResult taskExecutionResult = null;
 
-		int tasksListSize = task.getTaskSpec().getCommands().size();
+    String jobName = task.getId();
 
-		try {
-			V1Job job = k8sClient.createJob(jobName, imageId, command);
-			boolean jobIsRunning = true;
+    List<Command> commands = task.getTaskSpec().getCommands();
+    String command = joinCommands(commands);
 
-			while (jobIsRunning) {
-				try {
-					sleep(POOLING_PERIOD_TIME_MS);
-				} catch (InterruptedException e) {
-					LOGGER.error(e.getMessage(), e);
-				}
+    Map<String, String> requirements = task.getTaskSpec().getRequirements();
+    String imageId = getImageId(requirements);
+    String memoryRequest = getK8sRequest(requirements, K8sConstants.K8S_REQUIREMENTS_RAM_REQUEST);
+    String cpuRequest = getK8sRequest(requirements, K8sConstants.K8S_REQUIREMENTS_CPU_REQUEST);
 
-				job = k8sClient.getJob(jobName);
-				jobIsRunning = job.getStatus().getActive() != null;
-			}
+    LOGGER.debug("Image id: " + imageId);
+    LOGGER.debug("Command: " + command);
+    LOGGER.debug("Memory request: " + memoryRequest);
+    LOGGER.debug("CPU request: " + cpuRequest);
 
-			if (wasSuccessful(job)) {
-				finishSuccessfulExecution(task);
-				taskExecutionResult = getSuccessResultInstance(tasksListSize);
-			} else {
-				finishFailExecution(task);
-				taskExecutionResult = getFailResultInstance(tasksListSize);
-			}
-		} catch (ApiException e) {
-			LOGGER.error("Error while call K8s client API. " + e.getMessage(), e);
-			finishFailExecution(task);
-			taskExecutionResult = getFailResultInstance(tasksListSize);
-			return taskExecutionResult;
-		}
+    int tasksListSize = task.getTaskSpec().getCommands().size();
 
-		return taskExecutionResult;
-	}
+    try {
+      K8sJob job = k8sClient.createJob(jobName, imageId, memoryRequest, cpuRequest, command);
+      boolean jobIsRunning = true;
 
-	@Override
-	public Map<String, String> getMetadata() {
-		Map<String, String> metadata = new HashMap<>();
-		String address = this.k8sClusterResource.getApiAddress();
-		metadata.put(ADDRESS_METADATA_KEY, address);
-		return metadata;
-	}
+      while (jobIsRunning) {
+        try {
+          sleep(POOLING_PERIOD_TIME_MS);
+        } catch (InterruptedException e) {
+          LOGGER.error(e.getMessage(), e);
+        }
 
-	private String joinCommands(List<Command> commands) {
-		String result = "";
-		for (Command command : commands)
-			result += command.getCommand() + " && ";
-		result = result.substring(0, result.length() - 4);
+        job = k8sClient.getJob(jobName);
+        jobIsRunning = job.getStatus().getActive() != null;
+      }
 
-		return result;
-	}
+      if (wasSuccessful(job)) {
+        finishSuccessfulExecution(task);
+        taskExecutionResult = getSuccessResultInstance(tasksListSize);
+      } else {
+        finishFailExecution(task);
+        taskExecutionResult = getFailResultInstance(tasksListSize);
+      }
+    } catch (ApiException e) {
+      LOGGER.error("Error while call K8s client API. " + e.getMessage(), e);
+      finishFailExecution(task);
+      taskExecutionResult = getFailResultInstance(tasksListSize);
+      return taskExecutionResult;
+    }
 
-	private String getImageId(Map<String, String> requirements) throws IllegalArgumentException {
-		String imageId = null;
-		if (Objects.nonNull(requirements))
-			imageId = requirements.get(RequirementsContants.IMAGE_KEY);
+    return taskExecutionResult;
+  }
 
-		return imageId;
-	}
+  @Override
+  public Map<String, String> getMetadata() {
+    Map<String, String> metadata = new HashMap<>();
+    String address = this.k8sClusterResource.getApiAddress();
+    metadata.put(ADDRESS_METADATA_KEY, address);
+    return metadata;
+  }
 
-	private boolean wasSuccessful(V1Job job) {
-		Integer succeededAmount = job.getStatus().getSucceeded();
-		return succeededAmount != null && succeededAmount > 0;
-	}
+  private String joinCommands(List<Command> commands) {
+    String result = "";
+    for (Command command : commands) result += command.getCommand() + " && ";
+    result = result.substring(0, result.length() - 4);
 
-	private void finishSuccessfulExecution(Task task) {
-		for (Command c : task.getTaskSpec().getCommands()) {
-			c.setState(CommandState.FINISHED);
-			c.setExitcode(TaskExecutionResult.SUCCESS_RESULT);
-		}
-	}
+    return result;
+  }
 
-	private void finishFailExecution(Task task) {
-		for (Command c : task.getTaskSpec().getCommands()) {
-			c.setState(CommandState.FAILED);
-			c.setExitcode(TaskExecutionResult.UNDETERMINED_RESULT);
-		}
-	}
+  private String getImageId(Map<String, String> requirements) throws IllegalArgumentException {
+    String imageId = null;
+    if (Objects.nonNull(requirements)) imageId = requirements.get(RequirementsContants.IMAGE_KEY);
 
-	private TaskExecutionResult getFailResultInstance(int size) {
-		int[] exitCodes = new int[size];
-		Arrays.fill(exitCodes, TaskExecutionResult.UNDETERMINED_RESULT);
-		TaskExecutionResult taskExecutionResult = new TaskExecutionResult(RESULT.FAILURE, exitCodes);
-		return taskExecutionResult;
-	}
+    return imageId;
+  }
 
-	private TaskExecutionResult getSuccessResultInstance(int size) {
-		int[] exitCodes = new int[size];
-		Arrays.fill(exitCodes, TaskExecutionResult.SUCCESS_RESULT);
-		TaskExecutionResult taskExecutionResult = new TaskExecutionResult(RESULT.SUCCESS, exitCodes);
-		return taskExecutionResult;
-	}
+  private String getK8sRequest(Map<String, String> requirements, String key) {
+    String value = null;
+    if (Objects.nonNull(requirements)) value = requirements.get(key);
+    return value;
+  }
 
+  private boolean wasSuccessful(K8sJob job) {
+    Integer succeededAmount = job.getStatus().getSucceeded();
+    return succeededAmount != null && succeededAmount > 0;
+  }
+
+  private void finishSuccessfulExecution(Task task) {
+    for (Command c : task.getTaskSpec().getCommands()) {
+      c.setState(CommandState.FINISHED);
+      c.setExitcode(TaskExecutionResult.SUCCESS_RESULT);
+    }
+  }
+
+  private void finishFailExecution(Task task) {
+    for (Command c : task.getTaskSpec().getCommands()) {
+      c.setState(CommandState.FAILED);
+      c.setExitcode(TaskExecutionResult.UNDETERMINED_RESULT);
+    }
+  }
+
+  private TaskExecutionResult getFailResultInstance(int size) {
+    int[] exitCodes = new int[size];
+    Arrays.fill(exitCodes, TaskExecutionResult.UNDETERMINED_RESULT);
+    TaskExecutionResult taskExecutionResult = new TaskExecutionResult(RESULT.FAILURE, exitCodes);
+    return taskExecutionResult;
+  }
+
+  private TaskExecutionResult getSuccessResultInstance(int size) {
+    int[] exitCodes = new int[size];
+    Arrays.fill(exitCodes, TaskExecutionResult.SUCCESS_RESULT);
+    TaskExecutionResult taskExecutionResult = new TaskExecutionResult(RESULT.SUCCESS, exitCodes);
+    return taskExecutionResult;
+  }
 }

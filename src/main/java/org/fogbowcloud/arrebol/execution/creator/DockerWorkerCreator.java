@@ -1,3 +1,4 @@
+/* (C)2020 */
 package org.fogbowcloud.arrebol.execution.creator;
 
 import java.io.InputStream;
@@ -30,76 +31,76 @@ import org.springframework.core.io.Resource;
 
 public class DockerWorkerCreator implements WorkerCreator {
 
-    private static final String TASK_SCRIPT_EXECUTOR_NAME = "task-script-executor.sh";
-    private final Logger LOGGER = Logger.getLogger(ArrebolController.class);
-    private final String tsExecutorFileContent;
-    private final DockerConfiguration configuration;
+  private static final String TASK_SCRIPT_EXECUTOR_NAME = "task-script-executor.sh";
+  private final Logger LOGGER = Logger.getLogger(ArrebolController.class);
+  private final String tsExecutorFileContent;
+  private final DockerConfiguration configuration;
 
-    public DockerWorkerCreator(Configuration configuration) throws Exception {
-        this.configuration = new DockerConfiguration(configuration);
-        Resource resource = new ClassPathResource(TASK_SCRIPT_EXECUTOR_NAME);
-        try (InputStream is = resource.getInputStream()) {
-            this.tsExecutorFileContent = IOUtils.toString(is, "UTF-8");
-            LOGGER.debug("Task script executor content [" + this.tsExecutorFileContent + "]");
-        }
+  public DockerWorkerCreator(Configuration configuration) throws Exception {
+    this.configuration = new DockerConfiguration(configuration);
+    Resource resource = new ClassPathResource(TASK_SCRIPT_EXECUTOR_NAME);
+    try (InputStream is = resource.getInputStream()) {
+      this.tsExecutorFileContent = IOUtils.toString(is, "UTF-8");
+      LOGGER.debug("Task script executor content [" + this.tsExecutorFileContent + "]");
     }
+  }
 
-    @Override
-    public Collection<Worker> createWorkers(Integer poolId) {
-        Collection<Worker> workers = new LinkedList<>();
-        int poolSize = configuration.getWorkerPoolSize();
-        for (String address : configuration.getResourceAddresses()) {
-            for (int i = 0; i < poolSize; i++) {
-                LOGGER.info("Creating docker worker with address=" + address);
-                Worker worker = createDockerWorker(poolId, address);
-                workers.add(worker);
-            }
-        }
-        return workers;
+  @Override
+  public Collection<Worker> createWorkers(Integer poolId) {
+    Collection<Worker> workers = new LinkedList<>();
+    int poolSize = configuration.getWorkerPoolSize();
+    for (String address : configuration.getResourceAddresses()) {
+      for (int i = 0; i < poolSize; i++) {
+        LOGGER.info("Creating docker worker with address=" + address);
+        Worker worker = createDockerWorker(poolId, address);
+        workers.add(worker);
+      }
     }
+    return workers;
+  }
 
-    @Override
-    public Collection<Worker> createWorkers(Integer poolId, WorkerNode workerNode) {
-        Collection<Worker> workers = new LinkedList<>();
-        for(int i = 0; i < workerNode.getPoolSize(); i++){
-            LOGGER.info("Creating docker worker with address=" + workerNode.getAddress());
-            Worker worker = createDockerWorker(poolId, workerNode.getAddress());
-            workers.add(worker);
-        }
-        return workers;
+  @Override
+  public Collection<Worker> createWorkers(Integer poolId, WorkerNode workerNode) {
+    Collection<Worker> workers = new LinkedList<>();
+    for (int i = 0; i < workerNode.getPoolSize(); i++) {
+      LOGGER.info("Creating docker worker with address=" + workerNode.getAddress());
+      Worker worker = createDockerWorker(poolId, workerNode.getAddress());
+      workers.add(worker);
     }
+    return workers;
+  }
 
-    private Worker createDockerWorker(Integer poolId, String address) {
-        String containerId = "docker-executor-" + UUID.randomUUID().toString();
-        DockerContainerResource dockerContainerResource =
-                createDockerContainerResource(address, containerId);
-        Tasklet tasklet = createTasklet(address, containerId);
-        TaskExecutor executor =
-                new DockerTaskExecutor(
-                        this.configuration.getImageId(), dockerContainerResource, tasklet);
-        Specification resourceSpec = null;
-        Worker worker = new MatchAnyWorker(AppUtil.generateUniqueStringId(), resourceSpec, poolId, executor);
-        LOGGER.info("Created Docker Worker [" + worker.getId() + "]");
-        return worker;
-    }
+  private Worker createDockerWorker(Integer poolId, String address) {
+    String containerId = "docker-executor-" + UUID.randomUUID().toString();
+    DockerContainerResource dockerContainerResource =
+        createDockerContainerResource(address, containerId);
+    Tasklet tasklet = createTasklet(address, containerId);
+    TaskExecutor executor =
+        new DockerTaskExecutor(this.configuration.getImageId(), dockerContainerResource, tasklet);
+    Specification resourceSpec = null;
+    Worker worker =
+        new MatchAnyWorker(AppUtil.generateUniqueStringId(), resourceSpec, poolId, executor);
+    LOGGER.info("Created Docker Worker [" + worker.getId() + "]");
+    return worker;
+  }
 
-    private DockerContainerResource createDockerContainerResource(
-            String address, String containerId) {
-        DockerImageRequestHelper imageRequestHelper =
-                new DockerImageRequestHelper(address);
-        DockerContainerRequestHelper containerRequestHelper =
-                new DockerContainerRequestHelper(address, containerId);
-        DockerContainerResource dockerContainerResource =
-                new DefaultDockerContainerResource(
-                        containerId, containerRequestHelper, imageRequestHelper);
-        return dockerContainerResource;
-    }
+  private DockerContainerResource createDockerContainerResource(
+      String address, String containerId) {
+    DockerImageRequestHelper imageRequestHelper = new DockerImageRequestHelper(address);
+    DockerContainerRequestHelper containerRequestHelper =
+        new DockerContainerRequestHelper(address, containerId);
+    DockerContainerResource dockerContainerResource =
+        new DefaultDockerContainerResource(containerId, containerRequestHelper, imageRequestHelper);
+    return dockerContainerResource;
+  }
 
-    private Tasklet createTasklet(String address, String containerId){
-        DockerCommandExecutor dockerCommandExecutor = new DockerCommandExecutor();
-        DockerFileHandlerHelper dockerFileHandlerHelper = new DockerFileHandlerHelper(address, dockerCommandExecutor);
-        TaskletHelper taskletHelper = new TaskletHelper(address, containerId, dockerCommandExecutor, dockerFileHandlerHelper);
-        Tasklet tasklet = new DefaultTasklet(this.tsExecutorFileContent, taskletHelper);
-        return tasklet;
-    }
+  private Tasklet createTasklet(String address, String containerId) {
+    DockerCommandExecutor dockerCommandExecutor = new DockerCommandExecutor();
+    DockerFileHandlerHelper dockerFileHandlerHelper =
+        new DockerFileHandlerHelper(address, dockerCommandExecutor);
+    TaskletHelper taskletHelper =
+        new TaskletHelper(address, containerId, dockerCommandExecutor, dockerFileHandlerHelper);
+    Tasklet tasklet = new DefaultTasklet(this.tsExecutorFileContent, taskletHelper);
+    return tasklet;
+  }
 }

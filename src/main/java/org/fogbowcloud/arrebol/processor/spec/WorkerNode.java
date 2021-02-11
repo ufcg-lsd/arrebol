@@ -1,3 +1,4 @@
+/* (C)2020 */
 package org.fogbowcloud.arrebol.processor.spec;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -6,26 +7,26 @@ import javax.validation.constraints.NotEmpty;
 
 public class WorkerNode {
 
-    @NotEmpty
-    @JsonProperty("resource_address")
-    private String address;
+  @NotEmpty
+  @JsonProperty("resource_address")
+  private String address;
 
-    @Min(value = 1)
-    @JsonProperty("pool_size")
-    private Integer poolSize;
+  @Min(value = 1)
+  @JsonProperty("pool_size")
+  private Integer poolSize;
 
-    public WorkerNode(){}
+  public WorkerNode() {}
 
-    public WorkerNode(String address, Integer poolSize) {
-        this.address = address;
-        this.poolSize = poolSize;
-    }
+  public WorkerNode(String address, Integer poolSize) {
+    this.address = address;
+    this.poolSize = poolSize;
+  }
 
-    public String getAddress() {
-        return address;
-    }
+  public String getAddress() {
+    return address;
+  }
 
-    public Integer getPoolSize() {
-        return poolSize;
-    }
+  public Integer getPoolSize() {
+    return poolSize;
+  }
 }

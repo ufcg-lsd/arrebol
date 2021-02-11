@@ -1,8 +1,9 @@
+/* (C)2020 */
 package org.fogbowcloud.arrebol.execution.k8s.resource;
 
 public interface K8sClusterResource {
 
-    String getId();
+  String getId();
 
-    String getApiAddress();
+  String getApiAddress();
 }

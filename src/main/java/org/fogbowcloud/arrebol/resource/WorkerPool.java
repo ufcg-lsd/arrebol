@@ -1,14 +1,14 @@
+/* (C)2020 */
 package org.fogbowcloud.arrebol.resource;
 
-import org.fogbowcloud.arrebol.execution.Worker;
-
 import java.util.Collection;
+import org.fogbowcloud.arrebol.execution.Worker;
 
 public interface WorkerPool {
 
-    int getId();
+  int getId();
 
-    Collection<Worker> getWorkers();
+  Collection<Worker> getWorkers();
 
-    void addWorkers(Collection<Worker> workers);
+  void addWorkers(Collection<Worker> workers);
 }

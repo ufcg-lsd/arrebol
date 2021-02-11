@@ -1,3 +1,4 @@
+/* (C)2020 */
 package org.fogbowcloud.arrebol.models.task;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -18,67 +19,78 @@ import org.fogbowcloud.arrebol.models.command.Command;
 @Entity
 public class TaskSpec implements Serializable {
 
-    private static final long serialVersionUID = -6111900503456749695L;
+  private static final long serialVersionUID = -6111900503456749695L;
 
-    private String label;
+  private String label;
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    @JsonIgnore
-    private Long id;
+  @Id
+  @GeneratedValue(strategy = GenerationType.AUTO)
+  @JsonIgnore
+  private Long id;
 
-    @ElementCollection
-    private Map<String, String> requirements;
+  @ElementCollection private Map<String, String> requirements;
 
-    @Valid
-    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
-    @Size(
-            min = 1,
-            max = 10000,
-            message = "Commands list may not be smaller than one and greater than 10000")
-    private List<Command> commands;
+  @Valid
+  @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+  @Size(
+      min = 1,
+      max = 10000,
+      message = "Commands list may not be smaller than one and greater than 10000")
+  private List<Command> commands;
 
-    @ElementCollection private Map<String, String> metadata;
+  @ElementCollection private Map<String, String> metadata;
 
-    public TaskSpec(
-            Long id, Map<String, String> requirements, List<Command> commands, Map<String, String> metadata) {
-        this.id = id;
-        this.requirements = requirements;
-        this.commands = commands;
-        this.metadata = metadata;
-    }
+  public TaskSpec(
+      Long id,
+      Map<String, String> requirements,
+      List<Command> commands,
+      Map<String, String> metadata) {
+    this.id = id;
+    this.requirements = requirements;
+    this.commands = commands;
+    this.metadata = metadata;
+  }
 
-    public TaskSpec() {
-        // Default constructor.
-    }
+  public TaskSpec() {
+    // Default constructor.
+  }
 
-    public String getLabel() {
-        return label;
-    }
+  public String getLabel() {
+    return label;
+  }
 
-    public void setId(Long id) {
-        this.id = id;
-    }
+  public void setId(Long id) {
+    this.id = id;
+  }
 
-    public Long getId() {
-        return this.id;
-    }
+  public Long getId() {
+    return this.id;
+  }
 
-    public List<Command> getCommands() {
-        return this.commands;
-    }
+  public List<Command> getCommands() {
+    return this.commands;
+  }
 
-    public Map<String, String> getRequirements() {
-        return requirements;
-    }
+  public Map<String, String> getRequirements() {
+    return requirements;
+  }
 
-    public Map<String, String> getMetadata() {
-        return this.metadata;
-    }
+  public Map<String, String> getMetadata() {
+    return this.metadata;
+  }
 
-    @Override
-    public String toString() {
-        return "TaskSpec{" + "id='" + id + '\'' + ", requirements=" + requirements + ", commands="
-            + commands + ", metadata=" + metadata + '}';
-    }
+  @Override
+  public String toString() {
+    return "TaskSpec{"
+        + "id='"
+        + id
+        + '\''
+        + ", requirements="
+        + requirements
+        + ", commands="
+        + commands
+        + ", metadata="
+        + metadata
+        + '}';
+  }
 }
