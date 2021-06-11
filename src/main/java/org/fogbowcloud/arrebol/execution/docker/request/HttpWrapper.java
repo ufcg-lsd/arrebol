@@ -63,7 +63,11 @@ public class HttpWrapper {
         }
 
         Header h = new BasicHeader("Content-Type", HTTP_CONTENT_JSON);
-        request.addHeader(h);
+        try {
+        	request.addHeader(h);
+        } catch(NullPointerException np) {
+        	LOGGER.error("Error while do request");
+        }
         for (Header header : additionalHeaders) {
             request.addHeader(header);
         }
@@ -95,7 +99,9 @@ public class HttpWrapper {
                 if (entity != null) {
                     EntityUtils.toString(entity);
                 }
-            } catch (Exception e) {}
+            } catch (Exception e) {
+            	LOGGER.error("Error while do request");
+            }
         }
     }
 }
