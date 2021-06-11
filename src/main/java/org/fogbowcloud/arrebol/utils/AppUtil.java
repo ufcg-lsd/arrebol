@@ -16,11 +16,11 @@ public class AppUtil {
 
     public static void makeBodyField(JSONObject json, String key, Map map) {
     	try {
-	        if (map != null || !map.isEmpty()) {
+    		if (map != null || !map.isEmpty()) {
 	            json.put(key, map);
 	        }
     	} catch(NullPointerException np) {
-			 np.printStackTrace();
+    		np.printStackTrace();
     	}
     }
 
