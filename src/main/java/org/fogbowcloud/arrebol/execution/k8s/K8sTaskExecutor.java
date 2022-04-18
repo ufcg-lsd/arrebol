@@ -72,16 +72,18 @@ public class K8sTaskExecutor implements TaskExecutor {
     String imageId = getImageId(requirements);
     String memoryRequest = getK8sRequest(requirements, K8sConstants.K8S_REQUIREMENTS_RAM_REQUEST);
     String cpuRequest = getK8sRequest(requirements, K8sConstants.K8S_REQUIREMENTS_CPU_REQUEST);
+    String ephemeralRequest = getK8sRequest(requirements, K8sConstants.K8S_REQUIREMENTS_EPHEMERAL_REQUEST);
 
     LOGGER.debug("Image id: " + imageId);
     LOGGER.debug("Command: " + command);
     LOGGER.debug("Memory request: " + memoryRequest);
     LOGGER.debug("CPU request: " + cpuRequest);
+    LOGGER.debug("Ephemeral request: " + ephemeralRequest);
 
     int tasksListSize = task.getTaskSpec().getCommands().size();
 
     try {
-      K8sJob job = k8sClient.createJob(jobName, imageId, memoryRequest, cpuRequest, command);
+      K8sJob job = k8sClient.createJob(jobName, imageId, memoryRequest, cpuRequest, ephemeralRequest, command);
       boolean jobIsRunning = true;
 
       while (jobIsRunning) {

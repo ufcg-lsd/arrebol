@@ -76,7 +76,7 @@ public class DefaultK8sClient implements K8sClient {
 
   @Override
   public K8sJob createJob(
-      String name, String imageId, String memoryRequest, String cpuRequest, String command)
+      String name, String imageId, String memoryRequest, String cpuRequest, String ephemeralRequest, String command)
       throws ApiException {
     List<String> commandList = buildCommands(command);
     K8sContainer podContainer = new K8sContainer().name(name).image(imageId).command(commandList);
@@ -96,17 +96,19 @@ public class DefaultK8sClient implements K8sClient {
                       new V1PersistentVolumeClaimVolumeSource().claimName(volumeName))));
     }
 
-    if (Objects.nonNull(cpuRequest) && Objects.nonNull(memoryRequest)) {
+    if (Objects.nonNull(cpuRequest) && Objects.nonNull(memoryRequest) && Objects.nonNull(ephemeralRequest)) {
       final K8sResourceRequirements resources = new K8sResourceRequirements();
       final Map<String, String> requests = new HashMap<>();
 
       requests.put("cpu", cpuRequest);
       requests.put("memory", memoryRequest);
+      requests.put("ephemeral-storage", ephemeralRequest);
 
       final Map<String, String> limits = new HashMap<>();
 
       limits.put("cpu", cpuRequest);
       limits.put("memory", memoryRequest);
+      limits.put("ephemeral-storage", ephemeralRequest);
 
       resources.requests(requests);
       resources.limits(limits);

@@ -8,7 +8,7 @@ import org.fogbowcloud.arrebol.execution.k8s.models.K8sJob;
 public interface K8sClient {
 
   K8sJob createJob(
-      String name, String imageId, String memoryRequest, String cpuRequest, String command)
+      String name, String imageId, String memoryRequest, String cpuRequest, String ephemeralRequest, String command)
       throws ApiException;
 
   V1Status deleteJob(String name) throws ApiException;

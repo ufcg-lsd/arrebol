@@ -9,4 +9,5 @@ public class K8sConstants {
 
   public static final String K8S_REQUIREMENTS_CPU_REQUEST = "CPUUsage";
   public static final String K8S_REQUIREMENTS_RAM_REQUEST = "RAMUsage";
+  public static final String K8S_REQUIREMENTS_EPHEMERAL_REQUEST = "EphemeralUsage";
 }
