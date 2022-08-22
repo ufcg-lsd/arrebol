@@ -27,15 +27,21 @@ install_docker() {
     apt-get install -y docker-ce
 }
 
+install_docker_compose() {
+    echo "--> Installing Docker Compose..."
+    sudo curl -sL "https://github.com/docker/compose/releases/download/1.25.5/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+    sudo chmod +x /usr/local/bin/docker-compose
+}
+
 run() {
     DOCKER_INSTALLED=$(dpkg -l | grep -c docker-ce)
 
     if ! [ $DOCKER_INSTALLED -ne 0 ]; then
         install_docker
-        docker swarm init 
     else 
         echo "--> Docker already installed!"
     fi
+    install_docker_compose
 }
 
 run

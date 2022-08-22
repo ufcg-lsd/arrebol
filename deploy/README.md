@@ -46,7 +46,7 @@ Log in the arrebol host and run the following commands to install dependencies.
   sudo bash setup.sh
   ```
 
-### 3. Fill configuration files
+### 3.Fill configuration files
 
 Still within the `deploy` directory, go to` config` directory.
 ```bash
@@ -68,7 +68,7 @@ The **POSTGRES_PASSWORD** define a password to the postgres database. The postgr
 Considering that password is **@rrebol**. The content of the postgres.env file would be:
 
 ```
-POSTGRES_PASSWORD=@arrebol
+POSTGRES_PASSWORD=@rrebol
 ```
 
 #### PgAdmin Configuration
@@ -235,15 +235,13 @@ Considering that your k8s cluster is at **http://10.30.1.1:8002** with a capacit
 }
 ```
 
-### 4.Install
+### 4.Starting
 
 Now go back to the **arrebol/deploy** directory and run the below commands to install the arrebol service:
 ```
 cd ..
-sudo bash deploy-stack.sh
+sudo bash deploy.sh start
 ```
-
-Wait a few minutes, it may take a while for the services to be ready.
 
 ## Check 
 
@@ -566,12 +564,9 @@ Expected
 }
 ```
 
-## Hard Restart
+## Stopping
 
-To hard restart the Arrebol Stack, run the commands as follow:
+To stop the Arrebol Stack, run the commands as follow:
 ```bash
-sudo docker stack rm lsd
-sudo docker volume rm lsd_postgresdata
-sudo docker pull ufcglsd/arrebol:saps
-sudo bash deploy-stack.sh
+sudo bash deploy.sh stop
 ```
