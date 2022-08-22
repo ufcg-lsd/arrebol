@@ -20,7 +20,7 @@ services:
       - arrebol-net
       
   arrebol:
-    image: ufcglsd/arrebol:latest
+    image: ufcglsd/arrebol:saps
     ports:
       - 8080:8080
     networks: 

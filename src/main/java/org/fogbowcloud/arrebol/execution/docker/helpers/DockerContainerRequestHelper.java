@@ -10,6 +10,7 @@ import org.fogbowcloud.arrebol.execution.docker.exceptions.DockerStartException;
 import org.fogbowcloud.arrebol.execution.docker.request.HttpWrapper;
 import org.fogbowcloud.arrebol.utils.AppUtil;
 import org.json.JSONObject;
+import org.json.JSONArray;
 import org.fogbowcloud.arrebol.execution.docker.constants.DockerConstants;
 
 import java.io.UnsupportedEncodingException;
@@ -101,6 +102,11 @@ public class DockerContainerRequestHelper {
                     break;
             }
         }
+
+        JSONArray bindsJsonArray = new JSONArray();
+        bindsJsonArray.put("/nfs:/nfs");
+        jsonRequirements.put("Binds", bindsJsonArray);
+
         AppUtil.makeBodyField(jsonObject, "HostConfig", jsonRequirements);
     }
 

@@ -279,6 +279,7 @@ curl -X POST \
          "commands":[
             "echo Hello World!",
             "sleep 2",
+            "touch /nfs/test1",
             "sleep 2",
             "echo Goodbye World!"
          ],
@@ -295,6 +296,7 @@ curl -X POST \
          "commands":[
             "echo Hello World!",
             "sleep 2",
+            "touch /nfs/test2",
             "sleep 2",
             "echo Goodbye World!"
          ],
@@ -315,6 +317,7 @@ Expected
 Request 
 * Use the job id of previous request
 * Do until you see that the Job is finished
+* **After Job is `finished`, check if was created a file `test1` and `test2` into `/nfs` directory from `worker host`.**
 
 ```bash
 curl -X GET http://127.0.0.1:8080/queues/default/jobs/e77d7b5c-dc3b-4f22-83ea-b6cb48736455
@@ -345,6 +348,11 @@ Expected
                         "command": "sleep 2",
                         "state": "FINISHED",
                         "exitcode": 0
+                    },
+                    {
+                        "command":"touch /nfs/test1",
+                        "state":"FINISHED",
+                        "exitcode":0
                     },
                     {
                         "command": "sleep 2",
@@ -381,6 +389,11 @@ Expected
                         "command": "sleep 2",
                         "state": "FINISHED",
                         "exitcode": 0
+                    },
+                    {
+                        "command":"touch /nfs/test2",
+                        "state":"FINISHED",
+                        "exitcode":0
                     },
                     {
                         "command": "sleep 2",
@@ -551,4 +564,14 @@ Expected
     ],
     "job_state": "FINISHED"
 }
+```
+
+## Hard Restart
+
+To hard restart the Arrebol Stack, run the commands as follow:
+```bash
+sudo docker stack rm lsd
+sudo docker volume rm lsd_postgresdata
+sudo docker pull ufcglsd/arrebol:saps
+sudo bash deploy-stack.sh
 ```

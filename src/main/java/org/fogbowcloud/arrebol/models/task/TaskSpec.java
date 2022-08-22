@@ -9,6 +9,7 @@ import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
+import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.validation.Valid;
@@ -27,7 +28,7 @@ public class TaskSpec implements Serializable {
     @JsonIgnore
     private Long id;
 
-    @ElementCollection
+    @ElementCollection(fetch = FetchType.EAGER)
     private Map<String, String> requirements;
 
     @Valid
@@ -38,7 +39,8 @@ public class TaskSpec implements Serializable {
             message = "Commands list may not be smaller than one and greater than 10000")
     private List<Command> commands;
 
-    @ElementCollection private Map<String, String> metadata;
+    @ElementCollection(fetch = FetchType.EAGER)
+    private Map<String, String> metadata;
 
     public TaskSpec(
             Long id, Map<String, String> requirements, List<Command> commands, Map<String, String> metadata) {
