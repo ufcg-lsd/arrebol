@@ -1,7 +1,7 @@
 version: '3.7'
 services:
   postgresql:
-    image: postgres
+    image: postgres:9.6.21
     container_name: arrebol_postgresql
     env_file: ./config/postgres.env
     ports: 
@@ -13,7 +13,7 @@ services:
       - ./config/init.sql:/docker-entrypoint-initdb.d/init.sql
 
   pgadmin:
-    image: dpage/pgadmin4
+    image: dpage/pgadmin4:5.4
     container_name: arrebol_pgadmin
     env_file: ./config/pgadmin.env
     ports:
@@ -22,7 +22,7 @@ services:
       - arrebol-net
       
   arrebol:
-    image: ufcglsd/arrebol:saps
+    image: ufcglsd/arrebol:latest
     container_name: arrebol_service
     ports:
       - 8080:8080
