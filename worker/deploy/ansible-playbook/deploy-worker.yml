@@ -4,7 +4,7 @@
     setup: bash -x setup.sh
   tasks:
     - name: "copy setup file"
-      copy: src="../setup.sh" dest="/home/ubuntu"
+      copy: src="../setup.sh" dest="."
     - name: Setting up environment
       shell: "{{ setup }} {{ nfs_server }} {{ nfs_server_dir }}"
       become: yes
