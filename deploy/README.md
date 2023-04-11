@@ -46,7 +46,7 @@ Log in the arrebol host and run the following commands to install dependencies.
   sudo bash setup.sh
   ```
 
-### 3. Fill configuration files
+### 3.Fill configuration files
 
 Still within the `deploy` directory, go to` config` directory.
 ```bash
@@ -68,7 +68,7 @@ The **POSTGRES_PASSWORD** define a password to the postgres database. The postgr
 Considering that password is **@rrebol**. The content of the postgres.env file would be:
 
 ```
-POSTGRES_PASSWORD=@arrebol
+POSTGRES_PASSWORD=@rrebol
 ```
 
 #### PgAdmin Configuration
@@ -235,15 +235,13 @@ Considering that your k8s cluster is at **http://10.30.1.1:8002** with a capacit
 }
 ```
 
-### 4.Install
+### 4.Starting
 
 Now go back to the **arrebol/deploy** directory and run the below commands to install the arrebol service:
 ```
 cd ..
-sudo bash deploy-stack.sh
+sudo bash deploy.sh start
 ```
-
-Wait a few minutes, it may take a while for the services to be ready.
 
 ## Check 
 
@@ -279,6 +277,7 @@ curl -X POST \
          "commands":[
             "echo Hello World!",
             "sleep 2",
+            "touch /nfs/test1",
             "sleep 2",
             "echo Goodbye World!"
          ],
@@ -295,6 +294,7 @@ curl -X POST \
          "commands":[
             "echo Hello World!",
             "sleep 2",
+            "touch /nfs/test2",
             "sleep 2",
             "echo Goodbye World!"
          ],
@@ -315,6 +315,7 @@ Expected
 Request 
 * Use the job id of previous request
 * Do until you see that the Job is finished
+* **After Job is `finished`, check if was created a file `test1` and `test2` into `/nfs` directory from `worker host`.**
 
 ```bash
 curl -X GET http://127.0.0.1:8080/queues/default/jobs/e77d7b5c-dc3b-4f22-83ea-b6cb48736455
@@ -345,6 +346,11 @@ Expected
                         "command": "sleep 2",
                         "state": "FINISHED",
                         "exitcode": 0
+                    },
+                    {
+                        "command":"touch /nfs/test1",
+                        "state":"FINISHED",
+                        "exitcode":0
                     },
                     {
                         "command": "sleep 2",
@@ -381,6 +387,11 @@ Expected
                         "command": "sleep 2",
                         "state": "FINISHED",
                         "exitcode": 0
+                    },
+                    {
+                        "command":"touch /nfs/test2",
+                        "state":"FINISHED",
+                        "exitcode":0
                     },
                     {
                         "command": "sleep 2",
@@ -551,4 +562,11 @@ Expected
     ],
     "job_state": "FINISHED"
 }
+```
+
+## Stopping
+
+To stop the Arrebol Stack, run the commands as follow:
+```bash
+sudo bash deploy.sh stop
 ```
